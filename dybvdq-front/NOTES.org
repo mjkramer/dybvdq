@@ -1,0 +1,28 @@
+* References
+- https://github.com/Microsoft/TypeScript-React-Starter
+- https://github.com/sw-yx/react-typescript-cheatsheet
+
+* Linting setup
+** Before:
+#+BEGIN_SRC json
+"extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
+#+END_SRC
+** After:
+#+BEGIN_SRC json
+"extends": [],
+"defaultSeverity": "warning",
+#+END_SRC
+
+        "after": ["y", "y", "P", "k", ">", ">", "C"]
+
+* From RunAndFile.tsx (ViewProps)
+#+BEGIN_SRC typescript
+  // Event handlers must return any instead of void
+  // https://github.com/piotrwitek/react-redux-typescript-guide#caveat-with-bindactioncreators
+  // onChangeRunno: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  // onChangeFileno: (e: React.ChangeEvent<HTMLInputElement>) => any;
+  // onClick: (e: React.MouseEvent<any>) => any;
+  onChangeRunno: React.ChangeEventHandler<HTMLInputElement>;
+  onChangeFileno: React.ChangeEventHandler<HTMLInputElement>;
+  onClick: React.MouseEventHandler<any>;
+#+END_SRC

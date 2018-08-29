@@ -1,0 +1,15 @@
+{
+  "rulesDirectory": ["tslint-plugin-prettier"],
+  "extends": ["tslint:recommended", "tsling-react", "tslint-config-prettier"],
+  "defaultSeverity": "error",
+  "linterOptions": {
+    "exclude": [
+      "config/**/*.js",
+      "node_modules/**/*.ts",
+      "coverage/lcov-report/*.js"
+    ]
+  },
+  "rules": {
+    "prettier": true
+  }
+}
