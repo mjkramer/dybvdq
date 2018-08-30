@@ -1,6 +1,6 @@
 {
   "rulesDirectory": ["tslint-plugin-prettier"],
-  "extends": ["tslint:recommended", "tsling-react", "tslint-config-prettier"],
+  "extends": ["tslint:recommended", "tslint-react", "tslint-config-prettier"],
   "defaultSeverity": "error",
   "linterOptions": {
     "exclude": [

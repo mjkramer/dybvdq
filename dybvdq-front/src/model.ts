@@ -1,31 +1,31 @@
-export type State = {
+export interface IAppState {
   runno: number;
   fileno: number;
   hall: string;
-  selectedFields: Field[];
+  selectedFields: IField[];
   taggingsRequested: boolean;
   latestTaggings: number[];
   tagSelectionReq: boolean;
   selectionActive: boolean;
-};
+}
 
-export type Location = {
+export interface ILocation {
   runno: number;
   fileno: number;
-};
+}
 
-export type Field = {
+export interface IField {
   value: string;
   label: string;
-};
+}
 
-export const initialState: State = {
-  runno: 21221,
+export const initialState: IAppState = {
   fileno: 1,
-  hall: "EH1",
-  selectedFields: [{ value: "plikecounts", label: "Prompt-like counts" }],
-  taggingsRequested: false,
+  hall: 'EH1',
   latestTaggings: [],
+  runno: 21221,
+  selectedFields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
+  selectionActive: false,
   tagSelectionReq: false,
-  selectionActive: false
+  taggingsRequested: false,
 };

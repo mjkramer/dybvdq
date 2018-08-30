@@ -1,11 +1,11 @@
 import React from 'react';
-import { Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 
-export type Props = {
+export interface IProps {
   items: string[];
   currentItem: string;
   onSelect: (item: string) => any;
-};
+}
 
 const initialState = {
   dropdownOpen: false,
@@ -13,28 +13,23 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class DynamicDropdown extends React.Component<Props, State> {
-  readonly state: State = initialState;
+class DynamicDropdown extends React.Component<IProps, State> {
+  public readonly state: State = initialState;
 
-  toggle = () => {
-    this.setState(prevState => ({
-      dropdownOpen: !prevState.dropdownOpen,
-    }));
-  };
-
-  render() {
+  public render() {
     const { items, currentItem, onSelect } = this.props;
     const { dropdownOpen } = this.state;
 
     return (
       <Dropdown className="d-inline" isOpen={dropdownOpen} toggle={this.toggle}>
-        <DropdownToggle color="primary" outline caret>
+        <DropdownToggle color="primary" outline={true} caret={true}>
           {currentItem}
         </DropdownToggle>
         <DropdownMenu>
           {items.map(item => {
             const active = item === currentItem;
             return (
+              // tslint:disable-next-line:jsx-no-lambda
               <DropdownItem key={item} active={active} onClick={() => onSelect(item)}>
                 {item}
               </DropdownItem>
@@ -44,6 +39,12 @@ class DynamicDropdown extends React.Component<Props, State> {
       </Dropdown>
     );
   }
+
+  private toggle = () => {
+    this.setState(prevState => ({
+      dropdownOpen: !prevState.dropdownOpen,
+    }));
+  };
 }
 
 export default DynamicDropdown;

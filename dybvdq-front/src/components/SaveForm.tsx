@@ -1,19 +1,19 @@
 import React from 'react';
-import { connect, DispatchProp } from 'react-redux';
+import { connect, DispatchProp, MapStateToProps } from 'react-redux';
 
 import { Input, InputGroup, InputGroupAddon } from 'reactstrap';
 
 import axios from 'axios';
 
-import NavButton, { Props as ButtonProps } from './NavButton';
-import { requestTaggings, gotTaggings } from '../actions';
+import { gotTaggings, requestTaggings } from '../actions';
 import { AppState } from '../model';
+import NavButton, { Props as ButtonProps } from './NavButton';
 
-type ViewProps = {
+interface IViewProps {
   onClick: ButtonProps['onClick'];
-};
+}
 
-const View: React.SFC<ViewProps> = ({ onClick }) => (
+const View: React.SFC<IViewProps> = ({ onClick }) => (
   <div className="form-inline">
     <InputGroup className="mr-2">
       <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
@@ -25,4 +25,29 @@ const View: React.SFC<ViewProps> = ({ onClick }) => (
 
 // XXX replace me with a thunk?
 
-class SaveForm: React.Component {};
+type StateProps = Pick<AppState, 'latestTaggings'>;
+
+class SaveForm extends React.Component<StateProps & DispatchProp> {
+  public componentDidUpdate() {
+    const { dispatch, latestTaggings } = this.props;
+
+    if (latestTaggings.length !== 0) {
+      axios.post('/reportTaggings', { taggedIds: latestTaggings });
+      dispatch(gotTaggings());
+    }
+  }
+
+  public render() {
+    return <View onClick={this.onClick} />;
+  }
+
+  private onClick() {
+    this.props.dispatch(requestTaggings());
+  }
+}
+
+const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
+  latestTaggings,
+}) => ({ latestTaggings });
+
+export default connect(mapStateToProps)(SaveForm);

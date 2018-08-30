@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import ShiftButton from './ShiftButton';
 import HallSelector from './HallSelector';
 import RunAndFile from './RunAndFile';
 import SaveForm from './SaveForm';
+import ShiftButton from './ShiftButton';
 import TagSelectionButton from './TagSelectionButton';
 
 export default () => (
