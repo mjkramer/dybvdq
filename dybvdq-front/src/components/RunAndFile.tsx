@@ -3,8 +3,8 @@ import { connect, DispatchProp, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
 import { setRunAndFile } from '../actions';
-import { AppState } from '../model';
-import NavButton, { Props as ButtonProps } from './NavButton';
+import { IAppState } from '../model';
+import NavButton, { IProps as ButtonProps } from './NavButton';
 
 interface IViewProps {
   runno: number;
@@ -63,7 +63,7 @@ class RunAndFile extends React.Component<State & DispatchProp, State> {
 
 type StateProps = State & React.Attributes; // Add "key" attribute
 
-const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
+const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({
   fileno,
   runno,
 }) => ({

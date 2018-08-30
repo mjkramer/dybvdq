@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { Container } from 'reactstrap';
-// import './App.css';
 
 import Toolbar from './Toolbar';
 // import FieldSel from './FieldSel';

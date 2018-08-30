@@ -6,8 +6,8 @@ import { Input, InputGroup, InputGroupAddon } from 'reactstrap';
 import axios from 'axios';
 
 import { gotTaggings, requestTaggings } from '../actions';
-import { AppState } from '../model';
-import NavButton, { Props as ButtonProps } from './NavButton';
+import { IAppState } from '../model';
+import NavButton, { IProps as ButtonProps } from './NavButton';
 
 interface IViewProps {
   onClick: ButtonProps['onClick'];
@@ -25,7 +25,7 @@ const View: React.SFC<IViewProps> = ({ onClick }) => (
 
 // XXX replace me with a thunk?
 
-type StateProps = Pick<AppState, 'latestTaggings'>;
+type StateProps = Pick<IAppState, 'latestTaggings'>;
 
 class SaveForm extends React.Component<StateProps & DispatchProp> {
   public componentDidUpdate() {
@@ -46,7 +46,7 @@ class SaveForm extends React.Component<StateProps & DispatchProp> {
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
+const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({
   latestTaggings,
 }) => ({ latestTaggings });
 

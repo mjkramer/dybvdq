@@ -2,20 +2,19 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { createStore } from 'redux';
 import { Provider } from 'react-redux';
+import { Action, createStore, Reducer } from 'redux';
 
 import App from './components/App';
-// import './index.css';
-
+import { IAppState } from './model';
 import reducer from './reducer';
 
-const store = createStore(reducer);
+// FIXME: reducer is inferred as Reducer<IAppState, any>
+const store = createStore(reducer as Reducer<IAppState, Action<any>>);
 
 ReactDOM.render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('root')!
-  // document.getElementById('root') as HTMLElement
+  document.getElementById('root') as HTMLElement,
 );

@@ -12,10 +12,10 @@ import { Omit } from '../util';
 // receive a Ref<Button>, while our ButtonProps are trying to
 // give it a Ref<HTMLButtonElement>...
 
-export type Props = Omit<ButtonProps, 'ref'>;
+export type IProps = Omit<ButtonProps, 'ref'>;
 
-export const NavButton: React.SFC<Props> = (props: Props) => (
-  <Button color="primary" outline {...props} />
+export const NavButton: React.SFC<IProps> = (props: IProps) => (
+  <Button color="primary" outline={true} {...props} />
 );
 
 export default NavButton;

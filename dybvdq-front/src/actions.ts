@@ -12,16 +12,18 @@ export const {
   taggedSelection,
   didSelect,
   didDeselect,
-} = createActions({
-  SHIFT_PAGE: count => count,
-  SET_HALL: hall => hall,
-  SET_RUN_AND_FILE: (runno, fileno) => ({ runno, fileno }),
-  SEND_TAGGINGS: taggedIds => taggedIds,
-  SET_FIELDS: labeledFields => labeledFields,
-},
-'REQUEST_TAGGINGS',
-'GOT_TAGGINGS',
-'TAG_SELECTION',
-'TAGGED_SELECTION',
-'DID_SELECT',
-'DID_DESELECT');
+} = createActions(
+  {
+    SEND_TAGGINGS: taggedIds => taggedIds,
+    SET_FIELDS: labeledFields => labeledFields,
+    SET_HALL: hall => hall,
+    SET_RUN_AND_FILE: (runno, fileno) => ({ runno, fileno }),
+    SHIFT_PAGE: count => count,
+  },
+  'REQUEST_TAGGINGS',
+  'GOT_TAGGINGS',
+  'TAG_SELECTION',
+  'TAGGED_SELECTION',
+  'DID_SELECT',
+  'DID_DESELECT',
+);

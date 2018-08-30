@@ -1,11 +1,11 @@
 import React from 'react';
+import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Dispatch } from 'redux';
-import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
 
-import DynamicDropdown, { Props as DDProps } from './DynamicDropdown';
 import { setHall } from '../actions';
-import { AppState } from '../model';
+import { IAppState } from '../model';
 import { Omit } from '../util';
+import DynamicDropdown, { IProps as DDProps } from './DynamicDropdown';
 
 type Props = Omit<DDProps, 'items'>;
 
@@ -15,7 +15,7 @@ const HallSelector: React.SFC<Props> = ddProps => (
 
 type StateProps = Pick<Props, 'currentItem'>;
 
-const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ hall }) => ({
+const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({ hall }) => ({
   currentItem: hall,
 });
 

@@ -26,3 +26,57 @@
   onChangeFileno: React.ChangeEventHandler<HTMLInputElement>;
   onClick: React.MouseEventHandler<any>;
 #+END_SRC
+
+* Contents of src/components/App.test.tsx
+#+BEGIN_SRC typescript
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import App from './App';
+
+it('renders without crashing', () => {
+  const div = document.createElement('div');
+  ReactDOM.render(<App />, div);
+  ReactDOM.unmountComponentAtNode(div);
+});
+#+END_SRC
+
+* Contents of src/App.css
+#+BEGIN_SRC css
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+#+END_SRC
+
+* Contents of src/index.css
+#+BEGIN_SRC css
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+#+END_SRC
