@@ -10,7 +10,7 @@ import { IAppState } from './model';
 import reducer from './reducer';
 
 // FIXME: reducer is inferred as Reducer<IAppState, any>
-const store = createStore(reducer as Reducer<IAppState, Action<any>>);
+export const store = createStore(reducer as Reducer<IAppState, Action<any>>);
 
 ReactDOM.render(
   <Provider store={store}>

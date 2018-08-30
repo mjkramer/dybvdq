@@ -1,12 +1,10 @@
+import axios from 'axios';
 import React from 'react';
-import { connect, DispatchProp, MapStateToProps } from 'react-redux';
-
+import { connect, DispatchProp } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon } from 'reactstrap';
 
-import axios from 'axios';
-
 import { gotTaggings, requestTaggings } from '../actions';
-import { IAppState } from '../model';
+import { store } from '../index';
 import NavButton, { IProps as ButtonProps } from './NavButton';
 
 interface IViewProps {
@@ -23,31 +21,35 @@ const View: React.SFC<IViewProps> = ({ onClick }) => (
   </div>
 );
 
-// XXX replace me with a thunk?
+class SaveForm extends React.Component<DispatchProp> {
+  private lastTaggings: number[] = [];
 
-type StateProps = Pick<IAppState, 'latestTaggings'>;
-
-class SaveForm extends React.Component<StateProps & DispatchProp> {
-  public componentDidUpdate() {
-    const { dispatch, latestTaggings } = this.props;
-
-    if (latestTaggings.length !== 0) {
-      axios.post('/reportTaggings', { taggedIds: latestTaggings });
-      dispatch(gotTaggings());
-    }
+  public componentDidMount() {
+    // unsubscribe when we unmount
+    this.componentWillUnmount = store.subscribe(this.listener);
   }
 
   public render() {
     return <View onClick={this.onClick} />;
   }
 
+  private listener = () => {
+    const { latestTaggings } = store.getState();
+    // If, prior to this listener being called, DataViz's sendTaggings triggers
+    // re-renders (and subsequent dispatches) in other components, then this
+    // listener may receive stale data in those intermediate state updates, up
+    // until the gotTaggings is finally processed. Thus we must keep track of
+    // lastTaggings.
+    if (latestTaggings.length && latestTaggings !== this.lastTaggings) {
+      this.lastTaggings = latestTaggings;
+      axios.post('/reportTaggings', { taggedIds: latestTaggings });
+      store.dispatch(gotTaggings());
+    }
+  };
+
   private onClick() {
     this.props.dispatch(requestTaggings());
   }
 }
 
-const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({
-  latestTaggings,
-}) => ({ latestTaggings });
-
-export default connect(mapStateToProps)(SaveForm);
+export default connect()(SaveForm);

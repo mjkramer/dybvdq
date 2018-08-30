@@ -1,11 +1,11 @@
 import { createActions } from 'redux-actions';
 
 export const {
-  shiftPage,
-  setHall,
-  setRunAndFile,
   sendTaggings,
   setFields,
+  setHall,
+  setRunAndFile,
+  shiftPage,
   requestTaggings,
   gotTaggings,
   tagSelection,
