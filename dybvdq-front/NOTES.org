@@ -1,6 +1,13 @@
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet
+- https://levelup.gitconnected.com/ultimate-react-component-patterns-with-typescript-2-8-82990c516935
+
+* Opening the project in VS Code
+So far succeeded with opening dybvdq-front folder. Haven't tried opening the whole chooch.
+
+* Updating type definitions
+Just run ~typesync~
 
 * Linting setup
 ** Before:

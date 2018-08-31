@@ -5,15 +5,15 @@ import Select from 'react-select';
 import { Props as SelectProps } from 'react-select/lib/Select';
 
 import { setFields } from '../actions';
-import { IAppState, IField } from '../model';
+import { AppState, Field } from '../model';
 
 interface IProps {
-  selectedFields: IField[];
-  onChange: SelectProps<IField>['onChange'];
+  selectedFields: Field[];
+  onChange: SelectProps<Field>['onChange'];
 }
 
 const initialState = {
-  allFields: [] as IField[],
+  allFields: [] as Field[],
 };
 
 type State = Readonly<typeof initialState>;
@@ -42,7 +42,6 @@ class FieldSel extends React.Component<IProps, State> {
       <Select
         isMulti={true}
         options={allFields}
-        // value={this.objifyValues(values)}
         value={selectedFields}
         onChange={onChange}
       />
@@ -51,7 +50,7 @@ class FieldSel extends React.Component<IProps, State> {
 }
 
 type StateProps = Pick<IProps, 'selectedFields'>;
-const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({
+const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
   selectedFields,
 }) => ({ selectedFields });
 

@@ -77,7 +77,7 @@ def realdata():
 
             runno, fileno, det = row[:3]
 
-            if fileno != last_fileno: 
+            if fileno != last_fileno:
                 if numread == NROWS:
                     break
 
@@ -113,7 +113,7 @@ def fields():
         'tl208energy': 'Tl208 energy',
         'plikecounts': 'Prompt-like counts',
         'nlikecounts': 'Delayed-like counts',
-    } 
+    }
 
 @app.route('/list_fields')
 def list_fields():

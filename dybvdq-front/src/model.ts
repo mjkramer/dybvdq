@@ -1,25 +1,25 @@
-export interface IAppState {
+export type AppState = {
   runno: number;
   fileno: number;
   hall: string;
-  selectedFields: IField[];
+  selectedFields: Field[];
   taggingsRequested: boolean;
   latestTaggings: number[];
   tagSelectionReq: boolean;
   selectionActive: boolean;
-}
+};
 
-export interface ILocation {
+export type Location = {
   runno: number;
   fileno: number;
-}
+};
 
-export interface IField {
+export type Field = {
   value: string;
   label: string;
-}
+};
 
-export const initialState: IAppState = {
+export const initialState: AppState = {
   fileno: 1,
   hall: 'EH1',
   latestTaggings: [],
@@ -28,4 +28,21 @@ export const initialState: IAppState = {
   selectionActive: false,
   tagSelectionReq: false,
   taggingsRequested: false,
+};
+
+// Now we describe the data provided by the backend
+
+export type DetKey = 'AD1' | 'AD2' | 'AD3' | 'AD4' | 'IWP' | 'OWP';
+
+export type Metric = {
+  values: number[];
+  errors?: number[];
+};
+
+export type MetricSet = { [det in DetKey]: Metric };
+
+export type FileData = {
+  runnos: number[];
+  filenos: number[];
+  metrics: { [fieldName: string]: MetricSet };
 };

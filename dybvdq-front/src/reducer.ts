@@ -1,6 +1,6 @@
 import { Action, handleActions } from 'redux-actions';
 
-import { IAppState, IField, ILocation, initialState } from './model';
+import { AppState, Field, initialState, Location } from './model';
 
 import {
   didDeselect,
@@ -16,7 +16,7 @@ import {
   tagSelection,
 } from './actions';
 
-export default handleActions<IAppState, any>(
+export default handleActions<AppState, any>(
   {
     [shiftPage as any]: (state, action: Action<number>) => ({
       ...state,
@@ -26,7 +26,7 @@ export default handleActions<IAppState, any>(
       ...state,
       hall: action.payload!,
     }),
-    [setRunAndFile as any]: (state, action: Action<ILocation>) => ({
+    [setRunAndFile as any]: (state, action: Action<Location>) => ({
       ...state,
       fileno: action.payload!.fileno,
       runno: action.payload!.runno,
@@ -37,7 +37,7 @@ export default handleActions<IAppState, any>(
       latestTaggings: action.payload!,
       taggingsRequested: false,
     }),
-    [setFields as any]: (state, action: Action<IField[]>) => ({
+    [setFields as any]: (state, action: Action<Field[]>) => ({
       ...state,
       selectedFields: action.payload!,
     }),

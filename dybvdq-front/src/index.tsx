@@ -6,11 +6,11 @@ import { Provider } from 'react-redux';
 import { Action, createStore, Reducer } from 'redux';
 
 import App from './components/App';
-import { IAppState } from './model';
+import { AppState } from './model';
 import reducer from './reducer';
 
 // FIXME: reducer is inferred as Reducer<IAppState, any>
-export const store = createStore(reducer as Reducer<IAppState, Action<any>>);
+export const store = createStore(reducer as Reducer<AppState, Action<any>>);
 
 ReactDOM.render(
   <Provider store={store}>

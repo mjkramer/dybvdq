@@ -10,6 +10,8 @@
     ]
   },
   "rules": {
-    "prettier": true
+    "prettier": true,
+    "interface-over-type-literal": false,
+    "interface-name": false,
   }
 }

@@ -4,7 +4,7 @@
     "outDir": "build/dist",
     "module": "esnext",
     "target": "es5",
-    "lib": ["es6", "dom"],
+    "lib": ["es2017", "dom"],
     "sourceMap": true,
     "allowJs": true,
     "jsx": "react",
@@ -21,6 +21,7 @@
     "noErrorTruncation": true,
     "strictPropertyInitialization": true,
     "strictFunctionTypes": true,
+    "downlevelIteration": true,
   },
   "exclude": [
     "node_modules",
