@@ -1,18 +1,18 @@
 import axios from 'axios';
 import Plotly from 'plotly.js';
 import React from 'react';
-import { connect, MapStateToProps, MapDispatchToProps } from 'react-redux';
+import { connect, MapStateToProps } from 'react-redux';
 import 'redux';
 
-import { sendTaggings, taggedSelection, didSelect, didDeselect } from '../actions';
-import { Field, FileData, AppState } from '../model';
+import { store } from '..';
+import { didDeselect, didSelect, sendTaggings, taggedSelection } from '../actions';
+import { AppState, Field, FileData } from '../model';
 import {
   defaultPlotlyConfig,
   defaultPlotlyLayout,
   defaultPlotlyTrace,
   isNil,
 } from '../util';
-import { store } from '..';
 
 const COLORS = ['blue', 'orange'];
 
@@ -28,18 +28,13 @@ type StateProps = {
   fields: Field[];
 };
 
-type DispatchProps = {
-  onSelect(): void;
-  onDeselect(): void;
-};
-
 const initialState = {
   numDivs: 0,
 };
 
 type State = Readonly<typeof initialState>;
 
-class View extends React.PureComponent<StateProps & DispatchProps, State> {
+class View extends React.PureComponent<StateProps, State> {
   public readonly state: State = initialState;
 
   private cachedData: FileData | null = null;
@@ -48,6 +43,8 @@ class View extends React.PureComponent<StateProps & DispatchProps, State> {
   private selection: number[] = [];
 
   public componentDidMount() {
+    // unsubscribe when we unmount
+    this.componentWillUnmount = store.subscribe(this.listener);
     this.componentDidUpdate();
   }
 
@@ -114,19 +111,16 @@ class View extends React.PureComponent<StateProps & DispatchProps, State> {
     });
 
     el.on('plotly_selected', (eventData: Plotly.PlotSelectionEvent) => {
-      const { onSelect } = this.props;
-
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
         this.doSelect(pointNumbers, el);
-        onSelect();
+        store.dispatch(didSelect());
       }
     });
 
     el.on('plotly_deselect', () => {
-      const { onDeselect } = this.props;
       this.doSelect([], el);
-      onDeselect();
+      store.dispatch(didDeselect());
     });
 
     el.on('plotly_relayout', (eventData: Plotly.PlotRelayoutEvent) => {
@@ -160,6 +154,18 @@ class View extends React.PureComponent<StateProps & DispatchProps, State> {
     const { data } = await axios.get(url);
     return data;
   }
+
+  private listener = () => {
+    const { taggingsRequested, tagSelectionReq } = store.getState();
+
+    if (taggingsRequested) {
+      const taggedIds = this.getTaggedIds();
+      store.dispatch(sendTaggings(taggedIds));
+    } else if (tagSelectionReq) {
+      this.tagSelection();
+      store.dispatch(taggedSelection());
+    }
+  };
 
   private plot(data: FileData) {
     const { metrics } = data;
@@ -211,19 +217,24 @@ class View extends React.PureComponent<StateProps & DispatchProps, State> {
     });
   }
 
-  // we might have to deborg this
+  // XXX we might have to deborg this
   private zoomOthers(
     eventData: Plotly.PlotRelayoutEvent,
     src: Plotly.PlotlyHTMLElement,
   ) {
+    // tslint:disable-next-line:no-console
     console.log(eventData);
-    if (!eventData.xaxis) return;
+    if (!eventData.xaxis) {
+      return;
+    }
 
     const update: Partial<Plotly.Layout> = (() => {
       const range = eventData.xaxis.range;
       if (range && range[0] !== undefined) {
         return { xaxis: { range } };
-      } else return { xaxis: { autorange: true } };
+      } else {
+        return { xaxis: { autorange: true } };
+      }
     })();
 
     this.divs.forEach(el => {
@@ -237,54 +248,10 @@ class View extends React.PureComponent<StateProps & DispatchProps, State> {
 }
 
 const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = state => ({
-  runno: state.runno,
+  fields: state.selectedFields,
   fileno: state.fileno,
   hall: state.hall,
-  fields: state.selectedFields,
+  runno: state.runno,
 });
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onSelect: didSelect,
-  onDeselect: didDeselect,
-};
-
-const ActiveView = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-  null,
-  { withRef: true },
-)(View);
-
-class DataViz extends React.Component {
-  // XXX why not createRef<ActiveView>?
-  // Seems to be because connect (i.e. typeof ActiveView) yields a
-  // ComponentClass, so we get a RefObject of a ComponentClass (i.e. metadata),
-  // whereas ActiveView expects to receive a RefObject of a Component as its ref
-  viewRef = React.createRef<typeof ActiveView>();
-
-  componentDidMount() {
-    // unsubscribe when we unmount
-    this.componentWillUnmount = store.subscribe(this.listener);
-  }
-
-  render() {
-    return <ActiveView ref={this.viewRef as any} />;
-  }
-
-  private listener = () => {
-    const activeView = this.viewRef.current as any;
-    const view = activeView.getWrappedInstance() as View;
-
-    const { taggingsRequested, tagSelectionReq } = store.getState();
-
-    if (taggingsRequested) {
-      const taggedIds = view.getTaggedIds();
-      store.dispatch(sendTaggings(taggedIds));
-    } else if (tagSelectionReq) {
-      view.tagSelection();
-      store.dispatch(taggedSelection());
-    }
-  };
-}
-
-export default connect()(DataViz);
+export default connect(mapStateToProps)(View);

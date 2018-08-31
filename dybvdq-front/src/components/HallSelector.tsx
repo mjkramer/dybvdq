@@ -3,7 +3,7 @@ import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Dispatch } from 'redux';
 
 import { setHall } from '../actions';
-import { IAppState } from '../model';
+import { AppState } from '../model';
 import { Omit } from '../util';
 import DynamicDropdown, { IProps as DDProps } from './DynamicDropdown';
 
@@ -15,7 +15,7 @@ const HallSelector: React.SFC<Props> = ddProps => (
 
 type StateProps = Pick<Props, 'currentItem'>;
 
-const mapStateToProps: MapStateToProps<StateProps, {}, IAppState> = ({ hall }) => ({
+const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ hall }) => ({
   currentItem: hall,
 });
 
