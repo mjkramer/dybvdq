@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Container } from 'reactstrap';
 
+import DataViz from './DataViz';
 import FieldSel from './FieldSel';
 import Toolbar from './Toolbar';
-// import DataViz from './DataViz';
 
 export default () => (
   <Container>
@@ -12,6 +12,6 @@ export default () => (
     <div className="mb-2">
       <FieldSel />
     </div>
-    {/* <DataViz /> */}
+    <DataViz />
   </Container>
 );

@@ -15,7 +15,8 @@ declare module 'plotly.js' {
 
 export const defaultPlotlyTrace: Plotly.Data = {
   mode: 'markers',
-  type: 'scattergl',
+  // type: 'scattergl',
+  type: 'scatter',
 };
 
 export const defaultPlotlyLayout: Partial<Plotly.Layout> = {

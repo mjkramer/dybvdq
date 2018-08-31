@@ -224,18 +224,21 @@ class View extends React.PureComponent<StateProps, State> {
   ) {
     // tslint:disable-next-line:no-console
     console.log(eventData);
-    if (!eventData.xaxis) {
-      return;
-    }
 
-    const update: Partial<Plotly.Layout> = (() => {
-      const range = eventData.xaxis.range;
-      if (range && range[0] !== undefined) {
-        return { xaxis: { range } };
+    const update: Partial<Plotly.Layout> | null = (() => {
+      if (eventData['xaxis.range[0]'] !== undefined) {
+        const range = [eventData['xaxis.range[0]'], eventData['xaxis.range[1]']];
+        return { 'xaxis.range': range as [Plotly.Datum, Plotly.Datum] };
+      } else if (eventData['xaxis.autorange']) {
+        return { 'xaxis.autorange': true };
       } else {
-        return { xaxis: { autorange: true } };
+        return null;
       }
     })();
+
+    if (update === null) {
+      return;
+    }
 
     this.divs.forEach(el => {
       if (el !== src) {

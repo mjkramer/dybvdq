@@ -7,7 +7,8 @@ import util
 
 NROWS = 1000
 
-app = Flask(__name__, static_folder='dybvdq-front/build')
+app = Flask(__name__, template_folder='dybvdq-front/build',
+            static_folder='dybvdq-front/build/static')
 
 db = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
                      user='root', passwd='***REMOVED***', db='dq_db')

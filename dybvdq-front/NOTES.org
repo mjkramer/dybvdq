@@ -1,3 +1,6 @@
+* Things to do
+- window resize handling
+
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet
