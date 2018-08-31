@@ -1,6 +1,6 @@
 import { Action, handleActions } from 'redux-actions';
 
-import { AppState, Field, initialState, Location } from './model';
+import { AppState, DataLocation, Field, initialState } from './model';
 
 import {
   didDeselect,
@@ -26,7 +26,7 @@ export default handleActions<AppState, any>(
       ...state,
       hall: action.payload!,
     }),
-    [setRunAndFile as any]: (state, action: Action<Location>) => ({
+    [setRunAndFile as any]: (state, action: Action<DataLocation>) => ({
       ...state,
       fileno: action.payload!.fileno,
       runno: action.payload!.runno,

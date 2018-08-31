@@ -7,9 +7,9 @@ import Toolbar from './Toolbar';
 
 export default () => (
   <Container>
-    <h3 className="mb-4 mt-1">DYB Visual DQ!</h3>
+    <h3 className="mb-4 mt-1">DYB Visual DQ v0.314159</h3>
     <Toolbar />
-    <div className="mb-2">
+    <div className="mb-4">
       <FieldSel />
     </div>
     <DataViz />

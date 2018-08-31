@@ -6,7 +6,7 @@ import 'redux';
 
 import { store } from '..';
 import { didDeselect, didSelect, sendTaggings, taggedSelection } from '../actions';
-import { AppState, Field, FileData } from '../model';
+import { AppState, DataLocation, Field, FileData } from '../model';
 import {
   defaultPlotlyConfig,
   defaultPlotlyLayout,
@@ -40,6 +40,7 @@ class View extends React.PureComponent<StateProps, State> {
   private cachedData: FileData | null = null;
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
+  private lastLoc: DataLocation = { fileno: 0, runno: 0 };
   private selection: number[] = [];
 
   public componentDidMount() {
@@ -174,7 +175,12 @@ class View extends React.PureComponent<StateProps, State> {
     detectors.sort();
 
     const npoints = firstMetric[detectors[0]].values.length;
-    this.colors = Array(npoints).fill(COLORS[0]);
+
+    const { fileno, runno } = this.props;
+    if (fileno !== this.lastLoc.fileno || runno !== this.lastLoc.runno) {
+      this.colors = Array(npoints).fill(COLORS[0]);
+    }
+
     const xs = [...Array(npoints).keys()];
 
     let iDiv = -1;
@@ -203,6 +209,8 @@ class View extends React.PureComponent<StateProps, State> {
         this.bindPlotEvents(this.divs[iDiv]);
       });
     });
+
+    this.lastLoc = { fileno, runno };
   }
 
   private togglePoints(idxs: number[]) {

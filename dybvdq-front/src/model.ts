@@ -9,7 +9,7 @@ export type AppState = {
   selectionActive: boolean;
 };
 
-export type Location = {
+export type DataLocation = {
   runno: number;
   fileno: number;
 };

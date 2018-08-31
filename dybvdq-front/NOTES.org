@@ -1,5 +1,8 @@
 * Things to do
 - window resize handling
+- scattergl wtf
+- git remote @ NERSC
+- deploy to aftershock
 
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter

@@ -9,7 +9,7 @@ import App from './components/App';
 import { AppState } from './model';
 import reducer from './reducer';
 
-// FIXME: reducer is inferred as Reducer<IAppState, any>
+// FIXME: reducer is inferred as Reducer<AppState, any>
 export const store = createStore(reducer as Reducer<AppState, Action<any>>);
 
 ReactDOM.render(

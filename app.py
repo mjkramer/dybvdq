@@ -43,7 +43,7 @@ def realdata():
 
     result = {'runnos': [],
               'filenos': [],
-              'metrics': {field: {} for field in fields.split(',')}}
+              'metrics': {allFields()[field]: {} for field in fields.split(',')}}
 
     sitemask = [1, 2, 4][hall-1]
     focus_sql = util.focus_sql(hall, runno)
@@ -89,7 +89,7 @@ def realdata():
             detkey = f'AD{det}'
 
             for i, field in enumerate(fields.split(',')):
-                detdict = result['metrics'][field].setdefault(detkey, {})
+                detdict = result['metrics'][allFields()[field]].setdefault(detkey, {})
                 vals = detdict.setdefault('values', [])
 
                 if fileno == last_fileno and det == last_det:
@@ -101,7 +101,7 @@ def realdata():
 
     return jsonify(result)
 
-def fields():
+def allFields():
     return {
         'triggercounts': 'Trigger counts',
         'flashercounts': 'Flasher counts',
@@ -118,7 +118,7 @@ def fields():
 
 @app.route('/list_fields')
 def list_fields():
-    return jsonify(fields())
+    return jsonify(allFields())
 
 # entry point
 if __name__ == '__main__':
