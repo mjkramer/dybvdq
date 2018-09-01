@@ -11,4 +11,6 @@ COPY . /app
 
 RUN set -ex && pipenv install --deploy --system
 
+EXPOSE 5000
+
 CMD python3 app.py
