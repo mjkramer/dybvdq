@@ -8,7 +8,7 @@
 git pull
 # copy build directory (with JS bundle etc.) from local build
 docker build -t dayabay/dybvdq .
-docker run -d --net=host dayabay/dybvdq
+docker run -d --net=host -v .:/app dayabay/dybvdq
 iptables -A IN_public_allow -p tcp -m tcp --dport 5000 -m conntrack --ctstate NEW -j ACCEPT
 
 * Database stuff

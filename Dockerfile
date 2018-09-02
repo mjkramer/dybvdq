@@ -7,7 +7,7 @@ ENV LANG C.UTF-8
 
 RUN mkdir /app
 WORKDIR /app
-COPY . /app
+# COPY . /app
 
 RUN set -ex && pipenv install --deploy --system
 
