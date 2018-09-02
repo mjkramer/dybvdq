@@ -4,6 +4,37 @@
 - git remote @ NERSC
 - deploy to aftershock
 
+* Docker workflow (on aftershock.lbl.gov
+git pull
+# copy build directory (with JS bundle etc.) from local build
+docker build -t dayabay/dybvdq .
+docker run -d --net=host dayabay/dybvdq
+iptables -A IN_public_allow -p tcp -m tcp --dport 5000 -m conntrack --ctstate NEW -j ACCEPT
+
+* Database stuff
+
+docker run -d --name=vdq-mysql --user=1000:1000 --env="MYSQL_ROOT_PASSWORD=***REMOVED***" -p 6603:3306 -v ~dayabay/visual_dq/mysql/conf.d:/etc/mysql/conf.d -v ~dayabay/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
+
+mysqldump -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180628.sql
+
+(OLD) mysql> show master status;
++------------------+-----------+--------------+------------------+
+| File             | Position  | Binlog_Do_DB | Binlog_Ignore_DB |
++------------------+-----------+--------------+------------------+
+| mysql-bin.000263 | 494427353 |              |                  |
++------------------+-----------+--------------+------------------+
+1 row in set (0.00 sec)
+
++------------------+----------+--------------+------------------+
+| File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
++------------------+----------+--------------+------------------+
+| mysql-bin.000266 |      637 |              |                  |
++------------------+----------+--------------+------------------+
+1 row in set (0.00 sec)
+
+
+https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-replication-in-mysql
+
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet
