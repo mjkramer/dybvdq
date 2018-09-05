@@ -12,10 +12,30 @@ docker run -d --net=host -v .:/app dayabay/dybvdq
 iptables -A IN_public_allow -p tcp -m tcp --dport 5000 -m conntrack --ctstate NEW -j ACCEPT
 
 * Database stuff
+** Making a snapshot
+#+BEGIN_SRC bash
+mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180628.sql
+#+END_SRC
+-- takes < 1 minute on a good day
+
+Then scp the .sql to dayabay@aftershock.lbl.gov:visual_dq/mysql/dumps.
+It seems faster to transfer from dybdq than from lxslc6.
+What about mysqldump'ing directly onto aftershock? Bad idea; locks tables for too long.
 
 docker run -d --name=vdq-mysql --user=1000:1000 --env="MYSQL_ROOT_PASSWORD=***REMOVED***" -p 6603:3306 -v ~dayabay/visual_dq/mysql/conf.d:/etc/mysql/conf.d -v ~dayabay/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
 
-mysqldump -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180628.sql
+On the DigitalOcean droplet:
+
+rm -rf ~/visual_dq/mysql/data && mkdir -p ~/visual_dq/mysql/data
+docker container rm -f dybvdq-mysql
+docker run -d --name=dybvdq-mysql --env="MYSQL_ROOT_PASSWORD=***REMOVED***" -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
+docker cp mysql/dumps/dq_db.20180904.sql dybvdq-mysql:/
+docker exec -it dybvdq-mysql /bin/bash
+  mysql -p -e "create database dq_db"
+  mysql -p dq_db < dq_db.20180904.sql
+  rm /dq_db.20180904.sql
+
+The load took around 8 minutes on DigitalOcean
 
 (OLD) mysql> show master status;
 +------------------+-----------+--------------+------------------+
