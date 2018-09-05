@@ -1,10 +1,14 @@
 version: "3"
 services:
-  app:
-    container_name: dybvdq-app
-    build: .
+  # app:
+  #   container_name: dybvdq-app
+  #   build: .
   nginx:
     container_name: dybvdq-nginx
-    build: ./nginx
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      # - ./dybvdq-front/build:/webroot
     ports:
       - "80:80"
+      - "443:443"
