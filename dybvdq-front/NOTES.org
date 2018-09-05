@@ -90,6 +90,8 @@ source venv/bin/activate
 
 Certs/keys in /etc/letsencrypt
 
+* Password auth
+https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet
