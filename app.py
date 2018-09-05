@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from flask import Flask, jsonify, render_template, request
-import MySQLdb
+import MySQLdb                  # XXX change to PyMySQL for gevent compatibility
 from random import gauss
 
 import util
@@ -10,7 +10,10 @@ NROWS = 1000
 app = Flask(__name__, template_folder='dybvdq-front/build',
             static_folder='dybvdq-front/build/static')
 
-db = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
+# db = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
+#                      user='root', passwd='***REMOVED***', db='dq_db')
+
+db = MySQLdb.connect(host='142.93.95.86',
                      user='root', passwd='***REMOVED***', db='dq_db')
 
 # db = MySQLdb.connect(host='dybdq.ihep.ac.cn',

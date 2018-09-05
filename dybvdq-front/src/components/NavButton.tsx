@@ -11,7 +11,9 @@ import { Omit } from '../util';
 // Thus, according to the rules of TSX, our Button needs to
 // receive a Ref<Button>, while our ButtonProps are trying to
 // give it a Ref<HTMLButtonElement>...
+// https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20461
 
+// We might also be able to use Partial<ButtonProps>
 export type IProps = Omit<ButtonProps, 'ref'>;
 
 export const NavButton: React.SFC<IProps> = (props: IProps) => (
