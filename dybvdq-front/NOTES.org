@@ -14,7 +14,7 @@ iptables -A IN_public_allow -p tcp -m tcp --dport 5000 -m conntrack --ctstate NE
 
 ** On DigitalOcean
 cd visual_dq
-git clone mkramer@pdsf.nersc.gov:bak/dybvdq.git
+git clone mkramer@edison.nersc.gov:bak/dybvdq.git
 
 # Locally:
 scp -r physics/dqwg/new_website/dybvdq/dybvdq-front/build root@142.93.95.86:visual_dq/dybvdq/dybvdq-front
@@ -23,7 +23,7 @@ scp -r physics/dqwg/new_website/dybvdq/dybvdq-front/build root@142.93.95.86:visu
 cd visual_dq/dybvdq
 git pull
 docker build -t dayabay/dybvdq-app .
-docker run -d --net=host -v .:/app dayabay/dybvdq-app
+docker run --name=dybvdq-app -d --net=host -v $PWD:/app dayabay/dybvdq-app
 
 * Database stuff
 ** Making a snapshot
