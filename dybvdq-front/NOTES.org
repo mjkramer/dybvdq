@@ -1,8 +1,6 @@
 * Things to do
 - window resize handling
 - scattergl wtf
-- git remote @ NERSC
-- deploy to aftershock
 
 * Docker workflow
 ** On aftershock
@@ -22,6 +20,8 @@ scp -r physics/dqwg/new_website/dybvdq/dybvdq-front/build root@142.93.95.86:visu
 # Back on DO:
 cd visual_dq/dybvdq
 git pull
+docker container rm dybvdq-app
+docker image rm dayabay/dybvdq-app
 docker build -t dayabay/dybvdq-app .
 docker run --name=dybvdq-app -d --net=host -v $PWD:/app dayabay/dybvdq-app
 
@@ -69,6 +69,26 @@ The load took around 8 minutes on DigitalOcean
 
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-replication-in-mysql
+
+* Let's Encrypt
+(google certbot wildcard)
+https://levelup.gitconnected.com/how-to-get-certbot-wildcard-certificates-3d25618a81e0
+My steps:
+
+git clone https://github.com/certbot/certbot
+cd certbot
+./certbot-auto --os-packages-only
+./tools/venv.sh # only needed once; _creates_ venv
+source venv/bin/activate
+./certbot-auto -d dybdq.work -d *.dybdq.work --manual --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory certonly
+
+[[https://certbot.eff.org/docs/using.html#nginx][Renewal]] (every 90 days; due 2018/12/4): Either,
+- Manually repeat the above
+- Write a --manual-auth-hook to repeat the above
+- Switch to the "standalone" certbot plugin (no more wildcard)
+- Use the certbot-dns-digitalocean plugin
+
+Certs/keys in /etc/letsencrypt
 
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
