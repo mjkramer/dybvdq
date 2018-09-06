@@ -125,4 +125,4 @@ def list_fields():
 
 # entry point
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0')     # XXX remove binding to 0.0.0.0?

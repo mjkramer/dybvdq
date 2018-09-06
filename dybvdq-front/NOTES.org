@@ -92,6 +92,8 @@ Certs/keys in /etc/letsencrypt
 
 * Password auth
 https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authentication-with-nginx-on-ubuntu-14-04
+* Nginx stuff
+- https://stackoverflow.com/questions/46880853/deploy-create-react-app-on-nginx
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet

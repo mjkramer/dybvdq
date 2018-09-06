@@ -13,7 +13,5 @@ COPY Pipfile Pipfile.lock /
 RUN set -ex && pipenv install --deploy --system
 RUN rm /Pipfile /Pipfile.lock
 
-EXPOSE 5000
-
 WORKDIR /app
 CMD python3 app.py
