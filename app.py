@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 from flask import Flask, jsonify, render_template, request
-import MySQLdb                  # XXX change to PyMySQL for gevent compatibility
 from random import gauss
+
+# For gevent compatibility (when using the async gunicorn worker), we use
+# PyMySQL instead of mysqlclient
+import pymysql
+pymysql.install_as_MySQLdb();
 
 import util
 
