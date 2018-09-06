@@ -14,4 +14,4 @@ RUN set -ex && pipenv install --deploy --system
 RUN rm /Pipfile /Pipfile.lock
 
 WORKDIR /app
-CMD python3 app.py
+CMD gunicorn -w 4 -k gevent -b :5000 app:app
