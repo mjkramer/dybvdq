@@ -4,7 +4,6 @@
 # PyMySQL instead of mysqlclient
 import pymysql
 pymysql.install_as_MySQLdb()
-import MySQLdb
 
 from flask import Flask, jsonify, render_template, request
 from random import gauss
@@ -19,7 +18,7 @@ app = Flask(__name__, template_folder='dybvdq-front/build',
 # db = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
 #                      user='root', passwd='***REMOVED***', db='dq_db')
 
-db = MySQLdb.connect(host='142.93.95.86',
+db = pymysql.connect(host='142.93.95.86',
                      user='root', passwd='***REMOVED***', db='dq_db')
 
 # db = MySQLdb.connect(host='dybdq.ihep.ac.cn',
