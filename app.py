@@ -44,6 +44,8 @@ def reportTaggings():
 
 @app.route('/realdata')
 def realdata():
+    db.ping() # in case we've idled out -- replace with connection pool?
+
     runno = int(request.args.get('runno'))
     fileno = int(request.args.get('fileno'))
     hall = int(request.args.get('hall')[2])
