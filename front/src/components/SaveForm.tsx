@@ -42,7 +42,7 @@ class SaveForm extends React.Component<DispatchProp> {
     // lastTaggings.
     if (latestTaggings.length && latestTaggings !== this.lastTaggings) {
       this.lastTaggings = latestTaggings;
-      axios.post('/reportTaggings', { taggedIds: latestTaggings });
+      axios.post('/report_taggings', { taggedIds: latestTaggings });
       store.dispatch(gotTaggings());
     }
   };

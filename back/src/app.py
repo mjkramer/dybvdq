@@ -1,50 +1,38 @@
 #!/usr/bin/env python
-
-# For gevent compatibility (when using the async gunicorn worker), we use
-# PyMySQL instead of mysqlclient
-import pymysql
-pymysql.install_as_MySQLdb()
+"The Flask backend for DYB Visual DQ"
 
 from flask import Flask, jsonify, render_template, request
-from random import gauss
+import pymysql             # supports gevent (for gunicorn), unlike mysqlclient
 
 import util
 
+pymysql.install_as_MySQLdb()
+
 NROWS = 1000
 
-app = Flask(__name__, template_folder='dybvdq-front/build',
-            static_folder='dybvdq-front/build/static')
+# If nginx is configured properly, we shouldn't have any need for
+# template/static_folder
+APP = Flask(__name__, template_folder='../../front/build',
+            static_folder='../../front/build/static')
 
-# db = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
-#                      user='root', passwd='***REMOVED***', db='dq_db')
-
-db = pymysql.connect(host='142.93.95.86',
+DB = pymysql.connect(host='142.93.95.86',  # dybdq.work
                      user='root', passwd='***REMOVED***', db='dq_db')
 
-# db = MySQLdb.connect(host='dybdq.ihep.ac.cn',
-#                      user='dayabay', passwd='***REMOVED***', db='dq_db')
-
-@app.route('/')
+@APP.route('/')
 def index():
+    "Serve the HTML entrypoint (ideally should be handled by nginx)"
     return render_template('index.html')
 
-@app.route('/hello')
-def hello():
-    return 'Hello from the API!'
-
-@app.route('/data/<int:runno>/<int:fileno>')
-def data(runno, fileno):
-    vals = [gauss(runno, fileno) for _ in range(100)]
-    return jsonify(vals)
-
-@app.route('/reportTaggings', methods=['POST'])
-def reportTaggings():
+@APP.route('/report_taggings', methods=['POST'])
+def report_taggings():
+    "Receive taggings from client and save them somewhere"
     print(request.json)
     return 'Thanks!'
 
-@app.route('/realdata')
-def realdata():
-    db.ping() # in case we've idled out -- replace with connection pool?
+@APP.route('/realdata')
+def realdata():                 # pylint: disable=too-many-locals
+    "monstrous function that needs to be cleaned up"
+    DB.ping() # in case we've idled out -- replace with connection pool?
 
     runno = int(request.args.get('runno'))
     fileno = int(request.args.get('fileno'))
@@ -53,11 +41,11 @@ def realdata():
 
     result = {'runnos': [],
               'filenos': [],
-              'metrics': {allFields()[field]: {} for field in fields.split(',')}}
+              'metrics': {all_fields()[field]: {} for field in fields.split(',')}}
 
     sitemask = [1, 2, 4][hall-1]
     focus_sql = util.focus_sql(hall, runno)
-    cursor = db.cursor()
+    cursor = DB.cursor()
     cur_runno, last_fileno, last_det = None, None, None
     numread = 0
 
@@ -99,7 +87,7 @@ def realdata():
             detkey = f'AD{det}'
 
             for i, field in enumerate(fields.split(',')):
-                detdict = result['metrics'][allFields()[field]].setdefault(detkey, {})
+                detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
                 vals = detdict.setdefault('values', [])
 
                 if fileno == last_fileno and det == last_det:
@@ -111,7 +99,8 @@ def realdata():
 
     return jsonify(result)
 
-def allFields():
+def all_fields():
+    "Everything we know how to plot"
     return {
         'triggercounts': 'Trigger counts',
         'flashercounts': 'Flasher counts',
@@ -126,10 +115,11 @@ def allFields():
         'nlikecounts': 'Delayed-like counts',
     }
 
-@app.route('/list_fields')
+@APP.route('/list_fields')
 def list_fields():
-    return jsonify(allFields())
+    "Used by react-select for picking the quantities to plot"
+    return jsonify(all_fields())
 
 # entry point
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')     # XXX remove binding to 0.0.0.0?
+    APP.run()

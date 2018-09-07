@@ -10,7 +10,7 @@ docker build -t dayabay/dybvdq .
 docker run -d --net=host -v .:/app dayabay/dybvdq
 iptables -A IN_public_allow -p tcp -m tcp --dport 5000 -m conntrack --ctstate NEW -j ACCEPT
 
-** On DigitalOcean
+** On DigitalOcean (old)
 cd visual_dq
 git clone mkramer@edison.nersc.gov:bak/dybvdq.git
 
@@ -24,6 +24,18 @@ docker container rm dybvdq-app
 docker image rm dayabay/dybvdq-app
 docker build -t dayabay/dybvdq-app .
 docker run --name=dybvdq-app -d --net=host -v $PWD:/app dayabay/dybvdq-app
+** On DigitalOcean (new)
+# Locally:
+cd ~/physics/dqwg/new_website/front
+npm run build
+# rm???
+scp -r build root@dybdq.work:visual_dq/dybvdq/front
+
+# On dybdq.work
+cd visual_dq/dybvdq
+git pull
+docker-compose stop
+docker-compose up --build
 
 * Database stuff
 ** Making a snapshot
@@ -70,6 +82,13 @@ The load took around 8 minutes on DigitalOcean
 
 https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-replication-in-mysql
 
+** Old credentials from app.py
+#+BEGIN_SRC python
+# DB = MySQLdb.connect(host='aftershock.lbl.gov', port=6603,
+#                      user='root', passwd='***REMOVED***', db='dq_db')
+# DB = MySQLdb.connect(host='dybdq.ihep.ac.cn',
+#                      user='dayabay', passwd='***REMOVED***', db='dq_db')
+#+END_SRC
 * Let's Encrypt
 (google certbot wildcard)
 https://levelup.gitconnected.com/how-to-get-certbot-wildcard-certificates-3d25618a81e0
