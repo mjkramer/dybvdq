@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 "The Flask backend for DYB Visual DQ"
 
+import os
 from flask import Flask, jsonify, render_template, request
 import pymysql             # supports gevent (for gunicorn), unlike mysqlclient
 
@@ -15,8 +16,11 @@ NROWS = 1000
 APP = Flask(__name__, template_folder='../../front/build',
             static_folder='../../front/build/static')
 
-DB = pymysql.connect(host='142.93.95.86',  # dybdq.work
-                     user='root', passwd='***REMOVED***', db='dq_db')
+DB = pymysql.connect(host=os.environ['DYBVDQ_DB_HOST'],
+                     port=int(os.environ['DYBVDQ_DB_PORT']),
+                     user=os.environ['DYBVDQ_DB_USER'],
+                     passwd=os.environ['DYBVDQ_DB_PASS'],
+                     db=os.environ['DYBVDQ_DB_NAME'])
 
 @APP.route('/')
 def index():
