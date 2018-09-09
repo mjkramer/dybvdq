@@ -59,7 +59,7 @@ docker run -d --name=vdq-mysql --user=1000:1000 --env="MYSQL_ROOT_PASSWORD=***RE
 ** Running on DigitalOcean
 rm -rf ~/visual_dq/mysql/data && mkdir -p ~/visual_dq/mysql/data
 docker container rm -f dybvdq-mysql
-docker run -d --name=dybvdq-mysql --env="MYSQL_ROOT_PASSWORD=***REMOVED***" -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
+docker run -d --name=dybvdq-mysql -e MYSQL_ROOT_PASSWORD=***REMOVED*** -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
 docker cp mysql/dumps/dq_db.20180904.sql dybvdq-mysql:/
 docker exec -it dybvdq-mysql /bin/bash
   mysql -p -e "create database dq_db"

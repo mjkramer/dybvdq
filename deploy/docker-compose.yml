@@ -1,16 +1,17 @@
 version: "3"
 services:
-  app:
+  back:
     container_name: dybvdq-back
     build: ../back/
     volumes:
       - ../back/src:/app
     environment:
-      - DYBVDQ_DB_HOST
-      - DYBVDQ_DB_PORT
-      - DYBVDQ_DB_USER
-      - DYBVDQ_DB_PASS
-      - DYBVDQ_DB_NAME
+      - DYBVDQ_DQ_DB_HOST
+      - DYBVDQ_DQ_DB_PORT
+      - DYBVDQ_DQ_DB_USER
+      - DYBVDQ_DQ_DB_PASS
+      - DYBVDQ_DQ_DB_NAME
+      - DYBVDQ_APP_DB_PASS
   nginx:
     container_name: dybvdq-nginx
     image: nginx
@@ -28,4 +29,13 @@ services:
       - DYBVDQ_AUTH_USER
       - DYBVDQ_AUTH_PASS_HASH
     command: /bin/bash /start_nginx.sh
-
+  app_db:
+    container_name: dybvdq-app_db
+    image: mysql
+    volumes:
+      - ${DYBVDQ_APP_DB_DATA}:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DYBVDQ_APP_DB_PASS}
+      - MYSQL_DATABASE=app_db
+    ports:
+      - "3000:3306"
