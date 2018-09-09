@@ -12,7 +12,7 @@ services:
       - ../front/build:/webroot:ro
       - ../nginx/nginx.conf:/nginx.conf.template:ro
       - ../nginx/start_nginx.sh:/start_nginx.sh:ro
-      - ${NGINX_CERT_PATH}:/certs:ro
+      - "${NGINX_CERT_PATH}:/certs:ro"
     ports:
       - "80:80"
       - "443:443"
