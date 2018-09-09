@@ -38,6 +38,10 @@ git pull
 docker-compose stop
 docker-compose up --build
 
+** Inspecting a crashed container
+(doesn't seem to work)
+docker commit containername newimagename
+docker run -it --entrypoint /bin/bash newimagename
 * Database stuff
 ** Making a snapshot
 #+BEGIN_SRC bash
