@@ -96,6 +96,7 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-repl
 #+END_SRC
 * Let's Encrypt
 (google certbot wildcard)
+https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
 https://levelup.gitconnected.com/how-to-get-certbot-wildcard-certificates-3d25618a81e0
 My steps:
 
