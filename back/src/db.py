@@ -5,7 +5,8 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-from app import APP
+import app
+APP = app.APP
 
 def db_uri(host, port, user, passwd, database):
     return f'mysql+pymysql://{user}:{passwd}@{host}:{port}/{database}'
