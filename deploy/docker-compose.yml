@@ -12,8 +12,8 @@ services:
       - ../front/build:/webroot:ro
       - ../nginx/nginx.conf:/nginx.conf.template:ro
       - ../nginx/start_nginx.sh:/start_nginx.sh:ro
-      - /etc/letsencrypt/live/dybdq.work:/certs:ro
-      - "${NGINX_CERT_PATH}:/certs2:ro"
+      - ${NGINX_SSL_CERT}:/certs/fullchain.pem:ro
+      - ${NGINX_SSL_KEY}:/certs/privkey.pem:ro
     ports:
       - "80:80"
       - "443:443"
