@@ -8,6 +8,7 @@ flask = "*"
 pymysql = "*"
 gunicorn = "*"
 gevent = "*"
+flask-sqlalchemy = "*"
 
 [dev-packages]
 pylint = "*"

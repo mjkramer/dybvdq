@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 "The Flask backend for DYB Visual DQ"
 
-import os
+# pylint: disable=wrong-import-order,wrong-import-position
+
+# We apply gevent's monkey patching as early as possible, just to be safe.
+# From inspecting gunicorn's ggevent.py, we see that they use subprocess=True,
+# so do the same here. In theory, as long as we create our Flask before doing
+# anything else, this shouldn't be necessary. We can try removing it later.
+import gevent
+gevent.monkey.patch_all(subprocess=True)
+
 from flask import Flask, jsonify, request
-import pymysql             # supports gevent (for gunicorn), unlike mysqlclient
-
-import util
-
-pymysql.install_as_MySQLdb()
-
-NROWS = 1000
 
 APP = Flask(__name__)
 
-DB = pymysql.connect(host=os.environ['DYBVDQ_DB_HOST'],
-                     port=int(os.environ['DYBVDQ_DB_PORT']),
-                     user=os.environ['DYBVDQ_DB_USER'],
-                     passwd=os.environ['DYBVDQ_DB_PASS'],
-                     db=os.environ['DYBVDQ_DB_NAME'])
+import util
+from db import dq_exec
+
+NROWS = 1000
 
 @APP.route('/report_taggings', methods=['POST'])
 def report_taggings():
@@ -28,8 +28,6 @@ def report_taggings():
 @APP.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
     "monstrous function that needs to be cleaned up"
-    DB.ping() # in case we've idled out -- replace with connection pool?
-
     runno = int(request.args.get('runno'))
     fileno = int(request.args.get('fileno'))
     hall = int(request.args.get('hall')[2])
@@ -41,7 +39,6 @@ def realdata():                 # pylint: disable=too-many-locals
 
     sitemask = [1, 2, 4][hall-1]
     focus_sql = util.focus_sql(hall, runno)
-    cursor = DB.cursor()
     cur_runno, last_fileno, last_det = None, None, None
     numread = 0
 
@@ -53,23 +50,17 @@ def realdata():                 # pylint: disable=too-many-locals
                         FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
                         WHERE runno > {cur_runno} AND sitemask = {sitemask}
                         LIMIT 1'''
-            # print(query)
-            cursor.execute(query)
-            cur_runno = cursor.fetchone()[0]
+            cur_runno = dq_exec(query).fetchone()[0]
 
         query = f'''SELECT runno, fileno, detectorid, {fields}
                     FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
                     WHERE runno = {cur_runno} AND {focus_sql}
                     ORDER BY runno, fileno, detectorid, insertdate'''
-        # print(query)
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        rows = dq_exec(query).fetchall()
 
         last_fileno = -1
 
         for row in rows:
-            # print(row)
-
             runno, fileno, det = row[:3]
 
             if fileno != last_fileno:
