@@ -24,6 +24,7 @@ docker container rm dybvdq-app
 docker image rm dayabay/dybvdq-app
 docker build -t dayabay/dybvdq-app .
 docker run --name=dybvdq-app -d --net=host -v $PWD:/app dayabay/dybvdq-app
+
 ** On DigitalOcean (new)
 # Locally:
 cd ~/physics/dqwg/new_website/front
@@ -138,7 +139,7 @@ Just run ~typesync~
         "after": ["y", "y", "P", "k", ">", ">", "C"]
 
 * From RunAndFile.tsx (ViewProps)
-#+BEGIN_SRC typescript
+#+BEGIN_SRC typescript-tsx
   // Event handlers must return any instead of void
   // https://github.com/piotrwitek/react-redux-typescript-guide#caveat-with-bindactioncreators
   // onChangeRunno: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -150,7 +151,7 @@ Just run ~typesync~
 #+END_SRC
 
 * Contents of src/components/App.test.tsx
-#+BEGIN_SRC typescript
+#+BEGIN_SRC typescript-tsx
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import App from './App';
