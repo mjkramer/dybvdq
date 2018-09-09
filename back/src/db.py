@@ -5,18 +5,17 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-import app
-APP = app.APP
+from app import APP
 
 def db_uri(host, port, user, passwd, database):
     return f'mysql+pymysql://{user}:{passwd}@{host}:{port}/{database}'
 
 def get_binds():
-    dq_db_uri = db_uri(os.environ['DYBVDQ_DB_HOST'],
-                       os.environ['DYBVDQ_DB_PORT'],
-                       os.environ['DYBVDQ_DB_USER'],
-                       os.environ['DYBVDQ_DB_PASS'],
-                       os.environ['DYBVDQ_DB_NAME'])
+    dq_db_uri = db_uri(os.environ['DYBVDQ_DQ_DB_HOST'],
+                       os.environ['DYBVDQ_DQ_DB_PORT'],
+                       os.environ['DYBVDQ_DQ_DB_USER'],
+                       os.environ['DYBVDQ_DQ_DB_PASS'],
+                       os.environ['DYBVDQ_DQ_DB_NAME'])
 
     return {'dq_db': dq_db_uri}
 
