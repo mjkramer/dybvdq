@@ -27,4 +27,4 @@ DB = SQLAlchemy(APP)
 
 def dq_exec(query):
     # pylint: disable=E1101
-    return DB.session.execute(query, bind=DB.get_engine('dq_db'))
+    return DB.session.execute(query, bind=DB.get_engine(bind='dq_db'))
