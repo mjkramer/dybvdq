@@ -31,7 +31,7 @@ services:
     command: /bin/bash /start_nginx.sh
   app_db:
     container_name: dybvdq-app_db
-    image: mysql
+    image: mariadb
     volumes:
       - ${DYBVDQ_APP_DB_DATA}:/var/lib/mysql
     environment:
