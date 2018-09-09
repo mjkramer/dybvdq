@@ -2,7 +2,7 @@
 "The Flask backend for DYB Visual DQ"
 
 import os
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
 import pymysql             # supports gevent (for gunicorn), unlike mysqlclient
 
 import util
@@ -11,21 +11,13 @@ pymysql.install_as_MySQLdb()
 
 NROWS = 1000
 
-# If nginx is configured properly, we shouldn't have any need for
-# template/static_folder
-APP = Flask(__name__, template_folder='../../front/build',
-            static_folder='../../front/build/static')
+APP = Flask(__name__)
 
 DB = pymysql.connect(host=os.environ['DYBVDQ_DB_HOST'],
                      port=int(os.environ['DYBVDQ_DB_PORT']),
                      user=os.environ['DYBVDQ_DB_USER'],
                      passwd=os.environ['DYBVDQ_DB_PASS'],
                      db=os.environ['DYBVDQ_DB_NAME'])
-
-@APP.route('/')
-def index():
-    "Serve the HTML entrypoint (ideally should be handled by nginx)"
-    return render_template('index.html')
 
 @APP.route('/report_taggings', methods=['POST'])
 def report_taggings():
