@@ -2,16 +2,16 @@ version: "3"
 services:
   app:
     container_name: dybvdq-app
-    build: ./back/
+    build: ../back/
     volumes:
-      - ./:/app
+      - ../:/app
   nginx:
     container_name: dybvdq-nginx
     image: nginx
     volumes:
-      - ./front/build:/webroot:ro
-      - ./nginx/nginx.conf:/nginx.conf.template:ro
-      - ./nginx/start_nginx.sh:/start_nginx.sh:ro
+      - ../front/build:/webroot:ro
+      - ../nginx/nginx.conf:/nginx.conf.template:ro
+      - ../nginx/start_nginx.sh:/start_nginx.sh:ro
       - ${NGINX_CERT_PATH}:/certs:ro
     ports:
       - "80:80"
