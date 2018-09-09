@@ -4,7 +4,7 @@ services:
     container_name: dybvdq-back
     build: ../back/
     volumes:
-      - ../:/app
+      - ../back/src:/app
     environment:
       - DYBVDQ_DB_HOST
       - DYBVDQ_DB_PORT

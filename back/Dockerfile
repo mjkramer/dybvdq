@@ -10,5 +10,5 @@ RUN set -ex && pipenv install --deploy --system
 RUN rm /Pipfile /Pipfile.lock
 
 VOLUME /app
-WORKDIR /app/back/src
+WORKDIR /app
 CMD gunicorn -w 4 -k gevent -b :5000 app:APP
