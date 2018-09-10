@@ -3,6 +3,8 @@ services:
   back:
     container_name: dybvdq-back
     build: ../back/
+    depends_on:
+      - app_db
     volumes:
       - ../back/src:/app
     environment:
