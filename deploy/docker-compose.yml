@@ -19,6 +19,8 @@ services:
   nginx:
     container_name: dybvdq-nginx
     image: nginx
+    depends_on:
+      - back
     volumes:
       - ../front/build:/webroot:ro
       - ../nginx/nginx.conf:/nginx.conf.template:ro
