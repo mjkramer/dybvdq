@@ -5,6 +5,7 @@ import { Input, InputGroup, InputGroupAddon } from 'reactstrap';
 
 import { gotTaggings, requestTaggings } from '../actions';
 import { store } from '../index';
+import { DataLocation } from '../model';
 import NavButton, { IProps as ButtonProps } from './NavButton';
 
 interface IViewProps {
@@ -22,7 +23,7 @@ const View: React.SFC<IViewProps> = ({ onClick }) => (
 );
 
 class SaveForm extends React.Component<DispatchProp> {
-  private lastTaggings: number[] = [];
+  private lastTaggings: DataLocation[] = [];
 
   public componentDidMount() {
     // unsubscribe when we unmount

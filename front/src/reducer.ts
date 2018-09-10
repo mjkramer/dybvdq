@@ -32,7 +32,7 @@ export default handleActions<AppState, any>(
       runno: action.payload!.runno,
     }),
     [requestTaggings as any]: state => ({ ...state, taggingsRequested: true }),
-    [sendTaggings as any]: (state, action: Action<number[]>) => ({
+    [sendTaggings as any]: (state, action: Action<DataLocation[]>) => ({
       ...state,
       latestTaggings: action.payload!,
       taggingsRequested: false,

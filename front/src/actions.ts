@@ -1,5 +1,7 @@
 import { createActions } from 'redux-actions';
 
+import { DataLocation } from './model';
+
 export const {
   sendTaggings,
   setFields,
@@ -14,7 +16,7 @@ export const {
   didDeselect,
 } = createActions(
   {
-    SEND_TAGGINGS: taggedIds => taggedIds,
+    SEND_TAGGINGS: (taggedIds: DataLocation[]) => taggedIds,
     SET_FIELDS: labeledFields => labeledFields,
     SET_HALL: hall => hall,
     SET_RUN_AND_FILE: (runno, fileno) => ({ runno, fileno }),

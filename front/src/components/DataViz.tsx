@@ -37,6 +37,7 @@ type State = Readonly<typeof initialState>;
 class View extends React.PureComponent<StateProps, State> {
   public readonly state: State = initialState;
 
+  private data: FileData | null = null;
   private cachedData: FileData | null = null;
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
@@ -68,13 +69,19 @@ class View extends React.PureComponent<StateProps, State> {
     }
 
     this.cachedData = null;
+    this.data = data;
     this.plot(data);
   }
 
-  public getTaggedIds(): number[] {
+  public getTaggedIds(): DataLocation[] {
+    const locFor = (idx: number) => ({
+      fileno: this.data!.filenos[idx],
+      runno: this.data!.runnos[idx],
+    });
+
     return this.colors.reduce(
-      (result, color, idx) => [...result, ...(color === COLORS[1] ? [idx] : [])],
-      [] as number[],
+      (result, color, idx) => [...result, ...(color === COLORS[1] ? [locFor(idx)] : [])],
+      [] as DataLocation[],
     );
   }
 

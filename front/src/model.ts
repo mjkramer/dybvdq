@@ -4,7 +4,7 @@ export type AppState = {
   hall: string;
   selectedFields: Field[];
   taggingsRequested: boolean;
-  latestTaggings: number[];
+  latestTaggings: DataLocation[];
   tagSelectionReq: boolean;
   selectionActive: boolean;
 };
