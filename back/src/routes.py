@@ -17,7 +17,7 @@ from sqlalchemy.dialects import mysql
 from . import app
 from . import util
 from .db import db, dq_exec, app_exec
-from .db_model import Tagging
+from .model import Tagging
 
 NROWS = 1000
 
