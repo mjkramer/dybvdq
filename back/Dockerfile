@@ -11,4 +11,4 @@ RUN rm /Pipfile /Pipfile.lock
 
 VOLUME /app
 WORKDIR /app
-CMD gunicorn -w 4 -k gevent -b :5000 app:APP
+CMD gunicorn -w 4 -k gevent -b :5000 app:app
