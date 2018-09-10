@@ -12,6 +12,8 @@ services:
       - DYBVDQ_DQ_DB_PASS
       - DYBVDQ_DQ_DB_NAME
       - DYBVDQ_APP_DB_PASS
+      # set this to see debug printouts
+      - PYTHONUNBUFFERED
   nginx:
     container_name: dybvdq-nginx
     image: nginx
