@@ -3,9 +3,16 @@
 # pylint: disable=missing-docstring
 
 import os
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy as SA
 
 from app import app
+
+class SQLAlchemy(SA):
+    def apply_pool_defaults(self, theApp, options):  # pylint: disable=arguments-differ
+        SA.apply_pool_defaults(self, theApp, options)
+        options["pool_pre_ping"] = True
+
+db = SQLAlchemy()               # pylint: disable=invalid-name
 
 def db_uri(host, port, user, passwd, database):
     return f'mysql+pymysql://{user}:{passwd}@{host}:{port}/{database}'
