@@ -78,6 +78,7 @@ class View extends React.Component<StateProps, State> {
   // Don't rerender when just the session changes
   public shouldComponentUpdate(nextProps: StateProps, nextState: State) {
     return (
+      !!this.cachedData ||
       nextProps.runno !== this.props.runno ||
       nextProps.fileno !== this.props.fileno ||
       nextProps.hall !== this.props.hall ||

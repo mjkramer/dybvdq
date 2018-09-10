@@ -17,8 +17,11 @@ def get_binds():
                        os.environ['DYBVDQ_DQ_DB_PASS'],
                        os.environ['DYBVDQ_DQ_DB_NAME'])
 
-    app_db_uri = db_uri('dybvdq-app_db', 3306, 'root',
-                        os.environ['DYBVDQ_APP_DB_PASS'], 'app_db')
+    app_db_uri = db_uri(os.environ['DYBVDQ_APP_DB_HOST'],
+                        os.environ['DYBVDQ_APP_DB_PORT'],
+                        os.environ['DYBVDQ_APP_DB_USER'],
+                        os.environ['DYBVDQ_APP_DB_PASS'],
+                        os.environ['DYBVDQ_APP_DB_NAME'])
 
     return {'dq_db': dq_db_uri,
             'app_db': app_db_uri}
