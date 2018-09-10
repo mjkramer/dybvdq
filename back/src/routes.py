@@ -14,10 +14,10 @@
 from flask import jsonify, request
 from sqlalchemy.dialects import mysql
 
-from globals import app
-import util
-from db import db, dq_exec, app_exec
-from db_model import Tagging
+from . import app
+from . import util
+from .db import db, dq_exec, app_exec
+from .db_model import Tagging
 
 NROWS = 1000
 
@@ -157,7 +157,3 @@ def all_fields():
 def list_fields():
     "Used by react-select for picking the quantities to plot"
     return jsonify(all_fields())
-
-# entry point
-if __name__ == '__main__':
-    app.run()

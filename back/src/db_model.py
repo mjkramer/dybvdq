@@ -2,7 +2,7 @@
 
 # pylint: disable=missing-docstring,too-few-public-methods,no-member
 
-from db import db
+from .db import db
 
 class Tagging(db.Model):
     __bind_key__ = 'app_db'

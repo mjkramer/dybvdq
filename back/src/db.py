@@ -5,7 +5,7 @@
 import os
 from flask_sqlalchemy import SQLAlchemy as SA
 
-from globals import app
+from . import app
 
 class SQLAlchemy(SA):
     def apply_pool_defaults(self, theApp, options):  # pylint: disable=arguments-differ
