@@ -122,6 +122,11 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-password-authenti
 * SQLAlchemy
 ** Executing on a specific bind:
 - https://github.com/mitsuhiko/flask-sqlalchemy/issues/107
+** Compiling an on_duplicate_key_update statement
+stmt = mysql.insert(Tagging).values(update) \
+            .on_duplicate_key_update(hall=Tagging.hall)
+text = stmt.compile(mysql.dialect()).__str__()
+db.get_engine(bind='app_db').execute(stmt or text)
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet
