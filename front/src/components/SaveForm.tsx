@@ -50,7 +50,7 @@ class SaveForm extends React.Component<State & DispatchProp, State> {
     // re-renders (and subsequent dispatches) in other components, then this
     // listener may receive stale data in those intermediate state updates, up
     // until the gotTaggings is finally processed. Thus we must keep track of
-    // lastTaggings.
+    // lastTaggings. (Note: This whole premise is debateable)
     if (latestTaggings.length && latestTaggings !== this.lastTaggings) {
       this.lastTaggings = latestTaggings;
       axios.post('/report_taggings', {
@@ -69,7 +69,7 @@ class SaveForm extends React.Component<State & DispatchProp, State> {
   private onClick: ViewProps['onClick'] = () => {
     const { sessionName } = this.state;
     this.props.dispatch(setSession(sessionName));
-    this.props.dispatch(requestTaggings());
+    this.props.dispatch(requestTaggings()); // followed up in this.listener
   };
 }
 
