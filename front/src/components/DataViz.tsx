@@ -12,6 +12,7 @@ import {
   defaultPlotlyLayout,
   defaultPlotlyTrace,
   isNil,
+  toQuerystring,
 } from '../util';
 
 const COLORS = ['blue', 'orange'];
@@ -25,6 +26,7 @@ type StateProps = {
   runno: number;
   fileno: number;
   hall: string;
+  sessionName: string;
   fields: Field[];
 };
 
@@ -34,14 +36,14 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class View extends React.PureComponent<StateProps, State> {
+class View extends React.Component<StateProps, State> {
   public readonly state: State = initialState;
 
   private data: FileData | null = null;
   private cachedData: FileData | null = null;
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
-  private lastLoc: DataLocation = { fileno: 0, runno: 0 };
+  private lastLoc: DataLocation & { hall: string } = { fileno: 0, runno: 0, hall: '' };
   private selection: number[] = [];
 
   public componentDidMount() {
@@ -71,6 +73,16 @@ class View extends React.PureComponent<StateProps, State> {
     this.cachedData = null;
     this.data = data;
     this.plot(data);
+  }
+
+  // Don't rerender when just the session changes
+  public shouldComponentUpdate(nextProps: StateProps, nextState: State) {
+    return (
+      nextProps.runno !== this.props.runno ||
+      nextProps.fileno !== this.props.fileno ||
+      nextProps.hall !== this.props.hall ||
+      nextProps.fields !== this.props.fields
+    );
   }
 
   public getTaggedIds(): DataLocation[] {
@@ -155,10 +167,17 @@ class View extends React.PureComponent<StateProps, State> {
   }
 
   private async fetchData() {
-    const { runno, fileno, hall, fields } = this.props;
+    const { runno, fileno, hall, sessionName, fields } = this.props;
 
     const fieldStr = fields.map(o => o.value).join(',');
-    const url = `/realdata?runno=${runno}&fileno=${fileno}&hall=${hall}&fields=${fieldStr}`;
+    const args = {
+      fields: fieldStr,
+      fileno,
+      hall,
+      runno,
+      session: sessionName,
+    };
+    const url = `/realdata?${toQuerystring(args)}`;
     const { data } = await axios.get(url);
     return data;
   }
@@ -176,16 +195,21 @@ class View extends React.PureComponent<StateProps, State> {
   };
 
   private plot(data: FileData) {
-    const { metrics } = data;
+    const { metrics, tagStatus } = data;
     const firstMetric = metrics[Object.keys(metrics)[0]];
     const detectors = Object.keys(firstMetric);
     detectors.sort();
 
     const npoints = firstMetric[detectors[0]].values.length;
 
-    const { fileno, runno } = this.props;
-    if (fileno !== this.lastLoc.fileno || runno !== this.lastLoc.runno) {
-      this.colors = Array(npoints).fill(COLORS[0]);
+    // Don't reset taggings if we've only changed the fields
+    const { fileno, hall, runno } = this.props;
+    if (
+      fileno !== this.lastLoc.fileno ||
+      runno !== this.lastLoc.runno ||
+      hall !== this.lastLoc.hall
+    ) {
+      this.colors = tagStatus.map(s => (s ? COLORS[1] : COLORS[0]));
     }
 
     const xs = [...Array(npoints).keys()];
@@ -217,7 +241,7 @@ class View extends React.PureComponent<StateProps, State> {
       });
     });
 
-    this.lastLoc = { fileno, runno };
+    this.lastLoc = { fileno, hall, runno };
   }
 
   private togglePoints(idxs: number[]) {
@@ -270,6 +294,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = state => ({
   fileno: state.fileno,
   hall: state.hall,
   runno: state.runno,
+  sessionName: state.sessionName,
 });
 
 export default connect(mapStateToProps)(View);

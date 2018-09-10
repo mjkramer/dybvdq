@@ -4,6 +4,11 @@ export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export const isNil = (x: any) => x === undefined || x === null;
 
+export const toQuerystring = (obj: object) =>
+  Object.entries(obj)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+    .join('&');
+
 declare module 'plotly.js' {
   interface PlotlyHTMLElement {
     removeAllListeners(): void;

@@ -1,11 +1,11 @@
 import axios from 'axios';
 import React from 'react';
-import { connect, DispatchProp } from 'react-redux';
+import { connect, DispatchProp, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
-import { gotTaggings, requestTaggings } from '../actions';
+import { gotTaggings, requestTaggings, setSession } from '../actions';
 import { store } from '../index';
-import { DataLocation } from '../model';
+import { AppState, DataLocation } from '../model';
 import NavButton, { IProps as ButtonProps } from './NavButton';
 
 type ViewProps = {
@@ -24,14 +24,10 @@ const View: React.SFC<ViewProps> = ({ onChange, onClick, sessionName }) => (
   </div>
 );
 
-const initialState = {
-  sessionName: 'Awesome session',
-};
+type State = Readonly<Pick<AppState, 'sessionName'>>;
 
-type State = Readonly<typeof initialState>;
-
-class SaveForm extends React.Component<DispatchProp, State> {
-  public readonly state: State = initialState;
+class SaveForm extends React.Component<State & DispatchProp, State> {
+  public readonly state: State = this.props;
 
   private lastTaggings: DataLocation[] = [];
 
@@ -71,8 +67,19 @@ class SaveForm extends React.Component<DispatchProp, State> {
   };
 
   private onClick: ViewProps['onClick'] = () => {
+    const { sessionName } = this.state;
+    this.props.dispatch(setSession(sessionName));
     this.props.dispatch(requestTaggings());
   };
 }
 
-export default connect()(SaveForm);
+type StateProps = State & React.Attributes; // Add "key" attribute
+
+const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
+  sessionName,
+}) => ({
+  key: sessionName, // forces reinitialization when props change
+  sessionName,
+});
+
+export default connect(mapStateToProps)(SaveForm);

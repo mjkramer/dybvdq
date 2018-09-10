@@ -11,6 +11,7 @@ import {
   setFields,
   setHall,
   setRunAndFile,
+  setSession,
   shiftPage,
   taggedSelection,
   tagSelection,
@@ -50,6 +51,10 @@ export default handleActions<AppState, any>(
     }),
     [didSelect as any]: state => ({ ...state, selectionActive: true }),
     [didDeselect as any]: state => ({ ...state, selectionActive: false }),
+    [setSession as any]: (state, action: Action<string>) => ({
+      ...state,
+      sessionName: action.payload!,
+    }),
   },
   initialState,
 );

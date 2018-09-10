@@ -1,12 +1,13 @@
 export type AppState = {
-  runno: number;
   fileno: number;
   hall: string;
-  selectedFields: Field[];
-  taggingsRequested: boolean;
   latestTaggings: DataLocation[];
-  tagSelectionReq: boolean;
+  runno: number;
+  selectedFields: Field[];
   selectionActive: boolean;
+  sessionName: string;
+  tagSelectionReq: boolean;
+  taggingsRequested: boolean;
 };
 
 export type DataLocation = {
@@ -26,6 +27,7 @@ export const initialState: AppState = {
   runno: 21221,
   selectedFields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
   selectionActive: false,
+  sessionName: 'Awesome session',
   tagSelectionReq: false,
   taggingsRequested: false,
 };
@@ -45,4 +47,5 @@ export type FileData = {
   runnos: number[];
   filenos: number[];
   metrics: { [fieldName: string]: MetricSet };
+  tagStatus: boolean[];
 };

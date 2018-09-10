@@ -16,7 +16,7 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)           # pylint: disable=invalid-name
 
 import util
-from db import db, dq_exec
+from db import db, dq_exec, app_exec
 from db_model import Tagging
 
 NROWS = 1000
@@ -41,6 +41,25 @@ def report_taggings():
 
     return 'Thanks!'
 
+def get_taggings(hall, session, lowbound, highbound):
+    "Fetch any saved taggings between the bounds"
+    low_runno, low_fileno = lowbound
+    high_runno, high_fileno = highbound
+
+    if low_runno == high_runno:
+        pred = f'''runno={low_runno} AND
+                   (fileno BETWEEN {low_fileno} AND {high_fileno})'''
+    else:
+        pred = f'''(runno BETWEEN {low_runno}+1 AND {high_runno}-1) OR
+                   (runno={low_runno} AND fileno>={low_fileno}) OR
+                   (runno={high_runno} AND fileno<={high_fileno})'''
+
+    query = f'''SELECT runno, fileno FROM tagging
+                WHERE {pred} AND hall={hall} AND session={session}
+                ORDER BY runno, fileno'''
+
+    return app_exec(query).fetch_all()
+
 @app.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
     "monstrous function that needs to be cleaned up"
@@ -48,6 +67,7 @@ def realdata():                 # pylint: disable=too-many-locals
     fileno = int(request.args.get('fileno'))
     hall = int(request.args.get('hall')[2])
     fields = request.args.get('fields')
+    session = request.args.get('session')
 
     result = {'runnos': [],
               'filenos': [],
@@ -99,6 +119,14 @@ def realdata():                 # pylint: disable=too-many-locals
                     vals.append(row[i+3])
 
             last_fileno, last_det = fileno, det
+
+    lowbound = (result['runnos'][0], result['filenos'][0])
+    highbound = (result['runnos'][-1], result['filenos'][-1])
+    taggings = set(get_taggings(hall, session, lowbound, highbound))
+
+    result['tagStatus'] = [(runno, fileno) in taggings
+                           for (runno, fileno)
+                           in zip(result['runnos'], result['filenos'])]
 
     return jsonify(result)
 
