@@ -5,7 +5,7 @@
 import os
 from flask_sqlalchemy import SQLAlchemy
 
-from app import APP
+from app import app
 
 def db_uri(host, port, user, passwd, database):
     return f'mysql+pymysql://{user}:{passwd}@{host}:{port}/{database}'
@@ -17,13 +17,21 @@ def get_binds():
                        os.environ['DYBVDQ_DQ_DB_PASS'],
                        os.environ['DYBVDQ_DQ_DB_NAME'])
 
-    return {'dq_db': dq_db_uri}
+    app_db_uri = db_uri('dybdq-app_db', 3000, 'root',
+                        os.environ['DYBVDQ_APP_DB_PASS'], 'app_db')
 
-APP.config['SQLALCHEMY_BINDS'] = get_binds()
-APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    return {'dq_db': dq_db_uri,
+            'app_db': app_db_uri}
 
-DB = SQLAlchemy(APP)
+app.config['SQLALCHEMY_BINDS'] = get_binds()
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)            # pylint: disable=invalid-name
 
 def dq_exec(query):
     # pylint: disable=E1101
-    return DB.session.execute(query, bind=DB.get_engine(bind='dq_db'))
+    return db.session.execute(query, bind=db.get_engine(bind='dq_db'))
+
+def app_exec(query):
+    # pylint: disable=E1101
+    return db.session.execute(query, bind=db.get_engine(bind='app_db'))

@@ -7,25 +7,39 @@
 # From inspecting gunicorn's ggevent.py, we see that they use subprocess=True,
 # so do the same here. In theory, as long as we create our Flask before doing
 # anything else, this shouldn't be necessary. We can try removing it later.
+# Note: If an interactive "import app" hangs, comment out these lines.
 from gevent import monkey
 monkey.patch_all(subprocess=True)
 
 from flask import Flask, jsonify, request
 
-APP = Flask(__name__)
+app = Flask(__name__)           # pylint: disable=invalid-name
 
 import util
-from db import dq_exec
+from db import db, dq_exec
+from db_model import Tagging
 
 NROWS = 1000
 
-@APP.route('/report_taggings', methods=['POST'])
+@app.route('/report_taggings', methods=['POST'])
 def report_taggings():
     "Receive taggings from client and save them somewhere"
     print(request.json)
+
+    payload = request.json
+    hall = int(payload['hall'][2])
+
+    for tagged in payload['taggedIds']:
+        tagging = Tagging(fileno=tagged['fileno'],
+                          runno=tagged['runno'],
+                          hall=hall)
+        db.session.add(tagging)  # pylint: disable=no-member
+
+    db.session.commit()         # pylint: disable=no-member
+
     return 'Thanks!'
 
-@APP.route('/realdata')
+@app.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
     "monstrous function that needs to be cleaned up"
     runno = int(request.args.get('runno'))
@@ -102,11 +116,11 @@ def all_fields():
         'nlikecounts': 'Delayed-like counts',
     }
 
-@APP.route('/list_fields')
+@app.route('/list_fields')
 def list_fields():
     "Used by react-select for picking the quantities to plot"
     return jsonify(all_fields())
 
 # entry point
 if __name__ == '__main__':
-    APP.run()
+    app.run()
