@@ -55,7 +55,7 @@ def get_taggings(hall, session, lowbound, highbound):
                    (runno={high_runno} AND fileno<={high_fileno})'''
 
     query = f'''SELECT runno, fileno FROM tagging
-                WHERE {pred} AND hall={hall} AND session={session}
+                WHERE {pred} AND hall={hall} AND session="{session}"
                 ORDER BY runno, fileno'''
 
     return app_exec(query).fetch_all()
