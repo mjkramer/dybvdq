@@ -11,11 +11,10 @@
 # from gevent import monkey
 # monkey.patch_all(subprocess=True)
 
-from flask import Flask, jsonify, request
-import sqlalchemy.dialects.mysql as mysql
+from flask import jsonify, request
+from sqlalchemy.dialects import mysql
 
-app = Flask(__name__)           # pylint: disable=invalid-name
-
+from globals import app
 import util
 from db import db, dq_exec, app_exec
 from db_model import Tagging
