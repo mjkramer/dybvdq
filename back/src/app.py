@@ -8,10 +8,11 @@
 # so do the same here. In theory, as long as we create our Flask before doing
 # anything else, this shouldn't be necessary. We can try removing it later.
 # Note: If an interactive "import app" hangs, comment out these lines.
-from gevent import monkey
-monkey.patch_all(subprocess=True)
+# from gevent import monkey
+# monkey.patch_all(subprocess=True)
 
 from flask import Flask, jsonify, request
+import sqlalchemy.dialects.mysql as mysql
 
 app = Flask(__name__)           # pylint: disable=invalid-name
 
@@ -30,14 +31,20 @@ def report_taggings():
     hall = int(payload['hall'][2])
     session = payload['session']
 
-    for tagged in payload['taggedIds']:
-        tagging = Tagging(fileno=tagged['fileno'],
-                          runno=tagged['runno'],
-                          hall=hall,
-                          session=session)
-        db.session.add(tagging)  # pylint: disable=no-member
+    # for tagged in payload['taggedIds']:
+    #     tagging = Tagging(fileno=tagged['fileno'],
+    #                       runno=tagged['runno'],
+    #                       hall=hall,
+    #                       session=session)
+    #     db.session.add(tagging)  # pylint: disable=no-member
 
-    db.session.commit()         # pylint: disable=no-member
+    update = [{'hall': hall, 'session': session, **tagging}
+              for tagging in payload['taggedIds']]
+    stmt = mysql.insert(Tagging).values(update) \
+                .on_duplicate_key_update(hall=Tagging.hall)
+    db.get_engine(bind='app_db').execute(stmt)
+
+    # db.session.commit()         # pylint: disable=no-member
 
     return 'Thanks!'
 
