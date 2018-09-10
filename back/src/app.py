@@ -58,7 +58,8 @@ def get_taggings(hall, session, lowbound, highbound):
                 WHERE {pred} AND hall={hall} AND session="{session}"
                 ORDER BY runno, fileno'''
 
-    return app_exec(query).fetchall()
+    result = app_exec(query).fetchall()
+    return set(map(tuple, result))
 
 @app.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
