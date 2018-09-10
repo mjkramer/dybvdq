@@ -28,11 +28,13 @@ def report_taggings():
 
     payload = request.json
     hall = int(payload['hall'][2])
+    session = payload['session']
 
     for tagged in payload['taggedIds']:
         tagging = Tagging(fileno=tagged['fileno'],
                           runno=tagged['runno'],
-                          hall=hall)
+                          hall=hall,
+                          session=session)
         db.session.add(tagging)  # pylint: disable=no-member
 
     db.session.commit()         # pylint: disable=no-member
