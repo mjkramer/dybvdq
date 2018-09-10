@@ -37,5 +37,5 @@
     "tslint-plugin-prettier": "^1.3.0",
     "typescript": "^3.0.1"
   },
-  "proxy": "localhost:5000"
+  "proxy": "https://dybdq.work"
 }
