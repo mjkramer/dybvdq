@@ -48,9 +48,9 @@ class SaveForm extends React.Component<DispatchProp> {
     }
   };
 
-  private onClick() {
+  private onClick = () => {
     this.props.dispatch(requestTaggings());
-  }
+  };
 }
 
 export default connect()(SaveForm);
