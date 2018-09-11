@@ -5,11 +5,12 @@
 
 from flask import jsonify, request
 from sqlalchemy.dialects import mysql
+from typing import List
 
 from . import app
 from . import util
 from .db import db, dq_exec, app_exec
-from .model import Tagging
+from .model import Tagging, DataLocation, all_fields
 
 NROWS = 1000
 
@@ -20,7 +21,8 @@ def report_taggings():
 
     payload = request.json
     hall = int(payload['hall'][2])
-    session = payload['session']
+    session: str = payload['session']
+    tagged_ids: List[DataLocation] = payload['taggedIds']
 
     # for tagged in payload['taggedIds']:
     #     tagging = Tagging(fileno=tagged['fileno'],
@@ -30,7 +32,7 @@ def report_taggings():
     #     db.session.add(tagging)  # pylint: disable=no-member
 
     update = [{'hall': hall, 'session': session, **tagging}
-              for tagging in payload['taggedIds']]
+              for tagging in tagged_ids]
     stmt = mysql.insert(Tagging).values(update) \
                 .on_duplicate_key_update(hall=Tagging.hall)
     db.get_engine(bind='app_db').execute(stmt)
@@ -128,22 +130,6 @@ def realdata():                 # pylint: disable=too-many-locals
                            in zip(result['runnos'], result['filenos'])]
 
     return jsonify(result)
-
-def all_fields():
-    "Everything we know how to plot"
-    return {
-        'triggercounts': 'Trigger counts',
-        'flashercounts': 'Flasher counts',
-        'muoncounts': 'Muon counts',
-        'ibdcounts': 'IBD counts',
-        'spncounts': 'SPN counts',
-        'blocktrigcounts': 'Blocked trigger counts',
-        'spnenergy': 'SPN energy',
-        'k40energy': 'K40 energy',
-        'tl208energy': 'Tl208 energy',
-        'plikecounts': 'Prompt-like counts',
-        'nlikecounts': 'Delayed-like counts',
-    }
 
 @app.route('/list_fields')
 def list_fields():
