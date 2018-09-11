@@ -5,17 +5,17 @@ import { plzTagSelection } from '../events';
 import { AppState } from '../model';
 import NavButton, { Props as ButtonProps } from './NavButton';
 
+type Props = Pick<ButtonProps, 'disabled'>;
+
 const onClick = () => plzTagSelection.next();
 
-const TagSelectionButton: React.SFC<ButtonProps> = btnProps => (
-  <NavButton onClick={onClick} {...btnProps}>
+const TagSelectionButton: React.SFC<Props> = ({ disabled }) => (
+  <NavButton disabled={disabled} onClick={onClick}>
     TAG SEL
   </NavButton>
 );
 
-const mapStateToProps: MapStateToProps<ButtonProps, {}, AppState> = ({
-  selectionActive,
-}) => ({
+const mapStateToProps: MapStateToProps<Props, {}, AppState> = ({ selectionActive }) => ({
   disabled: !selectionActive,
 });
 
