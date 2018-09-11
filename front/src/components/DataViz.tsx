@@ -3,6 +3,7 @@ import React from 'react';
 import { connect, DispatchProp, MapStateToProps } from 'react-redux';
 import { Subscription } from 'rxjs';
 
+import { store } from '..';
 import { didDeselect, didSelect } from '../actions';
 import * as api from '../api';
 import { plzReportTaggings, plzTagSelection } from '../events';
@@ -180,7 +181,10 @@ class DataVizView extends React.Component<StateProps & DispatchProp, State> {
   }
 
   private reportTaggingsListener = () => {
-    const { hall, session } = this.props;
+    // const { hall, session } = this.props;
+    const { hall } = this.props;
+    // SaveForm updates state, but we get here before we receive new props?
+    const { session } = store.getState();
     const taggedIds = this.getTaggedIds();
     api.reportTaggings(hall, session, taggedIds);
   };
