@@ -5,7 +5,7 @@ import DataViz from './DataViz';
 import FieldSel from './FieldSel';
 import Toolbar from './Toolbar';
 
-export default () => (
+export const App = () => (
   <Container>
     <h3 className="mb-4 mt-1">DYB Visual DQ v0.314159</h3>
     <Toolbar />
@@ -15,3 +15,5 @@ export default () => (
     <DataViz />
   </Container>
 );
+
+export default App;

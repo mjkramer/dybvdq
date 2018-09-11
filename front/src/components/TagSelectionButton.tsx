@@ -7,7 +7,7 @@ import NavButton, { Props as ButtonProps } from './NavButton';
 
 const onClick = () => plzTagSelection.next();
 
-const View: React.SFC<ButtonProps> = btnProps => (
+const TagSelectionButton: React.SFC<ButtonProps> = btnProps => (
   <NavButton onClick={onClick} {...btnProps}>
     TAG SEL
   </NavButton>
@@ -19,4 +19,4 @@ const mapStateToProps: MapStateToProps<ButtonProps, {}, AppState> = ({
   disabled: !selectionActive,
 });
 
-export default connect(mapStateToProps)(View);
+export default connect(mapStateToProps)(TagSelectionButton);

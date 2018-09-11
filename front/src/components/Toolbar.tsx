@@ -6,7 +6,7 @@ import SaveForm from './SaveForm';
 import ShiftButton from './ShiftButton';
 import TagSelectionButton from './TagSelectionButton';
 
-export default () => (
+export const Toolbar = () => (
   <div className="d-flex justify-content-between mb-2">
     <ShiftButton count={-1}>PREV</ShiftButton>
     <HallSelector />
@@ -16,3 +16,5 @@ export default () => (
     <ShiftButton count={1}>NEXT</ShiftButton>
   </div>
 );
+
+export default Toolbar;
