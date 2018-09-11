@@ -4,8 +4,8 @@ import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import Select from 'react-select';
 import { Props as SelectProps } from 'react-select/lib/Select';
 
-import { setFields } from '../actions';
 import { AppState, Field } from '../model';
+import { doSetFields } from '../thunks';
 
 type Props = {
   fields: Field[];
@@ -51,7 +51,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ fields }) 
 
 type DispatchProps = Pick<Props, 'onChange'>;
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onChange: setFields,
+  onChange: doSetFields,
 };
 
 export default connect(

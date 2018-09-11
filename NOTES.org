@@ -226,3 +226,6 @@ export const toQuerystring = (obj: object) =>
     .join('&');
 #+END_SRC
 
+* TypeScript References
+** Variadic generics
+https://github.com/Microsoft/TypeScript/issues/5453

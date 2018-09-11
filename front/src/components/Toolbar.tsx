@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import HallSelector from './HallSelector';
 import RunAndFile from './RunAndFile';
-import SaveForm from './SaveForm';
+import SessionForm from './SessionForm';
 import ShiftButton from './ShiftButton';
 import TagSelectionButton from './TagSelectionButton';
 
@@ -11,7 +11,7 @@ export const Toolbar = () => (
     <ShiftButton count={-1}>PREV</ShiftButton>
     <HallSelector />
     <RunAndFile />
-    <SaveForm />
+    <SessionForm />
     <TagSelectionButton />
     <ShiftButton count={1}>NEXT</ShiftButton>
   </div>

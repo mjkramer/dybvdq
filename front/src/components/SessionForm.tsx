@@ -3,13 +3,12 @@ import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
 import { setSession } from '../actions';
-import { plzReportTaggings } from '../events';
 import { AppState } from '../model';
 import { num } from '../util';
 import NavButton, { Props as ButtonProps } from './NavButton';
 
 type DispatchProps = {
-  onSave: (session: string) => any;
+  onSwitch: (session: string) => any;
 };
 
 type State = Readonly<Pick<AppState, 'session'>>;
@@ -27,7 +26,7 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
           <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
           <Input onChange={this.onChange} size={num(12)} value={session} />
         </InputGroup>
-        <NavButton onClick={this.onClick}>SAVE</NavButton>
+        <NavButton onClick={this.onClick}>SWITCH</NavButton>
       </div>
     );
   }
@@ -37,10 +36,9 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
   };
 
   private onClick: ButtonProps['onClick'] = () => {
-    const { onSave } = this.props;
+    const { onSwitch } = this.props;
     const { session } = this.state;
-    onSave(session);
-    plzReportTaggings.next();
+    onSwitch(session);
   };
 }
 
@@ -52,7 +50,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ session })
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onSave: setSession,
+  onSwitch: setSession,
 };
 
 export default connect(

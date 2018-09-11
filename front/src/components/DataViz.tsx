@@ -3,7 +3,6 @@ import React from 'react';
 import { connect, DispatchProp, MapStateToProps } from 'react-redux';
 import { Subscription } from 'rxjs';
 
-import { store } from '..';
 import { didDeselect, didSelect } from '../actions';
 import * as api from '../api';
 import { plzReportTaggings, plzTagSelection } from '../events';
@@ -36,7 +35,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class DataVizView extends React.Component<StateProps & DispatchProp, State> {
+class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> {
   public readonly state: State = initialState;
 
   private data: FileData | null = null;
@@ -81,17 +80,6 @@ class DataVizView extends React.Component<StateProps & DispatchProp, State> {
     while (this.subscriptions.length) {
       this.subscriptions.pop()!.unsubscribe();
     }
-  }
-
-  // Don't rerender when just the session changes
-  public shouldComponentUpdate(nextProps: StateProps, nextState: State) {
-    return (
-      !!this.cachedData ||
-      nextProps.runno !== this.props.runno ||
-      nextProps.fileno !== this.props.fileno ||
-      nextProps.hall !== this.props.hall ||
-      nextProps.fields !== this.props.fields
-    );
   }
 
   public getTaggedIds(): DataLocation[] {
@@ -181,10 +169,7 @@ class DataVizView extends React.Component<StateProps & DispatchProp, State> {
   }
 
   private reportTaggingsListener = () => {
-    // const { hall, session } = this.props;
-    const { hall } = this.props;
-    // SaveForm updates state, but we get here before we receive new props?
-    const { session } = store.getState();
+    const { hall, session } = this.props;
     const taggedIds = this.getTaggedIds();
     api.reportTaggings(hall, session, taggedIds);
   };
