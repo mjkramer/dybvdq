@@ -1,11 +1,11 @@
 import React from 'react';
 import { Dropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 
-export interface IProps {
+export type Props = {
   items: string[];
   currentItem: string;
   onSelect: (item: string) => any;
-}
+};
 
 const initialState = {
   dropdownOpen: false,
@@ -13,7 +13,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class DynamicDropdown extends React.Component<IProps, State> {
+class DynamicDropdown extends React.Component<Props, State> {
   public readonly state: State = initialState;
 
   public render() {

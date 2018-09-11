@@ -18,7 +18,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class FieldSel extends React.Component<Props, State> {
+class FieldSelView extends React.Component<Props, State> {
   public readonly state: State = initialState;
 
   public async componentDidMount() {
@@ -57,4 +57,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(FieldSel);
+)(FieldSelView);

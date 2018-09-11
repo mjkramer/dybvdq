@@ -26,7 +26,7 @@ const View: React.SFC<ViewProps> = ({ onChange, onClick, session }) => (
 
 type State = Readonly<Pick<AppState, 'session'>>;
 
-class SaveForm extends React.Component<State & DispatchProp, State> {
+class SaveFormView extends React.Component<State & DispatchProp, State> {
   public readonly state: State = {
     session: this.props.session,
   };
@@ -54,4 +54,4 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ session })
   session,
 });
 
-export default connect(mapStateToProps)(SaveForm);
+export default connect(mapStateToProps)(SaveFormView);

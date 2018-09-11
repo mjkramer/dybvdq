@@ -9,7 +9,7 @@ type Props = Pick<ButtonProps, 'disabled'>;
 
 const onClick = () => plzTagSelection.next();
 
-const TagSelectionButton: React.SFC<Props> = ({ disabled }) => (
+const TagSelectionButtonView: React.SFC<Props> = ({ disabled }) => (
   <NavButton disabled={disabled} onClick={onClick}>
     TAG SEL
   </NavButton>
@@ -19,4 +19,4 @@ const mapStateToProps: MapStateToProps<Props, {}, AppState> = ({ selectionActive
   disabled: !selectionActive,
 });
 
-export default connect(mapStateToProps)(TagSelectionButton);
+export default connect(mapStateToProps)(TagSelectionButtonView);

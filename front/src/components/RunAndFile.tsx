@@ -31,7 +31,7 @@ const View: React.SFC<ViewProps> = props => (
 
 type State = Readonly<Pick<ViewProps, 'runno' | 'fileno'>>;
 
-class RunAndFile extends React.Component<State & DispatchProp, State> {
+class RunAndFileView extends React.Component<State & DispatchProp, State> {
   public readonly state: State = {
     fileno: this.props.fileno,
     runno: this.props.runno,
@@ -77,4 +77,4 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
   key: `${runno}_${fileno}`, // forces reinitialization when props change
 });
 
-export default connect(mapStateToProps)(RunAndFile);
+export default connect(mapStateToProps)(RunAndFileView);

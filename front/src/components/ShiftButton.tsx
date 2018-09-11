@@ -13,7 +13,7 @@ type DispatchProps = {
   shiftPage: (count: number) => any;
 };
 
-const ShiftButton: React.SFC<Props & DispatchProps> = ({
+const ShiftButtonView: React.SFC<Props & DispatchProps> = ({
   children,
   count,
   shiftPage,
@@ -29,4 +29,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, Props> = {
 export default connect(
   null,
   mapDispatchToProps,
-)(ShiftButton);
+)(ShiftButtonView);

@@ -5,11 +5,11 @@ import { Dispatch } from 'redux';
 import { setHall } from '../actions';
 import { AppState } from '../model';
 import { Omit } from '../util';
-import DynamicDropdown, { IProps as DDProps } from './DynamicDropdown';
+import DynamicDropdown, { Props as DDProps } from './DynamicDropdown';
 
 type Props = Omit<DDProps, 'items'>;
 
-const HallSelector: React.SFC<Props> = ddProps => (
+const HallSelectorView: React.SFC<Props> = ddProps => (
   <DynamicDropdown items={['EH1', 'EH2', 'EH3']} {...ddProps} />
 );
 
@@ -31,4 +31,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = (
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(HallSelector);
+)(HallSelectorView);

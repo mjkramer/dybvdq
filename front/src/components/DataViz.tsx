@@ -35,7 +35,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class DataViz extends React.Component<StateProps & DispatchProp, State> {
+class DataVizView extends React.Component<StateProps & DispatchProp, State> {
   public readonly state: State = initialState;
 
   private data: FileData | null = null;
@@ -292,4 +292,4 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = state => ({
   session: state.session,
 });
 
-export default connect(mapStateToProps)(DataViz);
+export default connect(mapStateToProps)(DataVizView);
