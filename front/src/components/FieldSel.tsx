@@ -7,10 +7,10 @@ import { Props as SelectProps } from 'react-select/lib/Select';
 import { setFields } from '../actions';
 import { AppState, Field } from '../model';
 
-interface IProps {
-  selectedFields: Field[];
+type Props = {
+  fields: Field[];
   onChange: SelectProps<Field>['onChange'];
-}
+};
 
 const initialState = {
   allFields: [] as Field[],
@@ -18,7 +18,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class FieldSel extends React.Component<IProps, State> {
+class FieldSel extends React.Component<Props, State> {
   public readonly state: State = initialState;
 
   public async componentDidMount() {
@@ -31,7 +31,7 @@ class FieldSel extends React.Component<IProps, State> {
   }
 
   public render() {
-    const { selectedFields, onChange } = this.props;
+    const { fields, onChange } = this.props;
     const { allFields } = this.state;
 
     if (!allFields) {
@@ -39,22 +39,17 @@ class FieldSel extends React.Component<IProps, State> {
     }
 
     return (
-      <Select
-        isMulti={true}
-        options={allFields}
-        value={selectedFields}
-        onChange={onChange}
-      />
+      <Select isMulti={true} options={allFields} value={fields} onChange={onChange} />
     );
   }
 }
 
-type StateProps = Pick<IProps, 'selectedFields'>;
-const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
-  selectedFields,
-}) => ({ selectedFields });
+type StateProps = Pick<Props, 'fields'>;
+const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ fields }) => ({
+  fields,
+});
 
-type DispatchProps = Pick<IProps, 'onChange'>;
+type DispatchProps = Pick<Props, 'onChange'>;
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
   onChange: setFields,
 };

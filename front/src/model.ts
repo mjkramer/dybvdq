@@ -1,13 +1,10 @@
 export type AppState = {
+  fields: Field[];
   fileno: number;
   hall: string;
-  latestTaggings: DataLocation[];
   runno: number;
-  selectedFields: Field[];
   selectionActive: boolean;
-  sessionName: string;
-  tagSelectionReq: boolean;
-  taggingsRequested: boolean;
+  session: string;
 };
 
 export type DataLocation = {
@@ -21,15 +18,12 @@ export type Field = {
 };
 
 export const initialState: AppState = {
+  fields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
   fileno: 1,
   hall: 'EH1',
-  latestTaggings: [],
   runno: 21221,
-  selectedFields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
   selectionActive: false,
-  sessionName: 'Awesome session',
-  tagSelectionReq: false,
-  taggingsRequested: false,
+  session: 'Default session',
 };
 
 // Now we describe the data provided by the backend

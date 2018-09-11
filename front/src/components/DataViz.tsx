@@ -1,18 +1,17 @@
-import axios from 'axios';
 import Plotly from 'plotly.js';
 import React from 'react';
-import { connect, MapStateToProps } from 'react-redux';
-import 'redux';
+import { connect, DispatchProp, MapStateToProps } from 'react-redux';
+import { Subscription } from 'rxjs';
 
-import { store } from '..';
-import { didDeselect, didSelect, sendTaggings, taggedSelection } from '../actions';
+import { didDeselect, didSelect } from '../actions';
+import * as api from '../api';
+import { plzReportTaggings, plzTagSelection } from '../events';
 import { AppState, DataLocation, Field, FileData } from '../model';
 import {
   defaultPlotlyConfig,
   defaultPlotlyLayout,
   defaultPlotlyTrace,
   isNil,
-  toQuerystring,
 } from '../util';
 
 const COLORS = ['blue', 'orange'];
@@ -26,7 +25,7 @@ type StateProps = {
   runno: number;
   fileno: number;
   hall: string;
-  sessionName: string;
+  session: string;
   fields: Field[];
 };
 
@@ -36,7 +35,7 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class View extends React.Component<StateProps, State> {
+class View extends React.Component<StateProps & DispatchProp, State> {
   public readonly state: State = initialState;
 
   private data: FileData | null = null;
@@ -45,10 +44,12 @@ class View extends React.Component<StateProps, State> {
   private divs: Plotly.PlotlyHTMLElement[] = [];
   private lastLoc: DataLocation & { hall: string } = { fileno: 0, runno: 0, hall: '' };
   private selection: number[] = [];
+  private subscriptions: Subscription[] = [];
 
   public componentDidMount() {
-    // unsubscribe when we unmount
-    this.componentWillUnmount = store.subscribe(this.listener);
+    const subs = this.subscriptions;
+    subs.push(plzReportTaggings.subscribe(this.reportTaggingsListener));
+    subs.push(plzTagSelection.subscribe(this.tagSelectionListener));
     this.componentDidUpdate();
   }
 
@@ -73,6 +74,12 @@ class View extends React.Component<StateProps, State> {
     this.cachedData = null;
     this.data = data;
     this.plot(data);
+  }
+
+  public componentWillUnmount() {
+    while (this.subscriptions.length) {
+      this.subscriptions.pop()!.unsubscribe();
+    }
   }
 
   // Don't rerender when just the session changes
@@ -135,13 +142,13 @@ class View extends React.Component<StateProps, State> {
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
         this.doSelect(pointNumbers, el);
-        store.dispatch(didSelect());
+        this.props.dispatch(didSelect());
       }
     });
 
     el.on('plotly_deselect', () => {
       this.doSelect([], el);
-      store.dispatch(didDeselect());
+      this.props.dispatch(didDeselect());
     });
 
     el.on('plotly_relayout', (eventData: Plotly.PlotRelayoutEvent) => {
@@ -168,31 +175,18 @@ class View extends React.Component<StateProps, State> {
   }
 
   private async fetchData() {
-    const { runno, fileno, hall, sessionName, fields } = this.props;
-
-    const fieldStr = fields.map(o => o.value).join(',');
-    const args = {
-      fields: fieldStr,
-      fileno,
-      hall,
-      runno,
-      session: sessionName,
-    };
-    const url = `/realdata?${toQuerystring(args)}`;
-    const { data } = await axios.get(url);
-    return data;
+    const { runno, fileno, hall, session, fields } = this.props;
+    return api.fetchData(runno, fileno, hall, session, fields);
   }
 
-  private listener = () => {
-    const { taggingsRequested, tagSelectionReq } = store.getState();
+  private reportTaggingsListener = () => {
+    const { hall, session } = this.props;
+    const taggedIds = this.getTaggedIds();
+    api.reportTaggings(hall, session, taggedIds);
+  };
 
-    if (taggingsRequested) {
-      const taggedIds = this.getTaggedIds();
-      store.dispatch(sendTaggings(taggedIds));
-    } else if (tagSelectionReq) {
-      this.tagSelection();
-      store.dispatch(taggedSelection());
-    }
+  private tagSelectionListener = () => {
+    this.tagSelection();
   };
 
   private plot(data: FileData) {
@@ -291,11 +285,11 @@ class View extends React.Component<StateProps, State> {
 }
 
 const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = state => ({
-  fields: state.selectedFields,
+  fields: state.fields,
   fileno: state.fileno,
   hall: state.hall,
   runno: state.runno,
-  sessionName: state.sessionName,
+  session: state.session,
 });
 
 export default connect(mapStateToProps)(View);

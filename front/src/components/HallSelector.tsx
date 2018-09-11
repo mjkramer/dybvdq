@@ -21,6 +21,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ hall }) =>
 
 type DispatchProps = Pick<Props, 'onSelect'>;
 
+// XXX Can we use the object form of mapDispatchToProps?
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = (
   dispatch: Dispatch,
 ) => ({

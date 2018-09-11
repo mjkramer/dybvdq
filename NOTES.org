@@ -216,3 +216,13 @@ body {
   font-family: sans-serif;
 }
 #+END_SRC
+
+* JS snippets
+** toQuerystring
+#+BEGIN_SRC js
+export const toQuerystring = (obj: object) =>
+  Object.entries(obj)
+    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+    .join('&');
+#+END_SRC
+

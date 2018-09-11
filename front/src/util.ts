@@ -4,10 +4,11 @@ export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export const isNil = (x: any) => x === undefined || x === null;
 
-export const toQuerystring = (obj: object) =>
-  Object.entries(obj)
-    .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-    .join('&');
+// Helper to convert a number to string while telling TS it's still a number.
+// Used for reactstrap.Input.size, which is typed as a number in TS but as a
+// string by the PropTypes, resulting in a runtime warning if we naively obey
+// the compiler.
+export const num = (x: number) => (x.toString() as any) as number;
 
 declare module 'plotly.js' {
   interface PlotlyHTMLElement {

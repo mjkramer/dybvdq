@@ -1,12 +1,16 @@
 import React from 'react';
-import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
+import { connect, MapStateToProps } from 'react-redux';
 
-import { tagSelection } from '../actions';
+import { plzTagSelection } from '../events';
 import { AppState } from '../model';
-import NavButton, { IProps as ButtonProps } from './NavButton';
+import NavButton, { Props as ButtonProps } from './NavButton';
+
+const onClick = () => plzTagSelection.next();
 
 const View: React.SFC<ButtonProps> = btnProps => (
-  <NavButton {...btnProps}>TAG SEL</NavButton>
+  <NavButton onClick={onClick} {...btnProps}>
+    TAG SEL
+  </NavButton>
 );
 
 const mapStateToProps: MapStateToProps<ButtonProps, {}, AppState> = ({
@@ -15,11 +19,4 @@ const mapStateToProps: MapStateToProps<ButtonProps, {}, AppState> = ({
   disabled: !selectionActive,
 });
 
-const mapDispatchToProps: MapDispatchToProps<ButtonProps, {}> = {
-  onClick: tagSelection,
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(View);
+export default connect(mapStateToProps)(View);

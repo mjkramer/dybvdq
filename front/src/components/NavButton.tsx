@@ -14,9 +14,9 @@ import { Omit } from '../util';
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/20461
 
 // We might also be able to use Partial<ButtonProps>
-export type IProps = Omit<ButtonProps, 'ref'>;
+export type Props = Omit<ButtonProps, 'ref'>;
 
-export const NavButton: React.SFC<IProps> = (props: IProps) => (
+export const NavButton: React.SFC<Props> = (props: Props) => (
   <Button color="primary" outline={true} {...props} />
 );
 

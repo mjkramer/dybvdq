@@ -4,34 +4,38 @@ import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
 import { setRunAndFile } from '../actions';
 import { AppState } from '../model';
-import NavButton, { IProps as ButtonProps } from './NavButton';
+import { num } from '../util';
+import NavButton, { Props as ButtonProps } from './NavButton';
 
-interface IViewProps {
+type ViewProps = {
   runno: number;
   fileno: number;
   onChangeRunno: InputProps['onChange'];
   onChangeFileno: InputProps['onChange'];
   onClick: ButtonProps['onClick'];
-}
+};
 
-const View: React.SFC<IViewProps> = props => (
+const View: React.SFC<ViewProps> = props => (
   <div className="form-inline">
     <InputGroup className="mr-2">
       <InputGroupAddon addonType="prepend">Run</InputGroupAddon>
-      <Input size={4} value={props.runno} onChange={props.onChangeRunno} />
+      <Input size={num(4)} value={props.runno} onChange={props.onChangeRunno} />
     </InputGroup>
     <InputGroup className="mr-2">
       <InputGroupAddon addonType="prepend">File</InputGroupAddon>
-      <Input size={3} value={props.fileno} onChange={props.onChangeFileno} />
+      <Input size={num(3)} value={props.fileno} onChange={props.onChangeFileno} />
     </InputGroup>
     <NavButton onClick={props.onClick}>GO!</NavButton>
   </div>
 );
 
-type State = Readonly<Pick<IViewProps, 'runno' | 'fileno'>>;
+type State = Readonly<Pick<ViewProps, 'runno' | 'fileno'>>;
 
 class RunAndFile extends React.Component<State & DispatchProp, State> {
-  public readonly state: State = this.props;
+  public readonly state: State = {
+    fileno: this.props.fileno,
+    runno: this.props.runno,
+  };
 
   public render() {
     const { runno, fileno } = this.state;
@@ -52,11 +56,11 @@ class RunAndFile extends React.Component<State & DispatchProp, State> {
     dispatch(setRunAndFile(runno, fileno));
   };
 
-  private onChangeRunno: IViewProps['onChangeRunno'] = e => {
+  private onChangeRunno: ViewProps['onChangeRunno'] = e => {
     this.setState({ runno: parseInt(e.target.value, 10) });
   };
 
-  private onChangeFileno: IViewProps['onChangeFileno'] = e => {
+  private onChangeFileno: ViewProps['onChangeFileno'] = e => {
     this.setState({ fileno: parseInt(e.target.value, 10) });
   };
 }
