@@ -5,7 +5,9 @@ import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 import { setRunAndFile } from '../actions';
 import { AppState } from '../model';
 import { num } from '../util';
-import NavButton, { Props as ButtonProps } from './NavButton';
+import NavButton from './NavButton';
+
+const noNaN = (x: number) => (isNaN(x) ? '' : x.toString());
 
 type DispatchProps = {
   onGo: (runno: number, fileno: number) => any;
@@ -25,16 +27,20 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
       <div className="form-inline">
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">Run</InputGroupAddon>
-          <Input size={num(4)} value={runno} onChange={this.onChangeRunno} />
+          <Input
+            size={num(4)}
+            value={noNaN(runno)} // cast to string, avoid NaN in input box
+            onChange={this.onChangeRunno}
+            onKeyUp={this.onKeyUp}
+          />
         </InputGroup>
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">File</InputGroupAddon>
           <Input
             size={num(3)}
-            value={fileno}
+            value={noNaN(fileno)}
             onChange={this.onChangeFileno}
-            // tslint:disable-next-line:jsx-no-lambda
-            onSubmit={() => alert('cool')}
+            onKeyUp={this.onKeyUp}
           />
         </InputGroup>
         <NavButton onClick={this.onClick}>GO!</NavButton>
@@ -42,7 +48,7 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
     );
   }
 
-  private onClick: ButtonProps['onClick'] = () => {
+  private onClick = () => {
     const { onGo } = this.props;
     const { runno, fileno } = this.state;
     onGo(runno, fileno);
@@ -54,6 +60,12 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
 
   private onChangeFileno: InputProps['onChange'] = e => {
     this.setState({ fileno: parseInt(e.target.value, 10) });
+  };
+
+  private onKeyUp: InputProps['onKeyUp'] = e => {
+    if (e.key === 'Enter') {
+      this.onClick();
+    }
   };
 }
 
