@@ -1,5 +1,5 @@
 import React from 'react';
-import { connect, DispatchProp, MapStateToProps } from 'react-redux';
+import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
 import { setSession } from '../actions';
@@ -8,41 +8,38 @@ import { AppState } from '../model';
 import { num } from '../util';
 import NavButton, { Props as ButtonProps } from './NavButton';
 
-type ViewProps = {
-  onClick: ButtonProps['onClick'];
-  onChange: InputProps['onChange'];
-  session: string;
+type DispatchProps = {
+  onSave: (session: string) => any;
 };
-
-const View: React.SFC<ViewProps> = ({ onChange, onClick, session }) => (
-  <div className="form-inline">
-    <InputGroup className="mr-2">
-      <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
-      <Input onChange={onChange} size={num(12)} value={session} />
-    </InputGroup>
-    <NavButton onClick={onClick}>SAVE</NavButton>
-  </div>
-);
 
 type State = Readonly<Pick<AppState, 'session'>>;
 
-class SaveFormView extends React.Component<State & DispatchProp, State> {
+class SaveFormView extends React.Component<State & DispatchProps, State> {
   public readonly state: State = {
     session: this.props.session,
   };
 
   public render() {
     const { session } = this.state;
-    return <View onChange={this.onChange} onClick={this.onClick} session={session} />;
+    return (
+      <div className="form-inline">
+        <InputGroup className="mr-2">
+          <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
+          <Input onChange={this.onChange} size={num(12)} value={session} />
+        </InputGroup>
+        <NavButton onClick={this.onClick}>SAVE</NavButton>
+      </div>
+    );
   }
 
-  private onChange: ViewProps['onChange'] = e => {
+  private onChange: InputProps['onChange'] = e => {
     this.setState({ session: e.target.value });
   };
 
-  private onClick: ViewProps['onClick'] = () => {
+  private onClick: ButtonProps['onClick'] = () => {
+    const { onSave } = this.props;
     const { session } = this.state;
-    this.props.dispatch(setSession(session));
+    onSave(session);
     plzReportTaggings.next();
   };
 }
@@ -54,4 +51,11 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ session })
   session,
 });
 
-export default connect(mapStateToProps)(SaveFormView);
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
+  onSave: setSession,
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(SaveFormView);
