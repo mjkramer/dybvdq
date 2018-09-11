@@ -24,6 +24,10 @@ def report_taggings():
     session: str = payload['session']
     tagged_ids: List[DataLocation] = payload['taggedIds']
 
+    # HACK
+    if not tagged_ids:
+        return 'Thanks!'
+
     # for tagged in payload['taggedIds']:
     #     tagging = Tagging(fileno=tagged['fileno'],
     #                       runno=tagged['runno'],
@@ -55,7 +59,7 @@ def get_taggings(hall, session, lowbound, highbound):
                    (runno={high_runno} AND fileno<={high_fileno})'''
 
     query = f'''SELECT runno, fileno FROM tagging
-                WHERE {pred} AND hall={hall} AND session="{session}"
+                WHERE ({pred}) AND hall={hall} AND session="{session}"
                 ORDER BY runno, fileno'''
 
     result = app_exec(query).fetchall()
