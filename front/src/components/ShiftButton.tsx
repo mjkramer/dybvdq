@@ -1,9 +1,8 @@
 import React from 'react';
 import { connect, MapDispatchToProps } from 'react-redux';
-import { Dispatch } from 'redux';
 
-import { shiftPage } from '../actions';
-import { NavButton, Props as ButtonProps } from './NavButton';
+import { shiftPage as shiftPageA } from '../actions';
+import { NavButton } from './NavButton';
 
 type Props = {
   count: number;
@@ -11,19 +10,21 @@ type Props = {
 };
 
 type DispatchProps = {
-  onClick: ButtonProps['onClick'];
+  shiftPage: (count: number) => any;
 };
 
-const ShiftButton: React.SFC<Props & DispatchProps> = ({ children, onClick }) => (
-  <NavButton children={children} onClick={onClick} />
+const ShiftButton: React.SFC<Props & DispatchProps> = ({
+  children,
+  count,
+  shiftPage,
+}) => (
+  // tslint:disable-next-line:jsx-no-lambda
+  <NavButton children={children} onClick={() => shiftPage(count)} />
 );
 
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, Props> = (
-  dispatch: Dispatch,
-  { count }: Props,
-) => ({
-  onClick: () => dispatch(shiftPage(count)),
-});
+const mapDispatchToProps: MapDispatchToProps<DispatchProps, Props> = {
+  shiftPage: shiftPageA,
+};
 
 export default connect(
   null,
