@@ -1,3 +1,4 @@
+import { ValueType as SelectValueType } from 'react-select/lib/types';
 import { Dispatch } from 'redux';
 
 import { setFields, setLocation } from './actions';
@@ -5,9 +6,11 @@ import * as api from './api';
 import { plzReportTaggings } from './events';
 import { AppState, Field } from './model';
 
-export const reportAndSetFields = (fields: Field[]) => (dispatch: Dispatch) => {
+export const reportAndSetFields = (fields: SelectValueType<Field>) => (
+  dispatch: Dispatch,
+) => {
   plzReportTaggings.next();
-  dispatch(setFields(fields));
+  dispatch(setFields(fields as Field[]));
 };
 
 export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (

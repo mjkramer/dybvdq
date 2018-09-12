@@ -2,15 +2,14 @@ import axios from 'axios';
 import React from 'react';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import Select from 'react-select';
-// import { Props as SelectProps } from 'react-select/lib/Select';
+import { ValueType as SelectValueType } from 'react-select/lib/types';
 
 import { AppState, Field } from '../model';
 import { reportAndSetFields } from '../thunks';
 
 type Props = {
   fields: Field[];
-  // onChange: SelectProps<Field>['onChange'];
-  onChange: any;
+  onChange: (fields: SelectValueType<Field>) => void;
 };
 
 const initialState = {
