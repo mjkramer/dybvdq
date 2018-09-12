@@ -48,13 +48,17 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
+# TODO: Don't go before 21221
 def get_shifted(runno, fileno, hall, page_shift):
     "For when user clicks NEXT or PREV"
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
-    query = f'''SELECT DISTINCT runno, fileno FROM DqDetectorNew
-                WHERE runno {oper} {runno}
-                OR (runno = {runno} AND fileno {oper}= {fileno})
+    sitemask = 4 if hall == 3 else hall
+    query = f'''SELECT DISTINCT runno, fileno
+                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
+                WHERE sitemask = {sitemask}
+                AND (runno {oper} {runno}
+                     OR (runno = {runno} AND fileno {oper}= {fileno}))
                 ORDER BY runno {order}, fileno {order}
                 LIMIT 1 OFFSET {NROWS}'''
     new_run, new_file = dq_exec(query).fetchone()

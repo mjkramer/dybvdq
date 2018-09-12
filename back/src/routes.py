@@ -75,7 +75,7 @@ def realdata():                 # pylint: disable=too-many-locals
     page_shift = request.args.get('pageShift')
 
     if page_shift:
-        runno, fileno = get_shifted(runno, fileno, page_shift)
+        runno, fileno = get_shifted(runno, fileno, hall, page_shift)
 
     result = {'runnos': [],
               'filenos': [],
