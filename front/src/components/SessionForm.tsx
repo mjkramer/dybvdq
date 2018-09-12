@@ -31,7 +31,12 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
             value={session}
           />
         </InputGroup>
-        <NavButton onClick={this.onClick}>SWITCH</NavButton>
+        <NavButton
+          disabled={this.state.session === this.props.session}
+          onClick={this.onClick}
+        >
+          SWITCH
+        </NavButton>
       </div>
     );
   }
