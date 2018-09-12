@@ -231,3 +231,5 @@ export const toQuerystring = (obj: object) =>
 https://github.com/Microsoft/TypeScript/issues/5453
 ** Removing 'undefined'
 https://github.com/Microsoft/TypeScript/issues/24067
+** Strict bind, call, apply
+https://github.com/Microsoft/TypeScript/pull/27028
