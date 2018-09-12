@@ -10,16 +10,16 @@ def focus_sql(hall, runno):
     "Restrict detector and runno as appropriate"
     if hall == 1:
         if runno >= START_7AD:
-            return f'm.detectorid = 2'
-        return f'm.detectorid <= 2 and runno < {START_7AD}'
+            return f'detectorid = 2'
+        return f'detectorid <= 2 and runno < {START_7AD}'
     if hall == 2:
         if runno >= START_8AD:
-            return f'm.detectorid <= 2'
-        return f'm.detectorid <= 1 and runno < {START_8AD}'
+            return f'detectorid <= 2'
+        return f'detectorid <= 1 and runno < {START_8AD}'
     if hall == 2:
         if runno >= START_8AD:
-            return f'm.detectorid <= 4'
-        return f'm.detectorid <= 3 and runno < {START_8AD}'
+            return f'detectorid <= 4'
+        return f'detectorid <= 3 and runno < {START_8AD}'
     raise "Invalid hall"
 
 def focus_sql_old(hall, runno):
