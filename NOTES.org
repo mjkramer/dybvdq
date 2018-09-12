@@ -229,3 +229,5 @@ export const toQuerystring = (obj: object) =>
 * TypeScript References
 ** Variadic generics
 https://github.com/Microsoft/TypeScript/issues/5453
+** Removing 'undefined'
+https://github.com/Microsoft/TypeScript/issues/24067
