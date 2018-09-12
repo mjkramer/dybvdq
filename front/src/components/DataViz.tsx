@@ -30,6 +30,7 @@ type StateProps = {
 };
 
 const initialState = {
+  // XXX use a ref to the root div and appendChild
   numDivs: 0,
 };
 
@@ -42,7 +43,13 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private cachedData: FileData | null = null;
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
-  private lastLoc: DataLocation & { hall: string } = { fileno: 0, runno: 0, hall: '' };
+  // XXX replace me with a key
+  private lastLoc: DataLocation & { hall: string; session: string } = {
+    fileno: 0,
+    hall: '',
+    runno: 0,
+    session: '',
+  };
   private selection: number[] = [];
   private subscriptions: Subscription[] = [];
 
@@ -187,11 +194,12 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const npoints = firstMetric[detectors[0]].values.length;
 
     // Don't reset taggings if we've only changed the fields
-    const { fileno, hall, runno } = this.props;
+    const { fileno, hall, runno, session } = this.props;
     if (
       fileno !== this.lastLoc.fileno ||
       runno !== this.lastLoc.runno ||
-      hall !== this.lastLoc.hall
+      hall !== this.lastLoc.hall ||
+      session !== this.lastLoc.session
     ) {
       this.colors = tagStatus.map(s => (s ? COLORS[1] : COLORS[0]));
     }
@@ -225,7 +233,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       });
     });
 
-    this.lastLoc = { fileno, hall, runno };
+    this.lastLoc = { fileno, hall, runno, session };
   }
 
   private togglePoints(idxs: number[]) {
