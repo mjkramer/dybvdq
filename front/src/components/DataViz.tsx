@@ -61,6 +61,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public async componentDidUpdate() {
+    this.divs.forEach(el => Plotly.purge(el));
+
     const data = this.cachedData || (await this.fetchData());
 
     // If data is fresh (i.e. cachedData is null), we must check that we've got
