@@ -9,7 +9,6 @@ from typing import List
 
 from . import app
 from .util import focus_sql, get_shifted
-from .constants import NROWS
 from .db import db, dq_exec, app_exec
 from .model import Tagging, DataLocation, all_fields
 
@@ -83,52 +82,41 @@ def realdata():                 # pylint: disable=too-many-locals
 
     sitemask = [1, 2, 4][hall-1]
     focus = focus_sql(hall, runno)
-    cur_runno, last_fileno, last_det = None, None, None
-    numread = 0
+    last_runno, last_fileno, last_det = None, None, None
 
-    while numread < NROWS:
-        if cur_runno is None:
-            cur_runno = runno
-        else:
-            query = f'''SELECT runno
-                        FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                        WHERE runno > {cur_runno} AND sitemask = {sitemask}
-                        LIMIT 1'''
-            cur_runno = dq_exec(query).fetchone()[0]
+    end_runno, end_fileno = get_shifted(runno, fileno, hall, 1)
+    if end_runno == runno:
+        loc_pred = f'runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1)'
+    else:
+        loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
+                       (runno = {runno} AND fileno >= {fileno}) OR
+                       (runno = {end_runno} AND fileno < {fileno})'''
+    query = f'''SELECT runno, fileno, detectorid, {fields}
+                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
+                WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
+                ORDER BY runno, fileno, detectorid, insertdate'''
 
-        fileno_pred = f'AND fileno >= {fileno}' if cur_runno == runno else ''
+    rows = dq_exec(query).fetchall()
 
-        query = f'''SELECT runno, fileno, detectorid, {fields}
-                    FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                    WHERE runno = {cur_runno} AND {focus} {fileno_pred}
-                    ORDER BY runno, fileno, detectorid, insertdate'''
-        rows = dq_exec(query).fetchall()
+    for row in rows:
+        runno, fileno, det = row[:3]
 
-        last_fileno = -1
+        if runno != last_runno or fileno != last_fileno:
+            result['runnos'].append(runno)
+            result['filenos'].append(fileno)
 
-        for row in rows:
-            runno, fileno, det = row[:3]
+        detkey = f'AD{det}'
 
-            if fileno != last_fileno:
-                if numread == NROWS:
-                    break
+        for i, field in enumerate(fields.split(',')):
+            detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
+            vals = detdict.setdefault('values', [])
 
-                result['runnos'].append(runno)
-                result['filenos'].append(fileno)
-                numread += 1
+            if fileno == last_fileno and det == last_det:
+                vals[-1] = row[i+3]
+            else:
+                vals.append(row[i+3])
 
-            detkey = f'AD{det}'
-
-            for i, field in enumerate(fields.split(',')):
-                detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
-                vals = detdict.setdefault('values', [])
-
-                if fileno == last_fileno and det == last_det:
-                    vals[-1] = row[i+3]
-                else:
-                    vals.append(row[i+3])
-
-            last_fileno, last_det = fileno, det
+        last_runno, last_fileno, last_det = runno, fileno, det
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])
