@@ -61,6 +61,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public async componentDidUpdate() {
+    // tslint:disable-next-line:no-console
+    console.log(this.divs);
+    // tslint:disable-next-line:no-console
+    console.log(this.state.numDivs);
     const data = this.cachedData || (await this.fetchData());
 
     // If data is fresh (i.e. cachedData is null), we must check that we've got
@@ -81,6 +85,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.cachedData = null;
     this.data = data;
     this.plot(data);
+    // tslint:disable-next-line:no-console
+    console.log(this.divs);
+    // tslint:disable-next-line:no-console
+    console.log(this.state.numDivs);
   }
 
   public componentWillUnmount() {
@@ -105,13 +113,20 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const { numDivs } = this.state;
     this.divs = [];
 
+    // tslint:disable-next-line:no-console
+    console.log(`render ${numDivs} ${this.divs}`);
+
     return (
       <div>
         {[...Array(numDivs)].map((_, i) => (
           <div
             key={i}
             ref={el => {
-              this.divs[i] = el as any;
+              // The ref gets called (with null) when the div is destroyed by
+              // the DOM. Thus we must take care not to pollute our array.
+              if (el) {
+                this.divs[i] = el as any;
+              }
             }}
           />
         ))}
@@ -163,6 +178,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.divs.forEach(el => {
       if (el !== src) {
+        // tslint:disable-next-line:no-console
+        console.log(src);
+        // tslint:disable-next-line:no-console
+        console.log(el);
         // No need to clear/rebind event handlers because setting
         // selectedpoints does not trigger plotly_selected/deselect
         Plotly.restyle(el, update, [0]);
