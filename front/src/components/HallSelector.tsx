@@ -2,7 +2,7 @@ import React from 'react';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 
 import { AppState } from '../model';
-import { doSetHall } from '../thunks';
+import { reportAndSetHall } from '../thunks';
 import DynamicDropdown, { Props as DDProps } from './DynamicDropdown';
 
 type StateProps = Pick<DDProps, 'currentItem'>;
@@ -22,7 +22,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ hall }) =>
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onSelect: doSetHall,
+  onSelect: reportAndSetHall,
 };
 
 export default connect(

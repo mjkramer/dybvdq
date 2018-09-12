@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect, MapDispatchToProps } from 'react-redux';
 
-import { doShiftPage } from '../thunks';
+import { reportAndShiftPage } from '../thunks';
 import { NavButton } from './NavButton';
 
 type Props = {
@@ -23,7 +23,7 @@ const ShiftButtonView: React.SFC<Props & DispatchProps> = ({
 );
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  doShift: doShiftPage,
+  doShift: reportAndShiftPage,
 };
 
 export default connect(

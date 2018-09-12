@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { Props as SelectProps } from 'react-select/lib/Select';
 
 import { AppState, Field } from '../model';
-import { doSetFields } from '../thunks';
+import { reportAndSetFields } from '../thunks';
 
 type Props = {
   fields: Field[];
@@ -51,7 +51,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ fields }) 
 
 type DispatchProps = Pick<Props, 'onChange'>;
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onChange: doSetFields,
+  onChange: reportAndSetFields,
 };
 
 export default connect(

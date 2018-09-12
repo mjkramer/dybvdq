@@ -3,7 +3,7 @@ import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
 import { AppState } from '../model';
-import { doSetRunAndFile } from '../thunks';
+import { reportAndSetRunAndFile } from '../thunks';
 import { num } from '../util';
 import NavButton from './NavButton';
 
@@ -82,7 +82,7 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onGo: doSetRunAndFile,
+  onGo: reportAndSetRunAndFile,
 };
 
 export default connect(

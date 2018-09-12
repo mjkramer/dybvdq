@@ -13,7 +13,7 @@ const makeReportingAction = <T>(action: ActionFunctionAny<Action<T>>) => (
   dispatch(action(...args));
 };
 
-export const doSetFields = makeReportingAction(setFields);
-export const doSetHall = makeReportingAction(setHall);
-export const doSetRunAndFile = makeReportingAction(setRunAndFile);
-export const doShiftPage = makeReportingAction(shiftPage);
+export const reportAndSetFields = makeReportingAction(setFields);
+export const reportAndSetHall = makeReportingAction(setHall);
+export const reportAndSetRunAndFile = makeReportingAction(setRunAndFile);
+export const reportAndShiftPage = makeReportingAction(shiftPage);
