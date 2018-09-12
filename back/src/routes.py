@@ -72,7 +72,7 @@ def realdata():                 # pylint: disable=too-many-locals
     hall = int(request.args.get('hall')[2])
     fields = request.args.get('fields')
     session = request.args.get('session')
-    page_shift = request.args.get('pageShift')
+    page_shift = int(request.args.get('pageShift', 0))
 
     if page_shift:
         runno, fileno = get_shifted(runno, fileno, hall, page_shift)
