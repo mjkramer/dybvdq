@@ -61,10 +61,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public async componentDidUpdate() {
-    // tslint:disable-next-line:no-console
-    console.log(this.divs);
-    // tslint:disable-next-line:no-console
-    console.log(this.state.numDivs);
     const data = this.cachedData || (await this.fetchData());
 
     // If data is fresh (i.e. cachedData is null), we must check that we've got
@@ -85,10 +81,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.cachedData = null;
     this.data = data;
     this.plot(data);
-    // tslint:disable-next-line:no-console
-    console.log(this.divs);
-    // tslint:disable-next-line:no-console
-    console.log(this.state.numDivs);
   }
 
   public componentWillUnmount() {
@@ -112,9 +104,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   public render() {
     const { numDivs } = this.state;
     this.divs = [];
-
-    // tslint:disable-next-line:no-console
-    console.log(`render ${numDivs} ${this.divs}`);
 
     return (
       <div>
@@ -178,10 +167,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.divs.forEach(el => {
       if (el !== src) {
-        // tslint:disable-next-line:no-console
-        console.log(src);
-        // tslint:disable-next-line:no-console
-        console.log(el);
         // No need to clear/rebind event handlers because setting
         // selectedpoints does not trigger plotly_selected/deselect
         Plotly.restyle(el, update, [0]);
@@ -272,9 +257,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     eventData: Plotly.PlotRelayoutEvent,
     src: Plotly.PlotlyHTMLElement,
   ) {
-    // tslint:disable-next-line:no-console
-    console.log(eventData);
-
     const update: Partial<Plotly.Layout> | null = (() => {
       if (eventData['xaxis.range[0]'] !== undefined) {
         const range = [eventData['xaxis.range[0]'], eventData['xaxis.range[1]']];
