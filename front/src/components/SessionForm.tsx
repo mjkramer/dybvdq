@@ -5,7 +5,7 @@ import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 import { setSession } from '../actions';
 import { AppState } from '../model';
 import { num } from '../util';
-import NavButton, { Props as ButtonProps } from './NavButton';
+import NavButton from './NavButton';
 
 type DispatchProps = {
   onSwitch: (session: string) => any;
@@ -24,7 +24,12 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
       <div className="form-inline">
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
-          <Input onChange={this.onChange} size={num(12)} value={session} />
+          <Input
+            onChange={this.onChange}
+            onKeyUp={this.onKeyUp}
+            size={num(12)}
+            value={session}
+          />
         </InputGroup>
         <NavButton onClick={this.onClick}>SWITCH</NavButton>
       </div>
@@ -35,10 +40,16 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
     this.setState({ session: e.target.value });
   };
 
-  private onClick: ButtonProps['onClick'] = () => {
+  private onClick = () => {
     const { onSwitch } = this.props;
     const { session } = this.state;
     onSwitch(session);
+  };
+
+  private onKeyUp: InputProps['onKeyUp'] = e => {
+    if (e.key === 'Enter') {
+      this.onClick();
+    }
   };
 }
 
