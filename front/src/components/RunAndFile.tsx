@@ -7,8 +7,6 @@ import { reportAndSetRunAndFile } from '../thunks';
 import { num } from '../util';
 import NavButton from './NavButton';
 
-const noNaN = (x: number) => (isNaN(x) ? '' : x.toString());
-
 type DispatchProps = {
   onGo: (runno: number, fileno: number) => any;
 };
@@ -29,7 +27,7 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
           <InputGroupAddon addonType="prepend">Run</InputGroupAddon>
           <Input
             size={num(4)}
-            value={noNaN(runno)} // cast to string, avoid NaN in input box
+            value={this.fmt(runno)} // cast to string, avoid NaN in input box
             onChange={this.onChangeRunno}
             onKeyUp={this.onKeyUp}
           />
@@ -38,7 +36,7 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
           <InputGroupAddon addonType="prepend">File</InputGroupAddon>
           <Input
             size={num(3)}
-            value={noNaN(fileno)}
+            value={this.fmt(fileno)}
             onChange={this.onChangeFileno}
             onKeyUp={this.onKeyUp}
           />
@@ -47,6 +45,9 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
       </div>
     );
   }
+
+  private fmt = (stateVal: number): string =>
+    this.props.runno === -1 ? 'WAIT' : isNaN(stateVal) ? '' : stateVal.toString();
 
   private onClick = () => {
     const { onGo } = this.props;
