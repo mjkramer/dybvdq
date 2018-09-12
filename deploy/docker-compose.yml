@@ -18,6 +18,7 @@ services:
       - DYBVDQ_APP_DB_USER
       - DYBVDQ_APP_DB_PASS
       - DYBVDQ_APP_DB_NAME
+      - DYBVDQ_SQLALCHEMY_ECHO
       # set this to see debug printouts
       - PYTHONUNBUFFERED
   nginx:

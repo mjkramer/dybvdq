@@ -33,6 +33,7 @@ def get_binds():
 
 app.config['SQLALCHEMY_BINDS'] = get_binds()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_ECHO'] = os.environ.get('DYBVDQ_SQLALCHEMY_ECHO') == '1'
 
 db = SQLAlchemy(app)            # pylint: disable=invalid-name
 
