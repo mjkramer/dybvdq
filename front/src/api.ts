@@ -1,23 +1,34 @@
 import axios from 'axios';
 
-import { DataLocation, Field } from './model';
+import { AppState, DataLocation, FileData } from './model';
+
+let cachedData: FileData | null = null;
+
+export type FetchDataParams = Pick<
+  AppState,
+  'runno' | 'fileno' | 'hall' | 'session' | 'fields'
+> & {
+  pageShift?: number;
+};
 
 export const fetchData = async (
-  runno: number,
-  fileno: number,
-  hall: string,
-  session: string,
-  fields: Field[],
-) => {
-  const fieldStr = fields.map(o => o.value).join(',');
-  const params = {
-    fields: fieldStr,
-    fileno,
-    hall,
-    runno,
-    session,
-  };
-  const { data } = await axios.get('/realdata', { params });
+  params: FetchDataParams,
+  { saveToCache } = { saveToCache: false },
+): Promise<FileData> => {
+  if (cachedData) {
+    const d = cachedData;
+    cachedData = null;
+    return d;
+  }
+
+  const fieldStr = params.fields.map(o => o.value).join(',');
+  const reqParams = { ...params, fields: fieldStr };
+  const { data } = await axios.get('/realdata', { params: reqParams });
+
+  if (saveToCache) {
+    cachedData = data;
+  }
+
   return data;
 };
 

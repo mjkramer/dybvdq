@@ -63,6 +63,12 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   public async componentDidUpdate() {
     this.divs.forEach(el => Plotly.purge(el));
 
+    // We're doing a NEXT/PREV/SetHall; wait for new runno/fileno
+    const { runno, fileno } = this.props;
+    if (runno === -1 || fileno === -1) {
+      return;
+    }
+
     const data = this.cachedData || (await this.fetchData());
 
     // If data is fresh (i.e. cachedData is null), we must check that we've got
@@ -178,7 +184,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private async fetchData() {
     const { runno, fileno, hall, session, fields } = this.props;
-    return api.fetchData(runno, fileno, hall, session, fields);
+    return api.fetchData({ runno, fileno, hall, session, fields });
   }
 
   private reportTaggingsListener = () => {

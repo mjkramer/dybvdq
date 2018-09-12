@@ -1,19 +1,59 @@
 import { Dispatch } from 'redux';
-import { Action, ActionFunctionAny } from 'redux-actions';
 
-import { setFields, setHall, setRunAndFile, shiftPage } from './actions';
+import { setFields, setLocation } from './actions';
+import * as api from './api';
 import { plzReportTaggings } from './events';
+import { AppState, Field } from './model';
 
-// Create a thunk that yells "please report taggings!" before dispatching the
-// provided action
-const makeReportingAction = <T>(action: ActionFunctionAny<Action<T>>) => (
-  ...args: any[]
-) => (dispatch: Dispatch) => {
+export const reportAndSetFields = (fields: Field[]) => (dispatch: Dispatch) => {
   plzReportTaggings.next();
-  dispatch(action(...args));
+  dispatch(setFields(fields));
 };
 
-export const reportAndSetFields = makeReportingAction(setFields);
-export const reportAndSetHall = makeReportingAction(setHall);
-export const reportAndSetRunAndFile = makeReportingAction(setRunAndFile);
-export const reportAndShiftPage = makeReportingAction(shiftPage);
+export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
+  dispatch: Dispatch,
+  getState: () => AppState,
+) => {
+  const { hall, session, fields } = getState();
+
+  plzReportTaggings.next();
+
+  const params = { runno, fileno, hall, session, fields };
+  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
+  dispatch(setLocation(newRun, newFile, hall));
+};
+
+export const reportAndSetHall = (hall: string) => async (
+  dispatch: Dispatch,
+  getState: () => AppState,
+) => {
+  const { runno, fileno, session, fields } = getState();
+
+  plzReportTaggings.next();
+  dispatch(setLocation(-1, -1, hall));
+
+  const params = { runno, fileno, hall, session, fields };
+  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
+  dispatch(setLocation(newRun, newFile, hall));
+};
+
+export const reportAndShiftPage = (count: number) => async (
+  dispatch: Dispatch,
+  getState: () => AppState,
+) => {
+  const { runno, fileno, hall, session, fields } = getState();
+
+  plzReportTaggings.next();
+  dispatch(setLocation(-1, -1));
+
+  const params = { runno, fileno, hall, session, fields, pageShift: count };
+  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
+  dispatch(setLocation(newRun, newFile, hall));
+};
+
+const fetchWithNewRunAndFile = async (params: api.FetchDataParams) => {
+  const data = await api.fetchData(params, { saveToCache: true });
+  const newRun = data.runnos[0];
+  const newFile = data.filenos[0];
+  return { newRun, newFile };
+};

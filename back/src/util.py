@@ -6,8 +6,8 @@ from .db import dq_exec
 START_7AD = 67976
 START_8AD = 26694
 
-def focus_sql_fancy(hall, runno):
-    "What was this one for?"
+def focus_sql(hall, runno):
+    "Restrict detector and runno as appropriate"
     if hall == 1:
         if runno >= START_7AD:
             return f'm.detectorid = 2'
@@ -22,7 +22,7 @@ def focus_sql_fancy(hall, runno):
         return f'm.detectorid <= 3 and runno < {START_8AD}'
     raise "Invalid hall"
 
-def focus_sql(hall, runno):
+def focus_sql_old(hall, runno):
     "We're currently using this simple one"
     if hall == 1:
         if runno >= START_7AD:
@@ -48,12 +48,20 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
-def get_shifted(runno, fileno, pageShift):
-    assert pageShift in [1, -1]
-    oper, order = ('>', 'ASC') if pageShift == 1 else ('<', 'DESC')
+def get_shifted(runno, fileno, hall, page_shift):
+    "For when user clicks NEXT or PREV"
+    assert page_shift in [1, -1]
+    oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
     query = f'''SELECT DISTINCT runno, fileno FROM DqDetectorNew
                 WHERE runno {oper} {runno}
                 OR (runno = {runno} AND fileno {oper}= {fileno})
                 ORDER BY runno {order}, fileno {order}
                 LIMIT 1 OFFSET {NROWS}'''
-    return dq_exec(query).fetchone()
+    new_run, new_file = dq_exec(query).fetchone()
+
+    boundary = {1: START_7AD, 2: START_8AD, 3: START_8AD}[hall]
+    if runno < boundary <= new_run:
+        return (boundary, 1)
+    if new_run < boundary <= runno:
+        return get_shifted(boundary, 1, hall, page_shift)
+    return new_run, new_file
