@@ -96,9 +96,11 @@ def realdata():                 # pylint: disable=too-many-locals
                         LIMIT 1'''
             cur_runno = dq_exec(query).fetchone()[0]
 
+        fileno_pred = f'AND fileno >= {fileno}' if cur_runno == runno else ''
+
         query = f'''SELECT runno, fileno, detectorid, {fields}
                     FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                    WHERE runno = {cur_runno} AND {focus}
+                    WHERE runno = {cur_runno} AND {focus} {fileno_pred}
                     ORDER BY runno, fileno, detectorid, insertdate'''
         rows = dq_exec(query).fetchall()
 
