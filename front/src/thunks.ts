@@ -44,7 +44,7 @@ export const reportAndShiftPage = (count: number) => async (
   const { runno, fileno, hall, session, fields } = getState();
 
   plzReportTaggings.next();
-  dispatch(setLocation(-1, -1));
+  dispatch(setLocation(-1, -1, hall));
 
   const params = { runno, fileno, hall, session, fields, pageShift: count };
   const { newRun, newFile } = await fetchWithNewRunAndFile(params);
