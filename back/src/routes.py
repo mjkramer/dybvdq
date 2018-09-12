@@ -8,11 +8,10 @@ from sqlalchemy.dialects import mysql
 from typing import List
 
 from . import app
-from . import util
+from .util import focus_sql, get_shifted
+from .constants import NROWS
 from .db import db, dq_exec, app_exec
 from .model import Tagging, DataLocation, all_fields
-
-NROWS = 1000
 
 @app.route('/report_taggings', methods=['POST'])
 def report_taggings():
@@ -73,13 +72,17 @@ def realdata():                 # pylint: disable=too-many-locals
     hall = int(request.args.get('hall')[2])
     fields = request.args.get('fields')
     session = request.args.get('session')
+    page_shift = request.args.get('pageShift')
+
+    if page_shift:
+        runno, fileno = get_shifted(runno, fileno, page_shift)
 
     result = {'runnos': [],
               'filenos': [],
               'metrics': {all_fields()[field]: {} for field in fields.split(',')}}
 
     sitemask = [1, 2, 4][hall-1]
-    focus_sql = util.focus_sql(hall, runno)
+    focus = focus_sql(hall, runno)
     cur_runno, last_fileno, last_det = None, None, None
     numread = 0
 
@@ -95,7 +98,7 @@ def realdata():                 # pylint: disable=too-many-locals
 
         query = f'''SELECT runno, fileno, detectorid, {fields}
                     FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                    WHERE runno = {cur_runno} AND {focus_sql}
+                    WHERE runno = {cur_runno} AND {focus}
                     ORDER BY runno, fileno, detectorid, insertdate'''
         rows = dq_exec(query).fetchall()
 
