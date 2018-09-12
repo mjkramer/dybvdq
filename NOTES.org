@@ -131,6 +131,10 @@ stmt = mysql.insert(Tagging).values(update) \
             .on_duplicate_key_update(hall=Tagging.hall)
 text = stmt.compile(mysql.dialect()).__str__()
 db.get_engine(bind='app_db').execute(stmt or text)
+** Query example
+D = DqDetectorNew
+D.query.with_entities(D.PLIKECOUNTS).filter(D.RUNNO == 54606 and D.DETECTORID == 1).all()
+
 * References
 - https://github.com/Microsoft/TypeScript-React-Starter
 - https://github.com/sw-yx/react-typescript-cheatsheet

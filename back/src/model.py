@@ -16,7 +16,13 @@ class Tagging(db.Model):
     runno = db.Column(db.Integer, primary_key=True, nullable=False)
     hall = db.Column(db.Integer, primary_key=True, nullable=False)
 
-db.create_all()
+class DqDetectorNew(db.Model):
+    __tablename__ = 'DqDetectorNew'
+    __bind_key__ = 'dq_db'
+    __table_args__ = {
+        'autoload': True,
+        'autoload_with': db.get_engine(bind='dq_db')
+    }
 
 def all_fields():
     "Everything we know how to plot"
@@ -33,3 +39,5 @@ def all_fields():
         'plikecounts': 'Prompt-like counts',
         'nlikecounts': 'Delayed-like counts',
     }
+
+db.create_all()
