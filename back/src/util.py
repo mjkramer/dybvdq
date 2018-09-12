@@ -54,8 +54,8 @@ def get_shifted(runno, fileno, hall, page_shift):
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
     sitemask = 4 if hall == 3 else hall
-    query = f'''SELECT DISTINCT runno, fileno
-                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
+    query = f'''SELECT runno, fileno
+                FROM runno_fileno_sitemask
                 WHERE sitemask = {sitemask}
                 AND (runno {oper} {runno}
                      OR (runno = {runno} AND fileno {oper}= {fileno}))
