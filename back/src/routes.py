@@ -8,8 +8,8 @@ from sqlalchemy.dialects import mysql
 from typing import List
 
 from . import app
-from .util import focus_sql, get_latest, get_shifted
-from .db import db, dq_exec, app_exec
+from .util import get_data, get_latest, get_shifted
+from .db import db, app_exec
 from .model import Tagging, DataLocation, all_fields
 
 @app.route('/report_taggings', methods=['POST'])
@@ -65,7 +65,7 @@ def get_taggings(hall, session, lowbound, highbound):
 
 @app.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
-    "monstrous function that needs to be cleaned up"
+    "A messy function that's not as bad as it used to be"
     runno = int(request.args.get('runno'))
     fileno = int(request.args.get('fileno'))
     hall = int(request.args.get('hall')[2])
@@ -76,47 +76,7 @@ def realdata():                 # pylint: disable=too-many-locals
     if page_shift:
         runno, fileno = get_shifted(runno, fileno, hall, page_shift)
 
-    result = {'runnos': [],
-              'filenos': [],
-              'metrics': {all_fields()[field]: {} for field in fields.split(',')}}
-
-    sitemask = [1, 2, 4][hall-1]
-    focus = focus_sql(hall, runno)
-    last_runno, last_fileno, last_det = None, None, None
-
-    end_runno, end_fileno = get_shifted(runno, fileno, hall, 1)
-    if end_runno == runno:
-        loc_pred = f'runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1)'
-    else:
-        loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
-                       (runno = {runno} AND fileno >= {fileno}) OR
-                       (runno = {end_runno} AND fileno < {fileno})'''
-    query = f'''SELECT runno, fileno, detectorid, {fields}
-                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
-                ORDER BY runno, fileno, detectorid, insertdate'''
-
-    rows = dq_exec(query).fetchall()
-
-    for row in rows:
-        runno, fileno, det = row[:3]
-
-        if runno != last_runno or fileno != last_fileno:
-            result['runnos'].append(runno)
-            result['filenos'].append(fileno)
-
-        detkey = f'AD{det}'
-
-        for i, field in enumerate(fields.split(',')):
-            detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
-            vals = detdict.setdefault('values', [])
-
-            if fileno == last_fileno and det == last_det:
-                vals[-1] = row[i+3]
-            else:
-                vals.append(row[i+3])
-
-        last_runno, last_fileno, last_det = runno, fileno, det
+    result = get_data(runno, fileno, hall, fields)
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])
