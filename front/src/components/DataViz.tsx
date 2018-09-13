@@ -12,6 +12,7 @@ import {
   defaultPlotlyLayout,
   defaultPlotlyTrace,
   isNil,
+  zip,
 } from '../util';
 
 const COLORS = ['blue', 'orange'];
@@ -201,7 +202,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   };
 
   private plot(data: FileData) {
-    const { metrics, tagStatus } = data;
+    const { runnos, filenos, metrics, tagStatus } = data;
     const firstMetric = metrics[Object.keys(metrics)[0]];
     const detectors = Object.keys(firstMetric);
     detectors.sort();
@@ -220,6 +221,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     }
 
     const xs = [...Array(npoints).keys()];
+    const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
 
     let iDiv = -1;
 
@@ -233,6 +235,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
           marker: {
             color: this.colors,
           },
+          text: labels,
           x: xs,
           y: ys,
           ...defaultPlotlyTrace,
