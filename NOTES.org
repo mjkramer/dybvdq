@@ -74,7 +74,7 @@ select distinct runno, fileno from DqDetectorNew where runno >= 21232 and fileno
 
 # create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
 create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (sitemask, runno, fileno));
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where detectorid < 5;
 # create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
 
 ** Replication junk

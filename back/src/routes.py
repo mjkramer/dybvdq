@@ -69,7 +69,7 @@ def realdata():                 # pylint: disable=too-many-locals
     result = get_data(runno, fileno, hall, fields)
 
     if len(result['runnos']) < NROWS:
-        # print('WTF', len(result['runnos']))
+        print('WTF', len(result['runnos']))
         runno, fileno = back_the_hell_up(runno, hall)
         result = get_data(runno, fileno, hall, fields)
 
