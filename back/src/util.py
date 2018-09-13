@@ -32,18 +32,20 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
-def get_shifted(runno, fileno, hall, page_shift):
-    "For when user clicks NEXT or PREV"
+def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
+    """For when user clicks NEXT or PREV. Also abused by back_the_hell_up, which
+    uses skipfirst=False"""
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
     sitemask = 4 if hall == 3 else hall
+    nrows = NROWS if skipfirst else NROWS-1
     query = f'''SELECT runno, fileno
                 FROM runno_fileno_sitemask
                 WHERE sitemask = {sitemask}
                 AND (runno {oper} {runno}
                      OR (runno = {runno} AND fileno {oper}= {fileno}))
                 ORDER BY runno {order}, fileno {order}
-                LIMIT 1 OFFSET {NROWS}'''
+                LIMIT 1 OFFSET {nrows}'''
     new_run, new_file = dq_exec(query).fetchone()
 
     boundary = {1: START_7AD, 2: START_8AD, 3: START_8AD}[hall]
@@ -70,8 +72,8 @@ def back_the_hell_up(runno, hall):
     latest_run, latest_file = get_latest(hall)
 
     if runno < mid_run:
-        return get_shifted(mid_run, 1, hall, -1)
-    return get_shifted(latest_run, latest_file + 1, hall, -1)
+        return get_shifted(mid_run, 1, hall, -1, skipfirst=False)
+    return get_shifted(latest_run, latest_file, hall, -1, skipfirst=False)
 
 def clip_location(runno, fileno, hall):
     """Ensure we don't go beyond 21221 or latest run"""
