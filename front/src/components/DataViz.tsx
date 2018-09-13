@@ -203,6 +203,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private plot(data: FileData) {
     const { runnos, filenos, metrics, tagStatus } = data;
+    if (Object.keys(metrics).length === 0) {
+      return;
+    }
+
     const firstMetric = metrics[Object.keys(metrics)[0]];
     const detectors = Object.keys(firstMetric);
     detectors.sort();

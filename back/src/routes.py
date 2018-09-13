@@ -51,9 +51,11 @@ def realdata():                 # pylint: disable=too-many-locals
     runno = int(request.args.get('runno'))
     fileno = int(request.args.get('fileno'))
     hall = int(request.args.get('hall')[2])
-    fields = request.args.get('fields')
     session = request.args.get('session')
     page_shift = int(request.args.get('pageShift', 0))
+
+    fields = request.args.get('fields')
+    fields = [] if fields == '' else fields.split(',')
 
     if page_shift:
         try:

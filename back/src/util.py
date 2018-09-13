@@ -96,7 +96,7 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     the specified one"""
     result = {'runnos': [],
               'filenos': [],
-              'metrics': {all_fields()[field]: {} for field in fields.split(',')}}
+              'metrics': {all_fields()[field]: {} for field in fields}}
 
     sitemask = [1, 2, 4][hall-1]
     focus = focus_sql(hall, runno)
@@ -107,13 +107,15 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     except EndOfDataException:  # return empty result, let caller decide how to proceed
         return result
 
+    field_sel = f', {",".join(fields)}' if fields else ''
+
     if end_runno == runno:
         loc_pred = f'runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1)'
     else:
         loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
                        (runno = {runno} AND fileno >= {fileno}) OR
                        (runno = {end_runno} AND fileno <= {end_fileno})'''
-    query = f'''SELECT runno, fileno, detectorid, {fields}
+    query = f'''SELECT runno, fileno, detectorid {field_sel}
                 FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
                 WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
                 ORDER BY runno, fileno, detectorid, insertdate'''
@@ -129,7 +131,7 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
 
         detkey = f'AD{det}'
 
-        for i, field in enumerate(fields.split(',')):
+        for i, field in enumerate(fields):
             detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
             vals = detdict.setdefault('values', [])
 
