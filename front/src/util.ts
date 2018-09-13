@@ -1,5 +1,11 @@
 import Plotly from 'plotly.js';
 
+export const FIRST_RUN = {
+  EH1: 21221,
+  EH2: 21222,
+  EH3: 21223,
+};
+
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 export const isNil = (x: any) => x === undefined || x === null;

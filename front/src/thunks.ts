@@ -13,6 +13,18 @@ export const reportAndSetFields = (fields: SelectValueType<Field>) => (
   dispatch(setFields(fields as Field[]));
 };
 
+// Called on app startup. Ensures that latestRun/File are set, as a bonus
+// it preloads plot data.
+export const initLocation = (runno: number, fileno: number, hall: string) => async (
+  dispatch: Dispatch,
+  getState: () => AppState,
+) => {
+  const { session, fields } = getState();
+
+  const params = { runno, fileno, hall, session, fields };
+  fetchWithNewLocation(params, dispatch);
+};
+
 export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   dispatch: Dispatch,
   getState: () => AppState,
@@ -22,8 +34,9 @@ export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   plzReportTaggings.next();
 
   const params = { runno, fileno, hall, session, fields };
-  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
-  dispatch(setLocation(newRun, newFile, hall));
+  fetchWithNewLocation(params, dispatch);
+  // const { newRun, newFile } = await fetchWithNewLocation(params);
+  // dispatch(setLocation(newRun, newFile, hall));
 };
 
 export const reportAndSetHall = (hall: string) => async (
@@ -36,8 +49,9 @@ export const reportAndSetHall = (hall: string) => async (
   dispatch(setLocation(-1, -1, hall));
 
   const params = { runno, fileno, hall, session, fields };
-  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
-  dispatch(setLocation(newRun, newFile, hall));
+  fetchWithNewLocation(params, dispatch);
+  // const { newRun, newFile } = await fetchWithNewLocation(params);
+  // dispatch(setLocation(newRun, newFile, hall));
 };
 
 export const reportAndShiftPage = (count: number) => async (
@@ -50,13 +64,18 @@ export const reportAndShiftPage = (count: number) => async (
   dispatch(setLocation(-1, -1, hall));
 
   const params = { runno, fileno, hall, session, fields, pageShift: count };
-  const { newRun, newFile } = await fetchWithNewRunAndFile(params);
-  dispatch(setLocation(newRun, newFile, hall));
+  fetchWithNewLocation(params, dispatch);
+  // const { newRun, newFile } = await fetchWithNewLocation(params);
+  // dispatch(setLocation(newRun, newFile, hall));
 };
 
-const fetchWithNewRunAndFile = async (params: api.FetchDataParams) => {
+const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispatch) => {
   const data = await api.fetchData(params, { saveToCache: true });
+
   const newRun = data.runnos[0];
   const newFile = data.filenos[0];
-  return { newRun, newFile };
+  const latestRun = data.latest.runno;
+  const latestFile = data.latest.fileno;
+
+  dispatch(setLocation(newRun, newFile, params.hall, latestRun, latestFile));
 };

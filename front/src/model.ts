@@ -2,6 +2,8 @@ export type AppState = {
   fields: Field[];
   fileno: number;
   hall: string;
+  latestFile: number;
+  latestRun: number;
   runno: number;
   selectionActive: boolean;
   session: string;
@@ -19,9 +21,11 @@ export type Field = {
 
 export const initialState: AppState = {
   fields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
-  fileno: 1,
+  fileno: -1,
   hall: 'EH1',
-  runno: 21221,
+  latestFile: -1,
+  latestRun: -1,
+  runno: -1,
   selectionActive: false,
   session: 'Default session',
 };
@@ -42,4 +46,5 @@ export type FileData = {
   filenos: number[];
   metrics: { [fieldName: string]: MetricSet };
   tagStatus: boolean[];
+  latest: { runno: number; fileno: number };
 };
