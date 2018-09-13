@@ -97,6 +97,7 @@ def list_fields():
 @app.route('/latest')
 def latest():
     "Get the latest runs. Used in frontend initialization"
-    obj = {f'EH{hall}': get_latest(hall)
+    annotate = lambda runno, fileno: {'runno': runno, 'fileno': fileno}
+    obj = {f'EH{hall}': annotate(*get_latest(hall))
            for hall in [1, 2, 3]}
     return jsonify(obj)
