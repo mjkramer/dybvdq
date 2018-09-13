@@ -93,3 +93,10 @@ def realdata():                 # pylint: disable=too-many-locals
 def list_fields():
     "Used by react-select for picking the quantities to plot"
     return jsonify(all_fields())
+
+@app.route('/latest')
+def latest():
+    "Get the latest runs. Used in frontend initialization"
+    obj = {f'EH{hall}': get_latest(hall)
+           for hall in [1, 2, 3]}
+    return jsonify(obj)
