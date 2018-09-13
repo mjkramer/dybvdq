@@ -2,9 +2,16 @@ import { Action, handleActions } from 'redux-actions';
 
 import { AppState, Field, initialState } from './model';
 
-import { didDeselect, didSelect, setFields, setLocation, setSession } from './actions';
+import {
+  didDeselect,
+  didSelect,
+  setFields,
+  setLocation,
+  setSession,
+  updateEndStatus,
+} from './actions';
 
-type Loc = Pick<AppState, 'runno' | 'fileno' | 'hall' | 'latestRun' | 'latestFile'>;
+type Loc = Pick<AppState, 'runno' | 'fileno' | 'hall'>;
 
 export default handleActions<AppState, any>(
   {
@@ -18,13 +25,15 @@ export default handleActions<AppState, any>(
       ...state,
       fileno: action.payload!.fileno,
       hall: action.payload!.hall,
-      latestFile: action.payload!.latestFile,
-      latestRun: action.payload!.latestRun,
       runno: action.payload!.runno,
     }),
     [setSession as any]: (state, action: Action<string>) => ({
       ...state,
       session: action.payload!,
+    }),
+    [updateEndStatus as any]: (state, action: Action<boolean>) => ({
+      ...state,
+      atEnd: action.payload!,
     }),
   },
   initialState,

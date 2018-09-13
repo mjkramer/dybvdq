@@ -1,7 +1,7 @@
 import { ValueType as SelectValueType } from 'react-select/lib/types';
 import { Dispatch } from 'redux';
 
-import { setFields, setLocation } from './actions';
+import { setFields, setLocation, updateEndStatus } from './actions';
 import * as api from './api';
 import { plzReportTaggings } from './events';
 import { AppState, Field } from './model';
@@ -15,15 +15,15 @@ export const reportAndSetFields = (fields: SelectValueType<Field>) => (
 
 // Called on app startup. Ensures that latestRun/File are set, as a bonus
 // it preloads plot data.
-export const initLocation = (runno: number, fileno: number, hall: string) => async (
-  dispatch: Dispatch,
-  getState: () => AppState,
-) => {
-  const { session, fields } = getState();
+// export const initLocation = (runno: number, fileno: number, hall: string) => async (
+//   dispatch: Dispatch,
+//   getState: () => AppState,
+// ) => {
+//   const { session, fields } = getState();
 
-  const params = { runno, fileno, hall, session, fields };
-  fetchWithNewLocation(params, dispatch);
-};
+//   const params = { runno, fileno, hall, session, fields };
+//   fetchWithNewLocation(params, dispatch);
+// };
 
 export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   dispatch: Dispatch,
@@ -76,6 +76,10 @@ const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispa
   const newFile = data.filenos[0];
   const latestRun = data.latest.runno;
   const latestFile = data.latest.fileno;
+  const atEnd =
+    data.runnos[data.runnos.length] === latestRun &&
+    data.filenos[data.filenos.length] === latestFile;
 
-  dispatch(setLocation(newRun, newFile, params.hall, latestRun, latestFile));
+  dispatch(updateEndStatus(atEnd));
+  dispatch(setLocation(newRun, newFile, params.hall));
 };

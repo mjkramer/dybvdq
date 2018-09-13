@@ -1,9 +1,8 @@
 export type AppState = {
+  atEnd: boolean;
   fields: Field[];
   fileno: number;
   hall: string;
-  latestFile: number;
-  latestRun: number;
   runno: number;
   selectionActive: boolean;
   session: string;
@@ -20,12 +19,11 @@ export type Field = {
 };
 
 export const initialState: AppState = {
+  atEnd: false,
   fields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
-  fileno: -1,
+  fileno: 1,
   hall: 'EH1',
-  latestFile: -1,
-  latestRun: -1,
-  runno: -1,
+  runno: 21221,
   selectionActive: false,
   session: 'Default session',
 };
