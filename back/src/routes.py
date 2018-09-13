@@ -8,7 +8,7 @@ from sqlalchemy.dialects import mysql
 from typing import List
 
 from . import app
-from .util import focus_sql, get_shifted
+from .util import focus_sql, get_latest, get_shifted
 from .db import db, dq_exec, app_exec
 from .model import Tagging, DataLocation, all_fields
 
@@ -125,6 +125,9 @@ def realdata():                 # pylint: disable=too-many-locals
     result['tagStatus'] = [(runno, fileno) in taggings
                            for (runno, fileno)
                            in zip(result['runnos'], result['filenos'])]
+
+    latest_run, latest_file = get_latest(hall)
+    result['latest'] = {'runno': latest_run, 'fileno': latest_file}
 
     return jsonify(result)
 

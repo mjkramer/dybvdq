@@ -1,5 +1,7 @@
 "Useful utilities"
 
+from functools import lru_cache
+
 from .constants import NROWS
 from .db import dq_exec
 
@@ -69,3 +71,12 @@ def get_shifted(runno, fileno, hall, page_shift):
     if new_run < boundary <= runno:
         return get_shifted(boundary, 1, hall, page_shift)
     return new_run, new_file
+
+@lru_cache()
+def get_latest(hall):
+    "Most recent run/file for a given hall"
+    sitemask = 4 if hall == 3 else hall
+    query = f'''SELECT runno, fileno FROM runno_fileno_sitemask
+                WHERE sitemask = {sitemask}
+                ORDER BY runno DESC, fileno DESC LIMIT 1'''
+    return dq_exec(query).fetchone()
