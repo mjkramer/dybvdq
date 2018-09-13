@@ -9,7 +9,7 @@ export const App = () => (
   <Container>
     <h3 className="mb-4 mt-1">DYB Visual DQ v0.314159</h3>
     <Toolbar />
-    <div className="mb-4">
+    <div className="mt-3 mb-4">
       <FieldSel />
     </div>
     <DataViz />
