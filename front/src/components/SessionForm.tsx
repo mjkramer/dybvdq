@@ -23,7 +23,7 @@ class SaveFormView extends React.Component<State & DispatchProps, State> {
     return (
       <div className="form-inline">
         <InputGroup className="mr-2">
-          <InputGroupAddon addonType="prepend">Session name</InputGroupAddon>
+          <InputGroupAddon addonType="prepend">Session</InputGroupAddon>
           <Input
             onChange={this.onChange}
             onKeyUp={this.onKeyUp}

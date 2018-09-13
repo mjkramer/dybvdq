@@ -35,7 +35,7 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">File</InputGroupAddon>
           <Input
-            size={num(3)}
+            size={num(2)}
             value={this.fmt(fileno)}
             onChange={this.onChangeFileno}
             onKeyUp={this.onKeyUp}
