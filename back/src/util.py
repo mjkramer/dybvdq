@@ -2,12 +2,9 @@
 
 from functools import lru_cache
 
-from .constants import NROWS
-from .db import dq_exec
+from .constants import NROWS, START_7AD, START_8AD, FIRST_RUN
+from .db import app_exec, dq_exec
 from .model import all_fields
-
-START_7AD = 67976
-START_8AD = 26694
 
 def focus_sql(hall, runno):
     "Restrict detector and runno as appropriate"
@@ -53,6 +50,7 @@ def get_shifted(runno, fileno, hall, page_shift):
     if runno < boundary <= new_run:
         return (boundary, 1)
     if new_run < boundary <= runno:
+        assert page_shift == -1
         return get_shifted(boundary, 1, hall, page_shift)
     return new_run, new_file
 
@@ -64,6 +62,25 @@ def get_latest(hall):
                 WHERE sitemask = {sitemask}
                 ORDER BY runno DESC, fileno DESC LIMIT 1'''
     return dq_exec(query).fetchone()
+
+def back_the_hell_up(runno, hall):
+    """If we're near a boundary (either 7/8AD switch or end of data), back up so we
+    get exactly NROWS points"""
+    mid_run = [START_7AD, START_8AD, START_8AD][hall-1]
+    latest_run, latest_file = get_latest(hall)
+
+    if runno < mid_run:
+        return get_shifted(mid_run, 1, hall, -1)
+    return get_shifted(latest_run, latest_file + 1, hall, -1)
+
+def clip_location(runno, fileno, hall):
+    """Ensure we don't go beyond 21221 or latest run"""
+    if runno < FIRST_RUN[hall]:
+        return FIRST_RUN[hall], 1
+    latest_run, latest_file = get_latest(hall)
+    if runno > latest_run or (runno == latest_run and fileno > latest_file):
+        return back_the_hell_up(latest_run, hall)
+    return runno, fileno
 
 def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     """Pull the data requested, starting from first VALID run/file after/including
@@ -111,3 +128,23 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
         last_runno, last_fileno, last_det = runno, fileno, det
 
     return result
+
+def get_taggings(hall, session, lowbound, highbound):
+    "Fetch any saved taggings between the bounds"
+    low_runno, low_fileno = lowbound
+    high_runno, high_fileno = highbound
+
+    if low_runno == high_runno:
+        pred = f'''runno={low_runno} AND
+                   (fileno BETWEEN {low_fileno} AND {high_fileno})'''
+    else:
+        pred = f'''(runno BETWEEN {low_runno}+1 AND {high_runno}-1) OR
+                   (runno={low_runno} AND fileno>={low_fileno}) OR
+                   (runno={high_runno} AND fileno<={high_fileno})'''
+
+    query = f'''SELECT runno, fileno FROM tagging
+                WHERE ({pred}) AND hall={hall} AND session="{session}"
+                ORDER BY runno, fileno'''
+
+    result = app_exec(query).fetchall()
+    return set(map(tuple, result))

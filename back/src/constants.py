@@ -1,3 +1,8 @@
 "Shared constants"
 
 NROWS = 1000
+
+START_7AD = 67976
+START_8AD = 26694
+FIRST_RUN = [21221, 21222, 21223]
+

@@ -8,8 +8,10 @@ from sqlalchemy.dialects import mysql
 from typing import List
 
 from . import app
-from .util import get_data, get_latest, get_shifted
-from .db import db, app_exec
+from .constants import NROWS
+from .util import back_the_hell_up, clip_location
+from .util import get_data, get_latest, get_shifted, get_taggings
+from .db import db
 from .model import Tagging, DataLocation, all_fields
 
 @app.route('/report_taggings', methods=['POST'])
@@ -43,26 +45,6 @@ def report_taggings():
 
     return 'Thanks!'
 
-def get_taggings(hall, session, lowbound, highbound):
-    "Fetch any saved taggings between the bounds"
-    low_runno, low_fileno = lowbound
-    high_runno, high_fileno = highbound
-
-    if low_runno == high_runno:
-        pred = f'''runno={low_runno} AND
-                   (fileno BETWEEN {low_fileno} AND {high_fileno})'''
-    else:
-        pred = f'''(runno BETWEEN {low_runno}+1 AND {high_runno}-1) OR
-                   (runno={low_runno} AND fileno>={low_fileno}) OR
-                   (runno={high_runno} AND fileno<={high_fileno})'''
-
-    query = f'''SELECT runno, fileno FROM tagging
-                WHERE ({pred}) AND hall={hall} AND session="{session}"
-                ORDER BY runno, fileno'''
-
-    result = app_exec(query).fetchall()
-    return set(map(tuple, result))
-
 @app.route('/realdata')
 def realdata():                 # pylint: disable=too-many-locals
     "A messy function that's not as bad as it used to be"
@@ -76,7 +58,13 @@ def realdata():                 # pylint: disable=too-many-locals
     if page_shift:
         runno, fileno = get_shifted(runno, fileno, hall, page_shift)
 
+    runno, fileno = clip_location(runno, fileno, hall)
+
     result = get_data(runno, fileno, hall, fields)
+
+    if len(result['runnos']) < NROWS:
+        print('WTF', len(result['runnos']))
+        runno, fileno = back_the_hell_up(runno, hall)
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])
