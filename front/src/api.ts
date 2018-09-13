@@ -32,12 +32,21 @@ export const fetchData = async (
   return data;
 };
 
+type Bounds = {
+  minRun: number;
+  minFile: number;
+  maxRun: number;
+  maxFile: number;
+};
+
 export const reportTaggings = (
   hall: Hall,
   session: string,
   taggedIds: DataLocation[],
+  bounds: Bounds,
 ) => {
   axios.post('/report_taggings', {
+    bounds,
     hall,
     session,
     taggedIds,

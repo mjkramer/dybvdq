@@ -37,10 +37,16 @@ app.config['SQLALCHEMY_ECHO'] = os.environ.get('DYBVDQ_SQLALCHEMY_ECHO') == '1'
 
 db = SQLAlchemy(app)            # pylint: disable=invalid-name
 
-def dq_exec(query):
+def dq_exec(query, commit=False):
     # pylint: disable=E1101
-    return db.session.execute(query, bind=db.get_engine(bind='dq_db'))
+    result = db.session.execute(query, bind=db.get_engine(bind='dq_db'))
+    if commit:
+        db.session.commit()
+    return result
 
-def app_exec(query):
+def app_exec(query, commit=False):
     # pylint: disable=E1101
-    return db.session.execute(query, bind=db.get_engine(bind='app_db'))
+    result = db.session.execute(query, bind=db.get_engine(bind='app_db'))
+    if commit:
+        db.session.commit()
+    return result

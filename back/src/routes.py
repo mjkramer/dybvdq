@@ -4,24 +4,28 @@
 # pylint: disable=wrong-import-order,wrong-import-position
 
 from flask import jsonify, request
+import os
 from sqlalchemy.dialects import mysql
-from typing import List
+from typing import Dict, List
 
 from . import app
 from .constants import NROWS
-from .util import EndOfDataException, back_the_hell_up, clip_location
-from .util import get_data, get_latest, get_shifted, get_taggings
 from .db import db
+from .util import EndOfDataException, app_exec
+from .util import back_the_hell_up, clip_location, loc_pred
+from .util import get_data, get_latest, get_shifted, get_taggings
 from .model import Tagging, DataLocation, all_fields
 
 @app.route('/report_taggings', methods=['POST'])
 def report_taggings():
     "Receive taggings from client and save them somewhere"
-    print(request.json)
+    if os.environ.get('DYBVDQ_SQLALCHEMY_ECHO') == '1':
+        print(request.json)
 
     payload = request.json
     hall = int(payload['hall'][2])
     session: str = payload['session']
+    bounds: Dict = payload['bounds']
     tagged_ids: List[DataLocation] = payload['taggedIds']
 
     # HACK
@@ -35,12 +39,18 @@ def report_taggings():
     #                       session=session)
     #     db.session.add(tagging)  # pylint: disable=no-member
 
+    loc = loc_pred(bounds['minRun'], bounds['minFile'],
+                   bounds['maxRun'], bounds['maxFile'])
+    del_query = f'''DELETE FROM tagging
+                    WHERE session = "{session}" AND hall = {hall}
+                    AND ({loc})'''
+    app_exec(del_query, commit=True)
+
     update = [{'hall': hall, 'session': session, **tagging}
               for tagging in tagged_ids]
-    stmt = mysql.insert(Tagging).values(update) \
-                .on_duplicate_key_update(hall=Tagging.hall)
+    stmt = mysql.insert(Tagging).values(update) # \
+                # .on_duplicate_key_update(hall=Tagging.hall)
     db.get_engine(bind='app_db').execute(stmt)
-
     # db.session.commit()         # pylint: disable=no-member
 
     return 'Thanks!'

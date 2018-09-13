@@ -91,6 +91,15 @@ def clip_location(runno, fileno, hall):
         return back_the_hell_up(latest_run, hall)
     return runno, fileno
 
+def loc_pred(runno, fileno, end_runno, end_fileno):
+    "Generate SQL to select the specified file range (inclusive)"
+    if end_runno == runno:
+        return f'(runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1))'
+    return f'''((runno BETWEEN {runno}+1 AND {end_runno}-1) OR
+                (runno = {runno} AND fileno >= {fileno}) OR
+                (runno = {end_runno} AND fileno <= {end_fileno}))'''
+
+
 def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     """Pull the data requested, starting from first VALID run/file after/including
     the specified one"""
@@ -108,16 +117,11 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
         return result
 
     field_sel = f', {",".join(fields)}' if fields else ''
+    loc = loc_pred(runno, fileno, end_runno, end_fileno)
 
-    if end_runno == runno:
-        loc_pred = f'runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1)'
-    else:
-        loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
-                       (runno = {runno} AND fileno >= {fileno}) OR
-                       (runno = {end_runno} AND fileno <= {end_fileno})'''
     query = f'''SELECT runno, fileno, detectorid {field_sel}
                 FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
+                WHERE ({loc}) AND ({focus}) AND sitemask={sitemask}
                 ORDER BY runno, fileno, detectorid, insertdate'''
 
     rows = dq_exec(query).fetchall()

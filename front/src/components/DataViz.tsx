@@ -189,7 +189,14 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private reportTaggingsListener = () => {
     const { hall, session } = this.props;
     const taggedIds = this.getTaggedIds();
-    api.reportTaggings(hall, session, taggedIds);
+    const { runnos, filenos } = this.data!;
+    const bounds = {
+      maxFile: filenos[filenos.length - 1],
+      maxRun: runnos[runnos.length - 1],
+      minFile: filenos[0],
+      minRun: runnos[0],
+    };
+    api.reportTaggings(hall, session, taggedIds, bounds);
   };
 
   private tagSelectionListener = () => {
