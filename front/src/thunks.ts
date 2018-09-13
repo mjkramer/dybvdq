@@ -45,10 +45,16 @@ export const reportAndSetHall = (hall: Hall) => async (
   dispatch: Dispatch,
   getState: () => AppState,
 ) => {
-  const { runno, fileno, session, fields } = getState();
+  const { session, fields, atEnd } = getState();
+  let { runno, fileno } = getState();
 
   plzReportTaggings.next();
   dispatch(setLocation(-1, -1, hall));
+
+  if (atEnd) {
+    const latest = globals.LATEST![hall];
+    [runno, fileno] = [latest.runno, latest.fileno];
+  }
 
   const params = { runno, fileno, hall, session, fields };
   fetchWithNewLocation(params, dispatch);
