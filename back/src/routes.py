@@ -55,16 +55,26 @@ def realdata():                 # pylint: disable=too-many-locals
     session = request.args.get('session')
     page_shift = int(request.args.get('pageShift', 0))
 
+    print('A', runno, fileno)
+
     if page_shift:
         runno, fileno = get_shifted(runno, fileno, hall, page_shift)
 
+    print('B', runno, fileno)
+
     runno, fileno = clip_location(runno, fileno, hall)
+
+    print('C', runno, fileno)
 
     result = get_data(runno, fileno, hall, fields)
 
     if len(result['runnos']) < NROWS:
-        print('WTF', len(result['runnos']))
+        # print('WTF', len(result['runnos']))
         runno, fileno = back_the_hell_up(runno, hall)
+        result = get_data(runno, fileno, hall, fields)
+
+    print('LEN', len(result['runnos']))
+    assert len(result['runnos']) == NROWS
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])

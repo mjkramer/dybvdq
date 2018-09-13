@@ -75,8 +75,8 @@ def back_the_hell_up(runno, hall):
 
 def clip_location(runno, fileno, hall):
     """Ensure we don't go beyond 21221 or latest run"""
-    if runno < FIRST_RUN[hall]:
-        return FIRST_RUN[hall], 1
+    if runno < FIRST_RUN[hall-1]:
+        return FIRST_RUN[hall-1], 1
     latest_run, latest_file = get_latest(hall)
     if runno > latest_run or (runno == latest_run and fileno > latest_file):
         return back_the_hell_up(latest_run, hall)
