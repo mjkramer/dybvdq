@@ -58,7 +58,12 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
             onKeyUp={this.onKeyUp}
           />
         </InputGroup>
-        <NavButton onClick={this.onClick}>GO!</NavButton>
+        <NavButton
+          disabled={runno === this.props.runno && fileno === this.props.fileno}
+          onClick={this.onClick}
+        >
+          GO!
+        </NavButton>
       </div>
     );
   }
