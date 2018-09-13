@@ -72,8 +72,10 @@ The load took around 8 minutes on DigitalOcean
 create index idx_runfile on DqDetectorNew(runno, fileno);
 select distinct runno, fileno from DqDetectorNew where runno >= 21232 and fileno >= 75 order by runno, fileno limit 1 offset 1000;
 
-create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
+# create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
+create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (sitemask, runno, fileno));
 insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld;
+# create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
 
 ** Replication junk
 (OLD) mysql> show master status;
