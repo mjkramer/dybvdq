@@ -1,3 +1,4 @@
+import { isNil, some, zip } from 'lodash';
 import Plotly from 'plotly.js';
 import React from 'react';
 import { connect, DispatchProp, MapStateToProps } from 'react-redux';
@@ -7,13 +8,7 @@ import { didDeselect, didSelect } from '../actions';
 import * as api from '../api';
 import { plzReportTaggings, plzTagSelection } from '../events';
 import { AppState, DataLocation, Field, FileData, Hall } from '../model';
-import {
-  defaultPlotlyConfig,
-  defaultPlotlyLayout,
-  defaultPlotlyTrace,
-  isNil,
-  zip,
-} from '../util';
+import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '../util';
 
 const COLORS = ['blue', 'orange'];
 
@@ -259,10 +254,9 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   private togglePoints(idxs: number[]) {
+    const allTagged = !some(idxs, i => this.colors[i] === COLORS[0]);
     idxs.forEach(i => {
-      const oldColor = this.colors[i];
-      const newColor = oldColor === COLORS[0] ? COLORS[1] : COLORS[0];
-      this.colors[i] = newColor;
+      this.colors[i] = allTagged ? COLORS[0] : COLORS[1];
     });
 
     this.divs.forEach(div => {
