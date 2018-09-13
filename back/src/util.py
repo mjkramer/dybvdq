@@ -16,7 +16,7 @@ def focus_sql(hall, runno):
         if runno >= START_8AD:
             return f'detectorid <= 2'
         return f'detectorid <= 1 and runno < {START_8AD}'
-    if hall == 2:
+    if hall == 3:
         if runno >= START_8AD:
             return f'detectorid <= 4'
         return f'detectorid <= 3 and runno < {START_8AD}'
@@ -99,7 +99,7 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     else:
         loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
                        (runno = {runno} AND fileno >= {fileno}) OR
-                       (runno = {end_runno} AND fileno < {fileno})'''
+                       (runno = {end_runno} AND fileno < {end_fileno})'''
     query = f'''SELECT runno, fileno, detectorid, {fields}
                 FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
                 WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
