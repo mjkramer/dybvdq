@@ -19,8 +19,25 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
     runno: this.props.runno,
   };
 
+  // private didClick = false;
+
   public render() {
+    // tslint:disable-next-line:no-console
+    console.log('R&F');
+
     const { runno, fileno } = this.state;
+
+    // let runno: number;
+    // let fileno: number;
+
+    // if (this.didClick) {
+    //   this.didClick = false;
+    //   [runno, fileno] = [this.props.runno, this.props.fileno];
+    //   this.setState({ runno, fileno });
+    // } else {
+    //   [runno, fileno] = [this.state.runno, this.state.fileno];
+    // }
+
     return (
       <div className="form-inline">
         <InputGroup className="mr-2">
@@ -52,7 +69,10 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
   private onClick = () => {
     const { onGo } = this.props;
     const { runno, fileno } = this.state;
+    // this.didClick = true;
     onGo(runno, fileno);
+    // this.forceUpdate();
+    // this.setState(this.props);
   };
 
   private onChangeRunno: InputProps['onChange'] = e => {

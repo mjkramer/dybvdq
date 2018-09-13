@@ -33,6 +33,7 @@ export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   const { hall, session, fields } = getState();
 
   plzReportTaggings.next();
+  dispatch(setLocation(-1, -1, hall));
 
   const params = { runno, fileno, hall, session, fields };
   fetchWithNewLocation(params, dispatch);
