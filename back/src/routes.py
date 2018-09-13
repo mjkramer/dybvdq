@@ -79,9 +79,6 @@ def realdata():                 # pylint: disable=too-many-locals
                            for (runno, fileno)
                            in zip(result['runnos'], result['filenos'])]
 
-    latest_run, latest_file = get_latest(hall)
-    result['latest'] = {'runno': latest_run, 'fileno': latest_file}
-
     return jsonify(result)
 
 @app.route('/list_fields')

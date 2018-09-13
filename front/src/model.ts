@@ -46,5 +46,4 @@ export type FileData = {
   filenos: number[];
   metrics: { [fieldName: string]: MetricSet };
   tagStatus: boolean[];
-  latest: { runno: number; fileno: number };
 };
