@@ -9,7 +9,7 @@ from typing import List
 
 from . import app
 from .constants import NROWS
-from .util import back_the_hell_up, clip_location
+from .util import EndOfDataException, back_the_hell_up, clip_location
 from .util import get_data, get_latest, get_shifted, get_taggings
 from .db import db
 from .model import Tagging, DataLocation, all_fields
@@ -58,7 +58,10 @@ def realdata():                 # pylint: disable=too-many-locals
     print('A', runno, fileno)
 
     if page_shift:
-        runno, fileno = get_shifted(runno, fileno, hall, page_shift)
+        try:
+            runno, fileno = get_shifted(runno, fileno, hall, page_shift)
+        except EndOfDataException:
+            pass                # Sorry, we're not moving!
 
     print('B', runno, fileno)
 

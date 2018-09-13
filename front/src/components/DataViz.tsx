@@ -6,7 +6,7 @@ import { Subscription } from 'rxjs';
 import { didDeselect, didSelect } from '../actions';
 import * as api from '../api';
 import { plzReportTaggings, plzTagSelection } from '../events';
-import { AppState, DataLocation, Field, FileData } from '../model';
+import { AppState, DataLocation, Field, FileData, Hall } from '../model';
 import {
   defaultPlotlyConfig,
   defaultPlotlyLayout,
@@ -24,7 +24,7 @@ const numGraphs = (data: FileData): number => {
 type StateProps = {
   runno: number;
   fileno: number;
-  hall: string;
+  hall: Hall;
   session: string;
   fields: Field[];
 };

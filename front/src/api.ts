@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { AppState, DataLocation, FileData } from './model';
+import { AppState, DataLocation, FileData, Hall } from './model';
 
 let cachedData: FileData | null = null;
 
@@ -33,7 +33,7 @@ export const fetchData = async (
 };
 
 export const reportTaggings = (
-  hall: string,
+  hall: Hall,
   session: string,
   taggedIds: DataLocation[],
 ) => {
@@ -43,3 +43,7 @@ export const reportTaggings = (
     taggedIds,
   });
 };
+
+export type Latest = { [hall in Hall]: DataLocation };
+
+export const latest = async (): Promise<Latest> => (await axios.get('/latest')).data;

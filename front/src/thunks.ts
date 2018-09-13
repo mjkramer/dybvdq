@@ -4,7 +4,8 @@ import { Dispatch } from 'redux';
 import { setFields, setLocation, updateEndStatus } from './actions';
 import * as api from './api';
 import { plzReportTaggings } from './events';
-import { AppState, Field } from './model';
+import * as globals from './globals';
+import { AppState, Field, Hall } from './model';
 
 export const reportAndSetFields = (fields: SelectValueType<Field>) => (
   dispatch: Dispatch,
@@ -39,7 +40,7 @@ export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   // dispatch(setLocation(newRun, newFile, hall));
 };
 
-export const reportAndSetHall = (hall: string) => async (
+export const reportAndSetHall = (hall: Hall) => async (
   dispatch: Dispatch,
   getState: () => AppState,
 ) => {
@@ -69,16 +70,32 @@ export const reportAndShiftPage = (count: number) => async (
   // dispatch(setLocation(newRun, newFile, hall));
 };
 
+export const initLocation = () => async (
+  dispatch: Dispatch,
+  getState: () => AppState,
+) => {
+  const latest = await api.latest();
+  globals.setLatest(latest);
+
+  const hall: Hall = 'EH1';
+  const { runno, fileno } = latest[hall];
+  const { session, fields } = getState();
+  const params = { runno, fileno, hall, session, fields };
+  fetchWithNewLocation(params, dispatch);
+  // dispatch(setLocation(runno, fileno, hall));
+};
+
 const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispatch) => {
   const data = await api.fetchData(params, { saveToCache: true });
 
   const newRun = data.runnos[0];
   const newFile = data.filenos[0];
-  const latestRun = data.latest.runno;
-  const latestFile = data.latest.fileno;
+  // const latestRun = data.latest.runno;
+  // const latestFile = data.latest.fileno;
+  const { hall } = params;
   const atEnd =
-    data.runnos[data.runnos.length] === latestRun &&
-    data.filenos[data.filenos.length] === latestFile;
+    data.runnos[data.runnos.length] === globals.LATEST![hall].runno &&
+    data.filenos[data.filenos.length] === globals.LATEST![hall].fileno;
 
   dispatch(updateEndStatus(atEnd));
   dispatch(setLocation(newRun, newFile, params.hall));

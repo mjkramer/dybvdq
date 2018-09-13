@@ -6,6 +6,10 @@ from .constants import NROWS, START_7AD, START_8AD, FIRST_RUN
 from .db import app_exec, dq_exec
 from .model import all_fields
 
+class EndOfDataException(Exception):
+    "We've hit the end, captain!"
+    pass
+
 def focus_sql(hall, runno):
     "Restrict detector and runno as appropriate"
     if hall == 1:
@@ -33,8 +37,8 @@ def ndet(hall, runno):
     raise "Invalid hall"
 
 def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
-    """For when user clicks NEXT or PREV. Also abused by back_the_hell_up, which
-    uses skipfirst=False"""
+    """For when user clicks NEXT or PREV. Also abused by back_the_hell_up and
+    get_shifted, which uses skipfirst=False """
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
     sitemask = 4 if hall == 3 else hall
@@ -46,7 +50,10 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
                      OR (runno = {runno} AND fileno {oper}= {fileno}))
                 ORDER BY runno {order}, fileno {order}
                 LIMIT 1 OFFSET {nrows}'''
-    new_run, new_file = dq_exec(query).fetchone()
+    result = dq_exec(query).fetchone()
+    if result is None:          # Went past the end
+        raise EndOfDataException
+    new_run, new_file = result
 
     boundary = {1: START_7AD, 2: START_8AD, 3: START_8AD}[hall]
     if runno < boundary <= new_run:
@@ -95,13 +102,17 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
     focus = focus_sql(hall, runno)
     last_runno, last_fileno, last_det = None, None, None
 
-    end_runno, end_fileno = get_shifted(runno, fileno, hall, 1)
+    try:
+        end_runno, end_fileno = get_shifted(runno, fileno, hall, 1, skipfirst=False)
+    except EndOfDataException:  # return empty result, let caller decide how to proceed
+        return result
+
     if end_runno == runno:
         loc_pred = f'runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1)'
     else:
         loc_pred = f'''(runno BETWEEN {runno}+1 AND {end_runno}-1) OR
                        (runno = {runno} AND fileno >= {fileno}) OR
-                       (runno = {end_runno} AND fileno < {end_fileno})'''
+                       (runno = {end_runno} AND fileno <= {end_fileno})'''
     query = f'''SELECT runno, fileno, detectorid, {fields}
                 FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
                 WHERE ({loc_pred}) AND ({focus}) AND sitemask={sitemask}
