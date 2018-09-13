@@ -94,8 +94,8 @@ const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispa
   // const latestFile = data.latest.fileno;
   const { hall } = params;
   const atEnd =
-    data.runnos[data.runnos.length] === globals.LATEST![hall].runno &&
-    data.filenos[data.filenos.length] === globals.LATEST![hall].fileno;
+    data.runnos[data.runnos.length - 1] === globals.LATEST![hall].runno &&
+    data.filenos[data.filenos.length - 1] === globals.LATEST![hall].fileno;
 
   dispatch(updateEndStatus(atEnd));
   dispatch(setLocation(newRun, newFile, params.hall));
