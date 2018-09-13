@@ -85,9 +85,9 @@ insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from D
 
 insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=2 and runno > 26694 and detectorid <= 2;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=3 and runno between 21221 and 26694-1 and detectorid <= 3;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=4 and runno between 21221 and 26694-1 and detectorid <= 3;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=3 and runno > 26694 and detectorid <= 4;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=4 and runno > 26694 and detectorid <= 4;
 
 # create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
 
