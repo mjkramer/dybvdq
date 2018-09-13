@@ -73,8 +73,22 @@ create index idx_runfile on DqDetectorNew(runno, fileno);
 select distinct runno, fileno from DqDetectorNew where runno >= 21232 and fileno >= 75 order by runno, fileno limit 1 offset 1000;
 
 # create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
+drop table runno_fileno_sitemask;
+
 create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (sitemask, runno, fileno));
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where detectorid < 5;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=1 and runno between 21221 and 67976-1 and detectorid <= 2;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=1 and runno > 67976 and detectorid=2;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=2 and runno between 21221 and 26694-1 and detectorid=1;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=2 and runno > 26694 and detectorid <= 2;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=3 and runno between 21221 and 26694-1 and detectorid <= 3;
+
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=3 and runno > 26694 and detectorid <= 4;
+
 # create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
 
 ** Replication junk
