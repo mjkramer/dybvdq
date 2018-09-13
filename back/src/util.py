@@ -49,7 +49,7 @@ def get_shifted(runno, fileno, hall, page_shift):
     boundary = {1: START_7AD, 2: START_8AD, 3: START_8AD}[hall]
     if runno < boundary <= new_run:
         return (boundary, 1)
-    if new_run < boundary <= runno:
+    if new_run < boundary <= runno and 1 < fileno:  # XXX check me
         assert page_shift == -1
         return get_shifted(boundary, 1, hall, page_shift)
     return new_run, new_file
