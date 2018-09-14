@@ -2,12 +2,13 @@
 - window resize handling
 - scattergl wtf
 
-* Deployment checklist
-- [ ] Dump dq_db
-- [ ] Build frontend
-- [ ] Delete/restart dybvdq-mysql
-- [ ] Load dq_db
-- [ ] Build indexes/derived tables
+* Deployment checklist [6/8]
+- [X] Dump dq_db
+- [X] Build/upload frontend
+- [X] Delete/restart dybvdq-mysql
+- [X] Load dq_db
+- [X] Build indexes/derived tables
+- [X] Clean up app_db if necessary
 - [ ] Set env vars
 - [ ] docker-compose rm; docker-compose up --build
 
@@ -69,21 +70,23 @@ docker run -d --name=vdq-mysql --user=1000:1000 --env="MYSQL_ROOT_PASSWORD=***RE
 ** Running on DigitalOcean
 rm -rf ~/visual_dq/mysql/data && mkdir -p ~/visual_dq/mysql/data
 docker container rm -f dybvdq-mysql
-docker run -d --name=dybvdq-mysql -e MYSQL_ROOT_PASSWORD=***REMOVED*** -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
-docker cp mysql/dumps/dq_db.20180904.sql dybvdq-mysql:/
+# docker run -d --name=dybvdq-mysql -e MYSQL_ROOT_PASSWORD=***REMOVED*** -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
+cd ~/visual_dq/mysql
+docker-compose up -d
+docker cp dumps/dq_db.20180904.sql dybvdq-mysql:/
 docker exec -it dybvdq-mysql /bin/bash
-  mysql -p -e "create database dq_db"
+  # mysql -p -e "create database dq_db"
   mysql -p dq_db < dq_db.20180904.sql
   rm /dq_db.20180904.sql
 
 The load took around 8 minutes on DigitalOcean
 
-** Indexes
+** Indexes and derived tables
 create index idx_runfile on DqDetectorNew(runno, fileno);
 select distinct runno, fileno from DqDetectorNew where runno >= 21232 and fileno >= 75 order by runno, fileno limit 1 offset 1000;
 
-# create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
-drop table runno_fileno_sitemask;
+# drop table runno_fileno_sitemask;
+create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
 
 create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (sitemask, runno, fileno));
 
