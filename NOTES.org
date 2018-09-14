@@ -2,15 +2,16 @@
 - window resize handling
 - scattergl wtf
 
-* Deployment checklist [6/8]
-- [X] Dump dq_db
+* Deployment checklist [9/9]
 - [X] Build/upload frontend
+- [X] Update Pipfile.lock
+- [X] Dump dq_db
 - [X] Delete/restart dybvdq-mysql
 - [X] Load dq_db
 - [X] Build indexes/derived tables
 - [X] Clean up app_db if necessary
-- [ ] Set env vars
-- [ ] docker-compose rm; docker-compose up --build
+- [X] Set env vars
+- [X] docker-compose rm; docker-compose up --build
 
 * Docker workflow
 ** On aftershock
