@@ -39,7 +39,7 @@ services:
       - DYBVDQ_HOSTNAME
       - DYBVDQ_AUTH_USER
       - DYBVDQ_AUTH_PASS_HASH
-    command: sleep 5 && /bin/bash /start_nginx.sh
+    command: /bin/bash /start_nginx.sh
   app_db:
     container_name: dybvdq-app_db
     image: mariadb
