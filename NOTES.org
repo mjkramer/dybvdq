@@ -2,6 +2,15 @@
 - window resize handling
 - scattergl wtf
 
+* Deployment checklist
+- [ ] Dump dq_db
+- [ ] Build frontend
+- [ ] Delete/restart dybvdq-mysql
+- [ ] Load dq_db
+- [ ] Build indexes/derived tables
+- [ ] Set env vars
+- [ ] docker-compose rm; docker-compose up --build
+
 * Docker workflow
 ** On aftershock
 git pull
@@ -45,9 +54,10 @@ docker run -it --entrypoint /bin/bash newimagename
 * Database stuff
 ** Making a snapshot
 #+BEGIN_SRC bash
-mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180628.sql
+mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180913.sql
 #+END_SRC
 -- takes < 1 minute on a good day
+Recommend using guwq@dybdq.ihep.ac.cn
 
 ** Running on aftershock
 Then scp the .sql to dayabay@aftershock.lbl.gov:visual_dq/mysql/dumps.
