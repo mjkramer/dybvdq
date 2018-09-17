@@ -22,7 +22,9 @@ export type Hall = 'EH1' | 'EH2' | 'EH3';
 
 export const initialState: AppState = {
   atEnd: false,
-  fields: [{ value: 'plikecounts', label: 'Prompt-like counts' }],
+  // XXX should get initial field from backend
+  // fields: [{ value: 'plikecounts', label: 'Prompt-like rate, Hz' }],
+  fields: [],
   fileno: -1,
   hall: 'EH1',
   runno: -1,

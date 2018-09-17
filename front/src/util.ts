@@ -6,6 +6,8 @@ export const FIRST_RUN = {
   EH3: 21223,
 };
 
+export const DEFAULT_FIELD = 'plikecounts';
+
 export type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 // Helper to convert a number to string while telling TS it's still a number.

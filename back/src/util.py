@@ -10,6 +10,14 @@ class EndOfDataException(Exception):
     "We've hit the end, captain!"
     pass
 
+def field_desc(field):
+    desc = all_fields()[field]
+    if desc.endswith('rate'):
+        return f'{desc}, Hz'
+    if desc.endswith('energy'):
+        return f'{desc}, MeV'
+    return desc
+
 def sitemask(hall):
     "Converts hall [1, 2, 3] to sitemask [1, 2, 4]"
     return [1, 2, 4][hall - 1]
@@ -126,7 +134,7 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
     the specified one"""
     result = {'runnos': [],
               'filenos': [],
-              'metrics': {all_fields()[field]: {} for field in fields}}
+              'metrics': {field_desc(field): {} for field in fields}}
 
     focus = focus_sql(hall, start_runno)
 
@@ -164,7 +172,7 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
         detkey = f'AD{det}'
 
         for i, field in enumerate(fields):
-            detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
+            detdict = result['metrics'][field_desc(field)].setdefault(detkey, {})
             vals = detdict.setdefault('values', [])
             val = row[i+3]
 

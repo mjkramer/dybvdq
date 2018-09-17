@@ -60,8 +60,9 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.divs.forEach(el => Plotly.purge(el));
 
     // We're doing a NEXT/PREV/SetHall; wait for new runno/fileno
-    const { runno, fileno } = this.props;
-    if (runno === -1 || fileno === -1) {
+    const { runno, fileno, fields } = this.props;
+
+    if (Object.keys(fields).length === 0 || runno === -1 || fileno === -1) {
       return;
     }
 

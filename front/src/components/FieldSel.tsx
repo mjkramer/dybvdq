@@ -1,11 +1,16 @@
 import axios from 'axios';
+import { find } from 'lodash';
 import React from 'react';
-import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
+import { connect, DispatchProp, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import Select from 'react-select';
 import { ValueType as SelectValueType } from 'react-select/lib/types';
+import { Action } from 'redux';
+import { ThunkDispatch } from 'redux-thunk';
 
+import { setFields } from '../actions';
 import { AppState, Field } from '../model';
-import { reportAndSetFields } from '../thunks';
+import { initLocation, reportAndSetFields } from '../thunks';
+import { DEFAULT_FIELD } from '../util';
 
 type Props = {
   fields: Field[];
@@ -18,16 +23,23 @@ const initialState = {
 
 type State = Readonly<typeof initialState>;
 
-class FieldSelView extends React.Component<Props, State> {
+class FieldSelView extends React.Component<Props & DispatchProp, State> {
   public readonly state: State = initialState;
 
   public async componentDidMount() {
     const { data } = await axios.get('/list_fields');
-    const allFields = Object.keys(data).map(k => ({
-      label: data[k],
+    const allFields = Object.entries(data).map(([k, v]) => ({
+      label: v as string,
       value: k,
     }));
+    // const allFields = Object.keys(data).map(k => ({,
+    //   label: data[k],,
+    //   value: k,,
+    // }));,
     this.setState({ allFields });
+    const defaultField = find(allFields, { value: DEFAULT_FIELD });
+    this.props.dispatch(setFields([defaultField]));
+    (this.props.dispatch as any)(initLocation());
   }
 
   public render() {
@@ -50,9 +62,15 @@ const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ fields }) 
 });
 
 type DispatchProps = Pick<Props, 'onChange'>;
-const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onChange: reportAndSetFields,
-};
+const mapDispatchToProps: MapDispatchToProps<
+  DispatchProps & DispatchProp,
+  {}
+> = dispatch => ({
+  dispatch,
+  onChange: fields => {
+    (dispatch as ThunkDispatch<AppState, void, Action>)(reportAndSetFields(fields));
+  },
+});
 
 export default connect(
   mapStateToProps,

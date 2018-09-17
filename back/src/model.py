@@ -30,17 +30,17 @@ class DqDetectorNew(db.Model):
 def all_fields():
     "Everything we know how to plot"
     return {
-        'triggercounts': 'Trigger counts',
-        'flashercounts': 'Flasher counts',
-        'muoncounts': 'Muon counts',
-        'ibdcounts': 'IBD counts',
-        'spncounts': 'SPN counts',
-        'blocktrigcounts': 'Blocked trigger counts',
+        'triggercounts': 'Trigger rate',
+        'flashercounts': 'Flasher rate',
+        'muoncounts': 'Muon rate',
+        'ibdcounts': 'IBD rate',
+        'spncounts': 'SPN rate',
+        'blocktrigcounts': 'Blocked trigger rate',
         'spnenergy': 'SPN energy',
         'k40energy': 'K40 energy',
         'tl208energy': 'Tl208 energy',
-        'plikecounts': 'Prompt-like counts',
-        'nlikecounts': 'Delayed-like counts',
+        'plikecounts': 'Prompt-like rate',
+        'nlikecounts': 'Delayed-like rate',
     }
 
 db.create_all()
