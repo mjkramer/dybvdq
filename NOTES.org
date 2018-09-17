@@ -7,7 +7,7 @@
 - [X] Update Pipfile.lock
 - [X] Dump dq_db
 - [X] Delete/restart dybvdq-mysql
-- [X] Load dq_db
+- [X] Load dq_db (convert to InnoDB?)
 - [X] Build indexes/derived tables
 - [X] Clean up app_db if necessary
 - [X] Set env vars
@@ -56,7 +56,7 @@ docker run -it --entrypoint /bin/bash newimagename
 * Database stuff
 ** Making a snapshot
 #+BEGIN_SRC bash
-mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime most_recent_file_tag > dq_db.20180913.sql
+mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.20180913.sql
 #+END_SRC
 -- takes < 1 minute on a good day
 Recommend using guwq@dybdq.ihep.ac.cn
@@ -105,6 +105,9 @@ insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from D
 
 # create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
 
+** MyISAM -> InnoDB
+- https://support.severalnines.com/hc/en-us/articles/212426983-Migrate-MyISAM-tables-to-INNODB-using-mysqldump
+- alter table DqDetectorNew engine=innodb;
 ** Replication junk
 (OLD) mysql> show master status;
 +------------------+-----------+--------------+------------------+
