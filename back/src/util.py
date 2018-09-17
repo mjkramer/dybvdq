@@ -10,6 +10,10 @@ class EndOfDataException(Exception):
     "We've hit the end, captain!"
     pass
 
+def sitemask(hall):
+    "Converts hall [1, 2, 3] to sitemask [1, 2, 4]"
+    return [1, 2, 4][hall - 1]
+
 def focus_sql(hall, runno):
     "Restrict detector and runno as appropriate"
     if hall == 1:
@@ -41,11 +45,10 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
     get_shifted, which uses skipfirst=False """
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
-    sitemask = 4 if hall == 3 else hall
     nrows = NROWS if skipfirst else NROWS-1
     query = f'''SELECT runno, fileno
                 FROM runno_fileno_sitemask
-                WHERE sitemask = {sitemask}
+                WHERE sitemask = {sitemask(hall)}
                 AND (runno {oper} {runno}
                      OR (runno = {runno} AND fileno {oper}= {fileno}))
                 ORDER BY runno {order}, fileno {order}
@@ -57,8 +60,10 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
 
     boundary = {1: START_7AD, 2: START_8AD, 3: START_8AD}[hall]
     if runno < boundary <= new_run:
+        assert page_shift == 1
         return (boundary, 1)
-    if new_run < boundary <= runno and 1 < fileno:  # XXX check me
+    on_boundary = runno == boundary and fileno == 1 # don't recurse if on_boundary!
+    if new_run < boundary <= runno and not on_boundary:
         assert page_shift == -1
         return get_shifted(boundary, 1, hall, page_shift)
     return new_run, new_file
@@ -66,9 +71,8 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
 @lru_cache()
 def get_latest(hall):
     "Most recent run/file for a given hall"
-    sitemask = 4 if hall == 3 else hall
     query = f'''SELECT runno, fileno FROM runno_fileno_sitemask
-                WHERE sitemask = {sitemask}
+                WHERE sitemask = {sitemask(hall)}
                 ORDER BY runno DESC, fileno DESC LIMIT 1'''
     return dq_exec(query).fetchone()
 
@@ -99,32 +103,56 @@ def loc_pred(runno, fileno, end_runno, end_fileno):
                 (runno = {runno} AND fileno >= {fileno}) OR
                 (runno = {end_runno} AND fileno <= {end_fileno}))'''
 
+def get_livetimes(runno, fileno, end_runno, end_fileno, hall):
+    "Get the livetimes for the given range of files"
+    loc = loc_pred(runno, fileno, end_runno, end_fileno)
+    # query = f'''SELECT runno, fileno, integralruntime
+    #             FROM DqLiveTime NATURAL JOIN DqLiveTimeVld WHERE
+    #             ({loc}) AND sitemask = {sitemask(hall)}
+    #             GROUP BY runno, fileno '''
 
-def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
+    # using window functions, we can ensure we get only the latest SEQNO
+    query = f''' WITH ranked AS (
+                   SELECT runno, fileno, integralruntime,
+                          ROW_NUMBER() OVER
+                            (PARTITION BY runno, fileno ORDER BY seqno DESC) AS rn
+                   FROM DqLiveTime NATURAL JOIN DqLiveTimeVld
+                   WHERE ({loc}) AND sitemask = {sitemask(hall)})
+                 SELECT runno, fileno, integralruntime FROM ranked WHERE rn = 1'''
+    return dq_exec(query)
+
+def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-many-locals
     """Pull the data requested, starting from first VALID run/file after/including
     the specified one"""
     result = {'runnos': [],
               'filenos': [],
               'metrics': {all_fields()[field]: {} for field in fields}}
 
-    sitemask = [1, 2, 4][hall-1]
-    focus = focus_sql(hall, runno)
-    last_runno, last_fileno, last_det = None, None, None
+    focus = focus_sql(hall, start_runno)
 
     try:
-        end_runno, end_fileno = get_shifted(runno, fileno, hall, 1, skipfirst=False)
+        end_runno, end_fileno = get_shifted(start_runno, start_fileno, hall, 1, skipfirst=False)
     except EndOfDataException:  # return empty result, let caller decide how to proceed
         return result
 
+    if any(f.endswith('counts') for f in fields):
+        livetimes = {}
+        rows = get_livetimes(start_runno, start_fileno, end_runno, end_fileno, hall)
+        for runno, fileno, lt_ms in rows:
+            livetimes[(runno, fileno)] = lt_ms / 1000
+        default_livetime = sum(livetimes.values()) / len(livetimes)
+
     field_sel = f', {",".join(fields)}' if fields else ''
-    loc = loc_pred(runno, fileno, end_runno, end_fileno)
+    loc = loc_pred(start_runno, start_fileno, end_runno, end_fileno)
 
     query = f'''SELECT runno, fileno, detectorid {field_sel}
                 FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                WHERE ({loc}) AND ({focus}) AND sitemask={sitemask}
+                WHERE ({loc}) AND ({focus}) AND sitemask={sitemask(hall)}
                 ORDER BY runno, fileno, detectorid, insertdate'''
 
     rows = dq_exec(query).fetchall()
+
+    last_runno, last_fileno, last_det = None, None, None
 
     for row in rows:
         runno, fileno, det = row[:3]
@@ -138,11 +166,20 @@ def get_data(runno, fileno, hall, fields):  # pylint: disable=too-many-locals
         for i, field in enumerate(fields):
             detdict = result['metrics'][all_fields()[field]].setdefault(detkey, {})
             vals = detdict.setdefault('values', [])
+            val = row[i+3]
+
+            if field.endswith('counts'):
+                try:
+                    norm = livetimes[(runno, fileno)]
+                except KeyError:
+                    print(f'WARNING: Missing livetime for {runno}, {fileno}')
+                    norm = default_livetime
+                val /= norm
 
             if fileno == last_fileno and det == last_det:
-                vals[-1] = row[i+3]
+                vals[-1] = val
             else:
-                vals.append(row[i+3])
+                vals.append(val)
 
         last_runno, last_fileno, last_det = runno, fileno, det
 
