@@ -182,7 +182,8 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
                 except KeyError:
                     print(f'WARNING: Missing livetime for {runno}, {fileno}')
                     norm = default_livetime
-                val /= norm
+                if val is not None:  # in case we got a NULL in this row
+                    val /= norm
 
             if fileno == last_fileno and det == last_det:
                 vals[-1] = val
