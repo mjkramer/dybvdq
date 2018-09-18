@@ -283,3 +283,4 @@ https://github.com/Microsoft/TypeScript/pull/27028
 - vert.x
 - ktor
 - jooby
+- javalin
