@@ -1,0 +1,5 @@
+/* Ian pointed out that the Run/File inputs were too small in Safari.
+   https://stackoverflow.com/questions/38401226/safari-text-input-and-number-input-size */
+* {
+    -webkit-appearance: none;
+}
