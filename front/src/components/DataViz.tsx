@@ -53,6 +53,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const subs = this.subscriptions;
     subs.push(plzReportTaggings.subscribe(this.reportTaggingsListener));
     subs.push(plzTagSelection.subscribe(this.tagSelectionListener));
+    window.addEventListener('resize', this.resizeHandler);
     this.componentDidUpdate();
   }
 
@@ -260,6 +261,12 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.lastLoc = { fileno, hall, runno, session };
   }
+
+  private resizeHandler = () => {
+    this.divs.forEach(el => {
+      Plotly.Plots.resize(el);
+    });
+  };
 
   private togglePoints(idxs: number[]) {
     const allTagged = !some(idxs, i => this.colors[i] === COLORS[0]);
