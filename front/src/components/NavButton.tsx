@@ -20,4 +20,5 @@ export const NavButton: React.SFC<Props> = (props: Props) => (
   <Button color="primary" outline={true} {...props} />
 );
 
+export type ButtonProps = ButtonProps;
 export default NavButton;

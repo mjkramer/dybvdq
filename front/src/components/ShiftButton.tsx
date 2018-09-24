@@ -3,13 +3,13 @@ import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 
 import { AppState } from '../model';
 import { reportAndShiftPage } from '../thunks';
-import { FIRST_RUN } from '../util';
-import { NavButton } from './NavButton';
+import { FIRST_RUN, Omit } from '../util';
+import { ButtonProps, NavButton } from './NavButton';
 
 type AllProps = {
   count: number;
   disabled: boolean;
-};
+} & ButtonProps;
 
 type DispatchProps = {
   doShift: (count: number) => any;
@@ -20,26 +20,41 @@ const ShiftButtonView: React.SFC<AllProps & DispatchProps> = ({
   count,
   disabled,
   doShift,
+  ...btnProps
 }) => (
-  // tslint:disable-next-line:jsx-no-lambda
-  <NavButton children={children} disabled={disabled} onClick={() => doShift(count)} />
+  <NavButton
+    children={children}
+    disabled={disabled}
+    // tslint:disable-next-line:jsx-no-lambda
+    onClick={() => doShift(count)}
+    {...btnProps}
+  />
 );
 
-type SubProps = Pick<AllProps, 'disabled'>;
+type SubProps = Omit<AllProps, 'count'>;
+type StateProps = Pick<SubProps, 'disabled'>;
 
-const PrevButtonView: React.SFC<SubProps & DispatchProps> = ({ disabled, doShift }) => (
-  <ShiftButtonView count={-1} disabled={disabled} doShift={doShift}>
+const PrevButtonView: React.SFC<SubProps & DispatchProps> = ({
+  disabled,
+  doShift,
+  ...btnProps
+}) => (
+  <ShiftButtonView count={-1} disabled={disabled} doShift={doShift} {...btnProps}>
     PREV
   </ShiftButtonView>
 );
 
-const NextButtonView: React.SFC<SubProps & DispatchProps> = ({ disabled, doShift }) => (
-  <ShiftButtonView count={1} disabled={disabled} doShift={doShift}>
+const NextButtonView: React.SFC<SubProps & DispatchProps> = ({
+  disabled,
+  doShift,
+  ...btnProps
+}) => (
+  <ShiftButtonView count={1} disabled={disabled} doShift={doShift} {...btnProps}>
     NEXT
   </ShiftButtonView>
 );
 
-const mapStateToPropsPrev: MapStateToProps<SubProps, {}, AppState> = ({
+const mapStateToPropsPrev: MapStateToProps<StateProps, {}, AppState> = ({
   runno,
   fileno,
   hall,
@@ -47,7 +62,7 @@ const mapStateToPropsPrev: MapStateToProps<SubProps, {}, AppState> = ({
   disabled: runno === FIRST_RUN[hall] && fileno === 1,
 });
 
-const mapStateToPropsNext: MapStateToProps<SubProps, {}, AppState> = ({ atEnd }) => ({
+const mapStateToPropsNext: MapStateToProps<StateProps, {}, AppState> = ({ atEnd }) => ({
   disabled: atEnd,
 });
 

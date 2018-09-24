@@ -7,13 +7,14 @@ import { NextButton, PrevButton } from './ShiftButton';
 import TagSelectionButton from './TagSelectionButton';
 
 export const Toolbar = () => (
-  <div className="d-flex justify-content-between mb-2">
-    <PrevButton />
-    <HallSelector />
+  <div className="d-flex mb-2">
+    <PrevButton className="mr-4" />
+    <NextButton className="mr-4" />
+    <HallSelector className="mr-4" />
     <RunAndFile />
-    <SessionForm />
+    <div style={{ flexGrow: 1 }} />
+    <SessionForm className="mr-4" />
     <TagSelectionButton />
-    <NextButton />
   </div>
 );
 

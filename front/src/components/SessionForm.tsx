@@ -13,15 +13,19 @@ type DispatchProps = {
 
 type State = Readonly<Pick<AppState, 'session'>>;
 
-class SaveFormView extends React.Component<State & DispatchProps, State> {
+type Props = State & DispatchProps & React.HTMLProps<HTMLDivElement>;
+
+class SaveFormView extends React.Component<Props, State> {
   public readonly state: State = {
     session: this.props.session,
   };
 
   public render() {
     const { session } = this.state;
+    const { onSwitch: _, ...divProps } = this.props;
+    divProps.className += ' form-inline';
     return (
-      <div className="form-inline">
+      <div {...divProps}>
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">Session</InputGroupAddon>
           <Input
