@@ -38,12 +38,17 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
     //   [runno, fileno] = [this.state.runno, this.state.fileno];
     // }
 
+    // HACK
+    const isSafari = (window as any).safari !== undefined;
+    const runInputSize = isSafari ? 6 : 4;
+    const fileInputSize = isSafari ? 4 : 2;
+
     return (
       <div className="form-inline">
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">Run</InputGroupAddon>
           <Input
-            size={num(4)}
+            size={num(runInputSize)}
             value={this.fmt(runno)} // cast to string, avoid NaN in input box
             onChange={this.onChangeRunno}
             onKeyUp={this.onKeyUp}
@@ -52,7 +57,7 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
         <InputGroup className="mr-2">
           <InputGroupAddon addonType="prepend">File</InputGroupAddon>
           <Input
-            size={num(2)}
+            size={num(fileInputSize)}
             value={this.fmt(fileno)}
             onChange={this.onChangeFileno}
             onKeyUp={this.onKeyUp}

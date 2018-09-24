@@ -1,5 +1,11 @@
 /* Ian pointed out that the Run/File inputs were too small in Safari.
-   https://stackoverflow.com/questions/38401226/safari-text-input-and-number-input-size */
+   https://stackoverflow.com/questions/38401226/safari-text-input-and-number-input-size
+   This doesn't seem to work. See hack in RunAndFile.tsx instead.
 * {
     -webkit-appearance: none;
 }
+
+input {
+    -webkit-appearance: none;
+}
+*/
