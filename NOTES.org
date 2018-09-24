@@ -1,5 +1,5 @@
 * Things to do
-- window resize handling
+- cleanup FieldSel
 - scattergl wtf
 
 * Deployment checklist [9/9]
