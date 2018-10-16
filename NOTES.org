@@ -1,6 +1,7 @@
 * Things to do
 - cleanup FieldSel
 - scattergl wtf
+- restrict to Physics files
 
 * Deployment checklist [9/9]
 - [X] Build/upload frontend
@@ -15,6 +16,12 @@
 
 * Frontend update
 ssh root@dybdq.work "rm -rf visual_dq/dybvdq/front/build" && scp -r build root@dybdq.work:visual_dq/dybvdq/front && ssh root@dybdq.work "docker restart dybvdq-nginx"
+* Collaborative debugging
+upnpc -a 192.168.1.2 3000 3000 TCP
+Add "0.0.0.0 lunix.mooo.com" to /etc/hosts
+HOST=lunix.mooo.com npm start
+Invite assistant to lunix.mooo.com:3000
+Also look into disableHostCheck option to avoid using $HOST?
 * Docker workflow
 ** On aftershock
 git pull
@@ -71,8 +78,10 @@ What about mysqldump'ing directly onto aftershock? Bad idea; locks tables for to
 docker run -d --name=vdq-mysql --user=1000:1000 --env="MYSQL_ROOT_PASSWORD=***REMOVED***" -p 6603:3306 -v ~dayabay/visual_dq/mysql/conf.d:/etc/mysql/conf.d -v ~dayabay/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
 
 ** Running on DigitalOcean
+# docker container rm -f dybvdq-mysql
+docker stop dybvdq-mysql
+docker rm dybvdq-mysql
 rm -rf ~/visual_dq/mysql/data && mkdir -p ~/visual_dq/mysql/data
-docker container rm -f dybvdq-mysql
 # docker run -d --name=dybvdq-mysql -e MYSQL_ROOT_PASSWORD=***REMOVED*** -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
 cd ~/visual_dq/mysql
 docker-compose up -d
@@ -82,7 +91,8 @@ docker exec -it dybvdq-mysql /bin/bash
   mysql -p dq_db < dq_db.20180904.sql
   rm /dq_db.20180904.sql
 
-The load took around 8 minutes on DigitalOcean
+The load took around 8 minutes on DigitalOcean, 3 minutes on dellite!
+Remember to recreate the indexes!
 
 ** Indexes and derived tables
 create index idx_runfile on DqDetectorNew(runno, fileno);

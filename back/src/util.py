@@ -11,6 +11,7 @@ class EndOfDataException(Exception):
     pass
 
 def field_desc(field):
+    "Given short name (e.g. plikecounts) of field, return full name plus unit"
     desc = all_fields()[field]
     if desc.endswith('rate'):
         return f'{desc}, Hz'
@@ -79,6 +80,11 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
 @lru_cache()
 def get_latest(hall):
     "Most recent run/file for a given hall"
+    # RFS = runno_fileno_sitemask
+    # query = select(RFS.runno, RFS.fileno)       \
+    #     .where(RFS.sitemask == sitemask(hall))  \
+    #     .order_by(RFS.runno.desc(), RFS.fileno) \
+    #     .limit(1);
     query = f'''SELECT runno, fileno FROM runno_fileno_sitemask
                 WHERE sitemask = {sitemask(hall)}
                 ORDER BY runno DESC, fileno DESC LIMIT 1'''
