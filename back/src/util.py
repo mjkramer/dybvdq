@@ -58,6 +58,7 @@ def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
     query = f'''SELECT runno, fileno
                 FROM runno_fileno_sitemask
                 WHERE sitemask = {sitemask(hall)}
+                AND streamtype = 'Physics'
                 AND (runno {oper} {runno}
                      OR (runno = {runno} AND fileno {oper}= {fileno}))
                 ORDER BY runno {order}, fileno {order}
@@ -87,6 +88,7 @@ def get_latest(hall):
     #     .limit(1);
     query = f'''SELECT runno, fileno FROM runno_fileno_sitemask
                 WHERE sitemask = {sitemask(hall)}
+                AND streamtype = 'Physics'
                 ORDER BY runno DESC, fileno DESC LIMIT 1'''
     return dq_exec(query).fetchone()
 
@@ -160,8 +162,10 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
     loc = loc_pred(start_runno, start_fileno, end_runno, end_fileno)
 
     query = f'''SELECT runno, fileno, detectorid {field_sel}
-                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld
-                WHERE ({loc}) AND ({focus}) AND sitemask={sitemask(hall)}
+                FROM DqDetectorNew NATURAL JOIN DqDetectorNewVld vld
+                LEFT JOIN runno_fileno_sitemask USING (runno, fileno)
+                WHERE ({loc}) AND ({focus}) AND vld.sitemask = {sitemask(hall)}
+                AND streamtype = 'Physics'
                 ORDER BY runno, fileno, detectorid, insertdate'''
 
     rows = dq_exec(query).fetchall()

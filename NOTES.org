@@ -1,7 +1,10 @@
 * Things to do
 - cleanup FieldSel
 - scattergl wtf
-- restrict to Physics files
+- Add #BC plot
+- Add custom comments
+- Add water pools
+- Add purple points
 
 * Deployment checklist [9/9]
 - [X] Build/upload frontend
@@ -66,6 +69,8 @@ docker run -it --entrypoint /bin/bash newimagename
 ** Making a snapshot
 #+BEGIN_SRC bash
 mysqldump -h dybdq.ihep.ac.cn -u dybrw -p --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.20180913.sql
+mysqldump -h dybdb1.ihep.ac.cn -u dayabay -p --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > DRDFI.20181017.sql
+# XXX confirm dybdb1 vs dybdb2, --skip-lock-tables, etc.
 #+END_SRC
 -- takes < 1 minute on a good day
 Recommend using guwq@dybdq.ihep.ac.cn
@@ -85,38 +90,36 @@ rm -rf ~/visual_dq/mysql/data && mkdir -p ~/visual_dq/mysql/data
 # docker run -d --name=dybvdq-mysql -e MYSQL_ROOT_PASSWORD=***REMOVED*** -p 3306:3306 -v ~/visual_dq/mysql/data:/var/lib/mysql mysql:5.7
 cd ~/visual_dq/mysql
 docker-compose up -d
-docker cp dumps/dq_db.20180904.sql dybvdq-mysql:/
+docker cp dumps/dq_db.20180904.sql dumps/DRDFI.20181017.sql dybvdq-mysql:/
 docker exec -it dybvdq-mysql /bin/bash
   # mysql -p -e "create database dq_db"
   mysql -p dq_db < dq_db.20180904.sql
-  rm /dq_db.20180904.sql
+  mysql -p dq_db < DRDFI.20181017.sql
+  rm /*.sql
 
 The load took around 8 minutes on DigitalOcean, 3 minutes on dellite!
 Remember to recreate the indexes!
+XXX convert any tables to InnoDB?
 
 ** Indexes and derived tables
-create index idx_runfile on DqDetectorNew(runno, fileno);
-select distinct runno, fileno from DqDetectorNew where runno >= 21232 and fileno >= 75 order by runno, fileno limit 1 offset 1000;
+create index drdfi_runno_fileno on DaqRawDataFileInfo (runno, fileno);
+create index idx_runfile on DqDetectorNew (runno, fileno);
 
-# drop table runno_fileno_sitemask;
-create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (runno, fileno, sitemask));
+create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer not null, streamtype varchar(32) not null, primary key (runno, fileno));
 
-create table runno_fileno_sitemask (runno integer, fileno integer, sitemask integer, primary key (sitemask, runno, fileno));
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=1 and runno between 21221 and 67976-1 and detectorid <= 2;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=1 and runno between 21221 and 67976-1 and detectorid <= 2;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=1 and runno > 67976 and detectorid=2;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=1 and runno > 67976 and detectorid=2;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=2 and runno between 21221 and 26694-1 and detectorid=1;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=2 and runno between 21221 and 26694-1 and detectorid=1;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=2 and runno > 26694 and detectorid <= 2;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=2 and runno > 26694 and detectorid <= 2;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=4 and runno between 21221 and 26694-1 and detectorid <= 3;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=4 and runno between 21221 and 26694-1 and detectorid <= 3;
+insert into runno_fileno_sitemask select distinct runno, fileno, sitemask, streamtype from DqDetectorNew natural join DqDetectorNewVld left join DaqRawDataFileInfo using (runno, fileno) where streamtype != 'AllStreams' and sitemask=4 and runno > 26694 and detectorid <= 4;
 
-insert into runno_fileno_sitemask select distinct runno, fileno, sitemask from DqDetectorNew natural join DqDetectorNewVld where sitemask=4 and runno > 26694 and detectorid <= 4;
-
-# create index idx_rev on runno_fileno_sitemask(sitemask, runno, fileno);
-
+create index idx4lookup on runno_fileno_sitemask (sitemask, streamtype, runno, fileno);
 ** MyISAM -> InnoDB
 - https://support.severalnines.com/hc/en-us/articles/212426983-Migrate-MyISAM-tables-to-INNODB-using-mysqldump
 - alter table DqDetectorNew engine=innodb;
