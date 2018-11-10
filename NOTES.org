@@ -154,21 +154,14 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-repl
 # DB = MySQLdb.connect(host='dybdq.ihep.ac.cn',
 #                      user='dayabay', passwd='***REMOVED***', db='dq_db')
 #+END_SRC
-** docker-compose.yml for the dq_db/offline_db clone
-#+BEGIN_SRC yaml
-version: "3"
-services:
-  mysql:
-    container_name: dybvdq-mysql
-    image: mariadb
-    volumes:
-      - ./data:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=***REMOVED***
-      - MYSQL_DATABASE=dq_db
-    ports:
-      - "3306:3306"
-#+END_SRC
+** HIGH AVAILABILITY
+- google: nginx pause all requests
+- https://github.com/solso/insomnia
+- https://github.com/basecamp/intermission
+- https://stackoverflow.com/questions/47366214/how-do-i-add-the-lua-module-for-nginx-on-alpine-linux (google: docker nginx lua)
+- https://serverfault.com/questions/654780/how-to-suspend-nginx-requests-during-backend-upgrades
+- https://serverfault.com/questions/675166/nginx-reverse-proxying-no-downtime-backend-update
+- https://forum.nginx.org/read.php?2,177,177#msg-177
 * Let's Encrypt
 (google certbot wildcard)
 https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
@@ -322,3 +315,11 @@ https://github.com/Microsoft/TypeScript/pull/27028
 * Misc notes
 ** SSH hopping
 - https://serverfault.com/questions/337274/ssh-from-a-through-b-to-c-using-private-key-on-b (google: ssh use key from jump)
+* Potentially useful libraries
+- immer
+- reselect
+- redux-starter-kit
+- bulma (CSS)
+* Long-term refactors
+- Replace Redux with Context
+- Use React Hooks instead of class components
