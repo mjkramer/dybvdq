@@ -46,7 +46,7 @@ rm -rf ~/visual_dq/dq_db/data/*
 echo "=== Starting fresh DB"
 cd ~/visual_dq/dybvdq/deploy
 docker-compose up -d dq_db
-sleep 60
+sleep 60                 # use code from P17B to determine when DB comes online?
 
 alias dq_mysql="docker exec -i dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS dq_db"
 
@@ -55,7 +55,7 @@ dq_mysql < ~/visual_dq/dq_db/dumps/dq_db.$TODAY.sql
 dq_mysql < ~/visual_dq/dq_db/dumps/offline_db.$TODAY.sql
 
 echo "=== Building indexes and derived tables"
-dq_mysql < ~/visual_dq/dybvdq/extra/indexes.sql dybvdq-dq_db:/
+dq_mysql < ~/visual_dq/dybvdq/extra/indexes.sql
 
 if [ -z "$dontstartback" ]; then
     echo "=== Starting backend"
