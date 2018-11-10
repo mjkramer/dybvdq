@@ -102,6 +102,10 @@ Remember to recreate the indexes!
 XXX convert any tables to InnoDB?
 
 ** Indexes and derived tables
+See extra/indexes.sql.
+
+Can delete the following:
+
 create index drdfi_runno_fileno on DaqRawDataFileInfo (runno, fileno);
 create index idx_runfile on DqDetectorNew (runno, fileno);
 
@@ -148,6 +152,21 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-repl
 #                      user='root', passwd='***REMOVED***', db='dq_db')
 # DB = MySQLdb.connect(host='dybdq.ihep.ac.cn',
 #                      user='dayabay', passwd='***REMOVED***', db='dq_db')
+#+END_SRC
+** docker-compose.yml for the dq_db/offline_db clone
+#+BEGIN_SRC yaml
+version: "3"
+services:
+  mysql:
+    container_name: dybvdq-mysql
+    image: mariadb
+    volumes:
+      - ./data:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=***REMOVED***
+      - MYSQL_DATABASE=dq_db
+    ports:
+      - "3306:3306"
 #+END_SRC
 * Let's Encrypt
 (google certbot wildcard)
@@ -299,3 +318,6 @@ https://github.com/Microsoft/TypeScript/pull/27028
 - ktor
 - jooby
 - javalin
+* Misc notes
+** SSH hopping
+- https://serverfault.com/questions/337274/ssh-from-a-through-b-to-c-using-private-key-on-b (google: ssh use key from jump)
