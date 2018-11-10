@@ -5,6 +5,7 @@ services:
     build: ../back/
     depends_on:
       - app_db
+      - dq_db
     volumes:
       - ../back:/app
     environment:
@@ -50,3 +51,13 @@ services:
       - MYSQL_DATABASE=app_db
     ports:
       - "3000:3306"
+  dq_db:
+    container_name: dybvdq-dq_db
+    image: mariadb
+    volumes:
+      - ${DYBVDQ_DQ_DB_DATA}:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DYBVDQ_DQ_DB_PASS}
+      - MYSQL_DATABASE=dq_db
+    ports:
+      - "3306:3306"
