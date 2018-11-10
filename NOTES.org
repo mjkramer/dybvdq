@@ -5,6 +5,7 @@
 - Add custom comments
 - Add water pools
 - Add purple points
+- Build frontend in container
 
 * Deployment checklist [9/9]
 - [X] Build/upload frontend
