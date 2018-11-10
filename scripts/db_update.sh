@@ -18,7 +18,7 @@ echo "Update started at $(date)"
 TODAY=$(date +%Y%m%d)
 
 echo "=== Clearing old dumps"
-cd ~/visual_dq/mysql/dumps
+cd ~/visual_dq/dq_db/dumps
 find . -name '*.sql' -mtime +60 | xargs -t rm
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
@@ -31,33 +31,33 @@ ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   echo "=== (dybdq.ihep) Dumping offline_db"
   mysqldump -h dybdb1.ihep.ac.cn -u dayabay --password=$OFFLINE_DB_PASS --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > offline_db.$TODAY.sql
   echo "=== (dybdq.ihep) Copying to dybdq.work"
-  scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@dybdq.work:visual_dq/mysql/dumps
+  scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@dybdq.work:visual_dq/dq_db/dumps
 EOF
 
 echo "=== Shutting down backend and DB"
 docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
 docker stop dybdq-back
-docker stop dybvdq-mysql
-docker rm dybvdq-mysql
+docker stop dybvdq-dq_db
+docker rm dybvdq-dq_db
 
 echo "=== Wiping old DB"
-rm -rf ~/visual_dq/mysql/data/*
+rm -rf ~/visual_dq/dq_db/data/*
 
 echo "=== Starting fresh DB"
-cd ~/visual_dq/mysql
+cd ~/visual_dq/dq_db
 docker-compose up -d
 
 echo "=== Loading data into DB"
-docker cp ~/visual_dq/mysql/dumps/{dq_db,offline_db}.$TODAY.sql dybvdq-mysql:/
-docker exec -i dybvdq-mysql /bin/bash <<-EOF
+docker cp ~/visual_dq/dq_db/dumps/{dq_db,offline_db}.$TODAY.sql dybvdq-dq_db:/
+docker exec -i dybvdq-dq_db /bin/bash <<-EOF
   mysql --password=$OFFLINE_DB_PASS dq_db < dq_db.$TODAY.sql
   mysql --password=$OFFLINE_DB_PASS dq_db < offline_db.$TODAY.sql
   rm /*.sql
 EOF
 
 echo "=== Building indexes and derived tables"
-docker cp ~/visual_dq/dybvdq/extra/indexes.sql dybvdq-mysql:/
-docker exec -i dybvdq-mysql /bin/bash <<-EOF
+docker cp ~/visual_dq/dybvdq/extra/indexes.sql dybvdq-dq_db:/
+docker exec -i dybvdq-dq_db /bin/bash <<-EOF
   mysql --password=$OFFLINE_DB_PASS dq_db < indexes.sql
   rm /*.sql
 EOF
