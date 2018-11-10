@@ -36,19 +36,21 @@ EOF
 
 echo "=== Shutting down backend and DB"
 docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
-docker stop dybdq-back
+docker stop dybvdq-back
 docker stop dybvdq-dq_db
-docker rm dybvdq-dq_db
+# docker rm dybvdq-dq_db
 
 echo "=== Wiping old DB"
 rm -rf ~/visual_dq/dq_db/data/*
 
 echo "=== Starting fresh DB"
-cd ~/visual_dq/dq_db
-docker-compose up -d
+# cd ~/visual_dq/dybvdq/deploy
+# docker-compose up -d dybvdq-dq_db
+docker start dybvdq-dq_db
 
 echo "=== Loading data into DB"
-docker cp ~/visual_dq/dq_db/dumps/{dq_db,offline_db}.$TODAY.sql dybvdq-dq_db:/
+docker cp ~/visual_dq/dq_db/dumps/dq_db.$TODAY.sql dybvdq-dq_db:/
+docker cp ~/visual_dq/dq_db/dumps/offline_db.$TODAY.sql dybvdq-dq_db:/
 docker exec -i dybvdq-dq_db /bin/bash <<-EOF
   mysql --password=$OFFLINE_DB_PASS dq_db < dq_db.$TODAY.sql
   mysql --password=$OFFLINE_DB_PASS dq_db < offline_db.$TODAY.sql
