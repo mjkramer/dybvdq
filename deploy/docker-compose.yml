@@ -28,7 +28,7 @@ services:
     depends_on:
       - back
     volumes:
-      - ../front/build:/webroot:ro
+      - ../front/build:/webroot
       - ../nginx/nginx.conf:/nginx.conf.template:ro
       - ../nginx/start_nginx.sh:/start_nginx.sh:ro
       - ${DYBVDQ_SSL_CERT}:/certs/fullchain.pem:ro
