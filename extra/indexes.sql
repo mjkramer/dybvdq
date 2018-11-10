@@ -23,4 +23,4 @@ SELECT DISTINCT runno, fileno, sitemask, streamtype
    (sitemask = 2 AND detectorid <= 2 AND runno >=      26694)           OR -- 29064
 
    (sitemask = 4 AND detectorid <= 3 AND runno BETWEEN 21221 AND 26693) OR
-   (sitemask = 4 AND detectorid <= 4 AND runno >=      26694);
+   (sitemask = 4 AND detectorid <= 4 AND runno >=      26694));
