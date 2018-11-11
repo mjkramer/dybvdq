@@ -107,16 +107,19 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     }
   }
 
-  public getTaggedIds(): DataLocation[] {
-    const locFor = (idx: number) => ({
-      fileno: this.data!.filenos[idx],
-      runno: this.data!.runnos[idx],
+  public getTaggings(): [Array<[number, number]>, string[]] {
+    const taggings: Array<[number, number]> = [];
+    const comments: string[] = [];
+
+    this.colors.forEach((color, idx) => {
+      if (color === COLOR_BAD) {
+        const loc = [this.data!.filenos[idx], this.data!.runnos[idx]];
+        taggings.push(loc as [number, number]);
+        comments.push(this.comments[idx]);
+      }
     });
 
-    return this.colors.reduce(
-      (result, color, idx) => [...result, ...(color === COLOR_BAD ? [locFor(idx)] : [])],
-      [] as DataLocation[],
-    );
+    return [taggings, comments];
   }
 
   public render() {
@@ -205,7 +208,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private reportTaggingsListener = () => {
     const { hall, session } = this.props;
-    const taggedIds = this.getTaggedIds();
+    const [taggings, comments] = this.getTaggings();
     const { runnos, filenos } = this.data!;
     const bounds = {
       maxFile: filenos[filenos.length - 1],
@@ -213,7 +216,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       minFile: filenos[0],
       minRun: runnos[0],
     };
-    api.reportTaggings(hall, session, taggedIds, bounds);
+    api.reportTaggings(hall, session, bounds, taggings, comments);
   };
 
   private tagSelectionListener = () => {

@@ -42,14 +42,16 @@ type Bounds = {
 export const reportTaggings = (
   hall: Hall,
   session: string,
-  taggedIds: DataLocation[],
   bounds: Bounds,
+  taggings: Array<[number, number]>,
+  comments: string[],
 ) => {
   axios.post('/report_taggings', {
     bounds,
+    comments,
     hall,
     session,
-    taggedIds,
+    taggings,
   });
 };
 
