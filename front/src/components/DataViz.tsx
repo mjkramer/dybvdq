@@ -145,7 +145,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.doSelect([], null);
   }
 
-  private bindPlotEvents(el: Plotly.PlotlyHTMLElement) {
+  private bindPlotEvents(iDiv: number) {
+    const el: Plotly.PlotlyHTMLElement = this.divs[iDiv];
     el.removeAllListeners();
 
     el.on('plotly_click', (eventData: Plotly.PlotMouseEvent) => {
@@ -264,7 +265,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         };
 
         Plotly.react(this.divs[iDiv], [trace], layout, defaultPlotlyConfig);
-        this.bindPlotEvents(this.divs[iDiv]);
+        this.bindPlotEvents(iDiv);
         this.plotMetadata.push({ name, detName });
       });
     });
@@ -309,10 +310,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       return;
     }
 
-    this.divs.forEach(el => {
+    this.divs.forEach((el, iDiv) => {
       if (el !== src) {
         el.removeAllListeners();
-        el.on('plotly_relayout', () => this.bindPlotEvents(el));
+        el.on('plotly_relayout', () => this.bindPlotEvents(iDiv));
         Plotly.relayout(el, update);
       }
     });
