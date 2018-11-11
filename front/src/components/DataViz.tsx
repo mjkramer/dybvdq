@@ -1,4 +1,4 @@
-import { isNil, some, zip } from 'lodash';
+import { isNil, mean, some, zip } from 'lodash';
 import Plotly from 'plotly.js';
 import React from 'react';
 import { connect, DispatchProp, MapStateToProps } from 'react-redux';
@@ -49,6 +49,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private divs: Plotly.PlotlyHTMLElement[] = [];
   private plotMetadata: PlotMetadata[] = [];
+  private plotAverages: number[] = [];
   private iDivOfSelection: number | null = null;
   // XXX replace me with a key
   private lastLoc: DataLocation & { hall: string; session: string } = {
@@ -262,6 +263,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
 
     this.plotMetadata = [];
+    this.plotAverages = [];
     let iDiv = -1;
 
     Object.entries(metrics).forEach(([name, metricSet]) => {
@@ -288,6 +290,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         Plotly.react(this.divs[iDiv], [trace], layout, defaultPlotlyConfig);
         this.bindPlotEvents(iDiv);
         this.plotMetadata.push({ name, detName });
+        this.plotAverages.push(mean(ys));
       });
     });
 
