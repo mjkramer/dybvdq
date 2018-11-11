@@ -217,9 +217,11 @@ def get_taggings(hall, session, lowbound, highbound):
                    (runno={low_runno} AND fileno>={low_fileno}) OR
                    (runno={high_runno} AND fileno<={high_fileno})'''
 
-    query = f'''SELECT runno, fileno FROM tagging
+    query = f'''SELECT runno, fileno, comment FROM tagging
                 WHERE ({pred}) AND hall={hall} AND session="{session}"
                 ORDER BY runno, fileno'''
 
     result = app_exec(query).fetchall()
-    return set(map(tuple, result))
+    taggings = [(runno, fileno) for runno, fileno, _ in result]
+    comments = [comment for _, _, comment in result]
+    return taggings, comments
