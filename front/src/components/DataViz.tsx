@@ -48,9 +48,12 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private comments: { [idx: number]: string } = [];
 
   private divs: Plotly.PlotlyHTMLElement[] = [];
+  private iDivOfSelection: number | null = null;
+
   private plotMetadata: PlotMetadata[] = [];
   private plotAverages: number[] = [];
-  private iDivOfSelection: number | null = null;
+  private plotValues: number[][] = [];
+
   // XXX replace me with a key
   private lastLoc: DataLocation & { hall: string; session: string } = {
     fileno: 0,
@@ -264,6 +267,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.plotMetadata = [];
     this.plotAverages = [];
+    this.plotValues = [];
     let iDiv = -1;
 
     Object.entries(metrics).forEach(([name, metricSet]) => {
@@ -291,6 +295,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         this.bindPlotEvents(iDiv);
         this.plotMetadata.push({ name, detName });
         this.plotAverages.push(mean(ys));
+        this.plotValues.push(ys);
       });
     });
 
@@ -303,9 +308,18 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
   };
 
+  private stripUnit(plotName: string): string {
+    const words = plotName.split(' ');
+    const last = words[words.length - 1];
+    const shouldStrip = last.startsWith('(') && last.endsWith(')');
+    const newWords = shouldStrip ? words.slice(0, -1) : words;
+    return newWords.join(' ');
+  }
+
   private togglePoints(idxs: number[], iDiv: number) {
     const { name, detName } = this.plotMetadata[iDiv];
-    const comment = `${detName} ${name}`;
+    const nameWithoutUnit = this.stripUnit(name);
+    const baseComment = `${detName} ${nameWithoutUnit}`;
 
     const untoggle = !some(idxs, i => this.colors[i] === COLOR_GOOD);
 
@@ -314,6 +328,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         this.colors[i] = COLOR_GOOD;
         delete this.comments[i];
       } else {
+        const high = this.plotValues[iDiv][i] > this.plotAverages[iDiv];
+        const comment = `${baseComment}: ${high ? 'HIGH' : 'LOW'}`;
         this.colors[i] = COLOR_BAD;
         this.comments[i] = comment;
       }
