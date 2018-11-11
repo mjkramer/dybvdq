@@ -24,7 +24,7 @@ services:
     container_name: dybvdq-nginx
     build:
       context: ..
-      dockerfile: ../nginx/Dockerfile
+      dockerfile: nginx/Dockerfile
     depends_on:
       - back
     volumes:
