@@ -298,9 +298,19 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   };
 
   private togglePoints(idxs: number[], iDiv: number) {
-    const allTagged = !some(idxs, i => this.colors[i] === COLOR_GOOD);
+    const { name, detName } = this.plotMetadata[iDiv];
+    const comment = `${detName} ${name}`;
+
+    const untoggle = !some(idxs, i => this.colors[i] === COLOR_GOOD);
+
     idxs.forEach(i => {
-      this.colors[i] = allTagged ? COLOR_GOOD : COLOR_BAD;
+      if (untoggle) {
+        this.colors[i] = COLOR_GOOD;
+        delete this.comments[i];
+      } else {
+        this.colors[i] = COLOR_BAD;
+        this.comments[i] = comment;
+      }
     });
 
     this.divs.forEach(div => {
