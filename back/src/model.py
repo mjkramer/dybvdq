@@ -18,6 +18,7 @@ class Tagging(db.Model):
     runno = db.Column(db.Integer, primary_key=True)
     fileno = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=func.now())
+    comment = db.Column(db.Text, default='')
 
 class DqDetectorNew(db.Model):
     __tablename__ = 'DqDetectorNew'
