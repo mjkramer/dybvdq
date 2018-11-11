@@ -22,7 +22,9 @@ services:
       - PYTHONUNBUFFERED
   nginx:
     container_name: dybvdq-nginx
-    build: ../nginx/
+    build:
+      context: ..
+      dockerfile: ../nginx/Dockerfile
     depends_on:
       - back
     volumes:
