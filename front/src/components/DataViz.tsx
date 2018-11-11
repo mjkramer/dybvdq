@@ -46,6 +46,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
   private plotMetadata: PlotMetadata[] = [];
+  private iDivOfSelection: number | null = null;
   // XXX replace me with a key
   private lastLoc: DataLocation & { hall: string; session: string } = {
     fileno: 0,
@@ -141,7 +142,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public tagSelection() {
-    this.togglePoints(this.selection);
+    this.togglePoints(this.selection, this.iDivOfSelection!);
     this.doSelect([], null);
   }
 
@@ -152,20 +153,20 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     el.on('plotly_click', (eventData: Plotly.PlotMouseEvent) => {
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
-        this.togglePoints(pointNumbers);
+        this.togglePoints(pointNumbers, iDiv);
       }
     });
 
     el.on('plotly_selected', (eventData: Plotly.PlotSelectionEvent) => {
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
-        this.doSelect(pointNumbers, el);
+        this.doSelect(pointNumbers, iDiv);
         this.props.dispatch(didSelect());
       }
     });
 
     el.on('plotly_deselect', () => {
-      this.doSelect([], el);
+      this.doSelect([], iDiv);
       this.props.dispatch(didDeselect());
     });
 
@@ -176,20 +177,22 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
   }
 
-  private doSelect(pointNumbers: number[], src: Plotly.PlotlyHTMLElement | null) {
+  private doSelect(pointNumbers: number[], iDiv: number | null) {
     this.selection = pointNumbers;
     const allPoints = () => [...Array(this.colors.length).keys()];
     const update = {
       selectedpoints: [pointNumbers.length ? pointNumbers : allPoints()],
     };
 
-    this.divs.forEach(el => {
-      if (el !== src) {
+    this.divs.forEach((el, i) => {
+      if (i !== iDiv) {
         // No need to clear/rebind event handlers because setting
         // selectedpoints does not trigger plotly_selected/deselect
         Plotly.restyle(el, update, [0]);
       }
     });
+
+    this.iDivOfSelection = pointNumbers.length ? iDiv : null;
   }
 
   private async fetchData() {
@@ -279,7 +282,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
   };
 
-  private togglePoints(idxs: number[]) {
+  private togglePoints(idxs: number[], iDiv: number) {
     const allTagged = !some(idxs, i => this.colors[i] === COLOR_GOOD);
     idxs.forEach(i => {
       this.colors[i] = allTagged ? COLOR_GOOD : COLOR_BAD;
