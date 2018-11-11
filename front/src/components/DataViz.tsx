@@ -171,13 +171,11 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
         this.doSelect(pointNumbers, iDiv);
-        this.props.dispatch(didSelect());
       }
     });
 
     el.on('plotly_deselect', () => {
       this.doSelect([], iDiv);
-      this.props.dispatch(didDeselect());
     });
 
     el.on('plotly_relayout', (eventData: Plotly.PlotRelayoutEvent) => {
@@ -203,6 +201,9 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
 
     this.iDivOfSelection = pointNumbers.length ? iDiv : null;
+
+    const action = pointNumbers.length ? didSelect() : didDeselect();
+    this.props.dispatch(action);
   }
 
   private async fetchData() {
