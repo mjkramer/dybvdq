@@ -10,7 +10,8 @@ import { plzReportTaggings, plzTagSelection } from '../events';
 import { AppState, DataLocation, Field, FileData, Hall } from '../model';
 import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '../util';
 
-const COLORS = ['blue', 'orange'];
+const COLOR_GOOD = 'blue';
+const COLOR_BAD = 'orange';
 
 const numGraphs = (data: FileData): number => {
   const metricSets = Object.values(data.metrics);
@@ -103,7 +104,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
 
     return this.colors.reduce(
-      (result, color, idx) => [...result, ...(color === COLORS[1] ? [locFor(idx)] : [])],
+      (result, color, idx) => [...result, ...(color === COLOR_BAD ? [locFor(idx)] : [])],
       [] as DataLocation[],
     );
   }
@@ -226,7 +227,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       hall !== this.lastLoc.hall ||
       session !== this.lastLoc.session
     ) {
-      this.colors = tagStatus.map(s => (s ? COLORS[1] : COLORS[0]));
+      this.colors = tagStatus.map(s => (s ? COLOR_BAD : COLOR_GOOD));
     }
 
     const xs = [...Array(npoints).keys()];
@@ -270,9 +271,9 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   };
 
   private togglePoints(idxs: number[]) {
-    const allTagged = !some(idxs, i => this.colors[i] === COLORS[0]);
+    const allTagged = !some(idxs, i => this.colors[i] === COLOR_GOOD);
     idxs.forEach(i => {
-      this.colors[i] = allTagged ? COLORS[0] : COLORS[1];
+      this.colors[i] = allTagged ? COLOR_GOOD : COLOR_BAD;
     });
 
     this.divs.forEach(div => {
