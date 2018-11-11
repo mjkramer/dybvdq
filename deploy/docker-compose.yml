@@ -24,13 +24,10 @@ services:
       - PYTHONUNBUFFERED
   nginx:
     container_name: dybvdq-nginx
-    image: nginx
+    build: ../nginx/
     depends_on:
       - back
     volumes:
-      - ../front/build:/webroot:rw
-      - ../nginx/nginx.conf:/nginx.conf.template:ro
-      - ../nginx/start_nginx.sh:/start_nginx.sh:ro
       - ${DYBVDQ_SSL_CERT}:/certs/fullchain.pem:ro
       - ${DYBVDQ_SSL_KEY}:/certs/privkey.pem:ro
     ports:
@@ -40,7 +37,6 @@ services:
       - DYBVDQ_HOSTNAME
       - DYBVDQ_AUTH_USER
       - DYBVDQ_AUTH_PASS_HASH
-    command: /bin/bash /start_nginx.sh
   app_db:
     container_name: dybvdq-app_db
     image: mariadb
