@@ -43,7 +43,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private data: FileData | null = null;
   private cachedData: FileData | null = null;
-  private colors: string[] = [];
+
+  private colors: string[] = []; // size: total # of files
+  private comments: { [idx: number]: string } = [];
+
   private divs: Plotly.PlotlyHTMLElement[] = [];
   private plotMetadata: PlotMetadata[] = [];
   private iDivOfSelection: number | null = null;
@@ -218,7 +221,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   };
 
   private plot(data: FileData) {
-    const { runnos, filenos, metrics, tagStatus } = data;
+    const { runnos, filenos, metrics, taggings, comments } = data;
     if (Object.keys(metrics).length === 0) {
       return;
     }
@@ -237,7 +240,19 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       hall !== this.lastLoc.hall ||
       session !== this.lastLoc.session
     ) {
-      this.colors = tagStatus.map(s => (s ? COLOR_BAD : COLOR_GOOD));
+      const locToIndex: { [loc: string]: number } = {};
+      zip(runnos, filenos).forEach(([r, f], i) => {
+        locToIndex[`${r}_${f}`] = i;
+      });
+
+      this.colors = Array(npoints).fill(COLOR_GOOD);
+      this.comments = {};
+
+      zip(taggings, comments).forEach(([[r, f], c]) => {
+        const idx = locToIndex[`${r}_${f}`];
+        this.colors[idx] = COLOR_BAD;
+        this.comments[idx] = c!;
+      });
     }
 
     const xs = [...Array(npoints).keys()];

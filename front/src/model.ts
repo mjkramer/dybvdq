@@ -47,5 +47,6 @@ export type FileData = {
   runnos: number[];
   filenos: number[];
   metrics: { [fieldName: string]: MetricSet };
-  tagStatus: boolean[];
+  taggings: Array<[number, number]>;
+  comments: string[];
 };
