@@ -2,13 +2,13 @@
 
 # pylint: disable=missing-docstring,too-few-public-methods,no-member
 
-from mypy_extensions import TypedDict
+# from mypy_extensions import TypedDict
 from sqlalchemy.sql.expression import func
 
 from .db import db
 
-DataLocation = TypedDict('DataLocation',  # pylint: disable=invalid-name
-                         {'runno': int, 'fileno': int})
+# DataLocation = TypedDict('DataLocation',  # pylint: disable=invalid-name
+#                          {'runno': int, 'fileno': int})
 
 class Tagging(db.Model):
     __bind_key__ = 'app_db'

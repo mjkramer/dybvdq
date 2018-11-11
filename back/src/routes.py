@@ -14,7 +14,7 @@ from .db import db
 from .util import EndOfDataException, app_exec
 from .util import back_the_hell_up, clip_location, loc_pred
 from .util import get_data, get_latest, get_shifted, get_taggings
-from .model import Tagging, DataLocation, all_fields
+from .model import Tagging, all_fields
 
 @app.route('/report_taggings', methods=['POST'])
 def report_taggings():
@@ -26,18 +26,12 @@ def report_taggings():
     hall = int(payload['hall'][2])
     session: str = payload['session']
     bounds: Dict = payload['bounds']
-    tagged_ids: List[DataLocation] = payload['taggedIds']
+    taggings: List[List[int]] = payload['taggings']  # [[run, file]]
+    comments: List[str] = payload['comments']
 
     # HACK
-    if not tagged_ids:
+    if not taggings:
         return 'Thanks!'
-
-    # for tagged in payload['taggedIds']:
-    #     tagging = Tagging(fileno=tagged['fileno'],
-    #                       runno=tagged['runno'],
-    #                       hall=hall,
-    #                       session=session)
-    #     db.session.add(tagging)  # pylint: disable=no-member
 
     loc = loc_pred(bounds['minRun'], bounds['minFile'],
                    bounds['maxRun'], bounds['maxFile'])
@@ -46,9 +40,20 @@ def report_taggings():
                     AND ({loc})'''
     app_exec(del_query, commit=True)
 
-    update = [{'hall': hall, 'session': session, **tagging}
-              for tagging in tagged_ids]
-    stmt = mysql.insert(Tagging).values(update) # \
+    # need to test whether this is actually slower than "manual" bulk insert
+    # for tagging, comment in zip(taggings, comments):
+    #     tagging = Tagging(fileno=tagging[0],
+    #                       runno=tagging[1],
+    #                       hall=hall,
+    #                       session=session,
+    #                       comment=comment)
+    #     db.session.add(tagging)  # pylint: disable=no-member
+
+    inserts = [{'hall': hall, 'session': session,
+                'runno': tagging[0], 'fileno': tagging[1],
+                'comment': comment}
+               for tagging, comment in zip(taggings, comments)]
+    stmt = mysql.insert(Tagging).values(inserts) # \
                 # .on_duplicate_key_update(hall=Tagging.hall)
     db.get_engine(bind='app_db').execute(stmt)
     # db.session.commit()         # pylint: disable=no-member
