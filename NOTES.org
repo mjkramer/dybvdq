@@ -17,7 +17,10 @@
 - [X] Clean up app_db if necessary
 - [X] Set env vars
 - [X] docker-compose rm; docker-compose up --build
-
+* New deployment checklist
+- [ ] git pull
+- [ ] docker-compose up
+- [ ] scripts/db_update.sh if necessary
 * Frontend update
 ssh root@dybdq.work "rm -rf visual_dq/dybvdq/front/build" && scp -r build root@dybdq.work:visual_dq/dybvdq/front && ssh root@dybdq.work "docker restart dybvdq-nginx"
 * Collaborative debugging
