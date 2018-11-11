@@ -6,8 +6,6 @@ services:
     depends_on:
       - app_db
       - dq_db
-    volumes:
-      - ../back:/app
     environment:
       - DYBVDQ_DQ_DB_HOST
       - DYBVDQ_DQ_DB_PORT
