@@ -72,7 +72,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     // If data is fresh (i.e. cachedData is null), we must check that we've got
     // the right number of divs, and if we don't, then we must re-render the
     // component, in which case we'll cache the data for the next
-    // componentDidUpdate
+    // componentDidUpdate. Once we implement our own DOM manipulation, we can
+    // get rid of this caching logic.
     if (!this.cachedData) {
       const { numDivs } = this.state;
       const newNumDivs = numGraphs(data);
