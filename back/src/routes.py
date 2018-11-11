@@ -85,11 +85,8 @@ def realdata():                 # pylint: disable=too-many-locals
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])
-    taggings = set(get_taggings(hall, session, lowbound, highbound))
-
-    result['tagStatus'] = [(runno, fileno) in taggings
-                           for (runno, fileno)
-                           in zip(result['runnos'], result['filenos'])]
+    result['taggings'], result['comments'] = \
+        get_taggings(hall, session, lowbound, highbound)
 
     return jsonify(result)
 
