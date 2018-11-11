@@ -309,10 +309,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   };
 
   private stripUnit(plotName: string): string {
-    const words = plotName.split(' ');
+    // blah blah blah, Hz -> blah blah blah
+    const words = plotName.split(' ').slice(0, -1);
     const last = words[words.length - 1];
-    const shouldStrip = last.startsWith('(') && last.endsWith(')');
-    const newWords = shouldStrip ? words.slice(0, -1) : words;
+    const newWords = [...words.slice(0, -1), last.slice(0, -1)];
     return newWords.join(' ');
   }
 
