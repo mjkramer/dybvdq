@@ -117,7 +117,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.colors.forEach((color, idx) => {
       if (color === COLOR_BAD) {
-        const loc = [this.data!.filenos[idx], this.data!.runnos[idx]];
+        const loc = [this.data!.runnos[idx], this.data!.filenos[idx]];
         taggings.push(loc as [number, number]);
         comments.push(this.comments[idx]);
       }
