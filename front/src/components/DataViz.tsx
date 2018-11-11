@@ -18,6 +18,11 @@ const numGraphs = (data: FileData): number => {
   return metricSets.reduce((sum, metricSet) => sum + Object.keys(metricSet).length, 0);
 };
 
+type PlotMetadata = {
+  name: string;
+  detName: string;
+};
+
 type StateProps = {
   runno: number;
   fileno: number;
@@ -40,6 +45,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private cachedData: FileData | null = null;
   private colors: string[] = [];
   private divs: Plotly.PlotlyHTMLElement[] = [];
+  private plotMetadata: PlotMetadata[] = [];
   // XXX replace me with a key
   private lastLoc: DataLocation & { hall: string; session: string } = {
     fileno: 0,
@@ -233,6 +239,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const xs = [...Array(npoints).keys()];
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
 
+    this.plotMetadata = [];
     let iDiv = -1;
 
     Object.entries(metrics).forEach(([name, metricSet]) => {
@@ -258,6 +265,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
         Plotly.react(this.divs[iDiv], [trace], layout, defaultPlotlyConfig);
         this.bindPlotEvents(this.divs[iDiv]);
+        this.plotMetadata.push({ name, detName });
       });
     });
 
