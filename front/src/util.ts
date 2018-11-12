@@ -18,6 +18,7 @@ export const num = (x: number) => (x.toString() as any) as number;
 
 declare module 'plotly.js' {
   interface PlotlyHTMLElement {
+    data: object;
     removeAllListeners(): void;
   }
   interface PlotData {
