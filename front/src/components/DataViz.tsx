@@ -73,11 +73,11 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public async componentDidUpdate() {
-    this.divs.forEach(el => Plotly.purge(el));
-
-    // We're doing a NEXT/PREV/SetHall; wait for new runno/fileno
     const { runno, fileno, fields } = this.props;
 
+    this.clearPlots();
+
+    // We're doing a NEXT/PREV/SetHall; wait for new runno/fileno
     if (Object.keys(fields).length === 0 || runno === -1 || fileno === -1) {
       return;
     }
@@ -183,6 +183,33 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         this.zoomOthers(eventData, el);
       }
     });
+  }
+
+  private clearPlots() {
+    const { runno, fileno, hall, session } = this.props;
+
+    // Are we "sliding" or changing sessions? if so, don't remove axes
+    if (
+      (hall === this.lastLoc.hall &&
+        runno !== this.lastLoc.runno &&
+        fileno !== this.lastLoc.fileno) ||
+      session !== this.lastLoc.session
+    ) {
+      this.divs.forEach(el => {
+        // If plot is already empty, deleteTraces will throw
+        try {
+          Plotly.deleteTraces(el, 0);
+        } catch {
+          return;
+        }
+      });
+    } else {
+      // We're changing fields/hall. Purge the plots, since the labels will
+      // change. Once we have deterministic ordering of fields, we can perhaps
+      // leave the axes in place for a change of fields, and only do a full
+      // purge when changing halls.
+      this.divs.forEach(el => Plotly.purge(el));
+    }
   }
 
   private doSelect(pointNumbers: number[], iDiv: number | null) {
