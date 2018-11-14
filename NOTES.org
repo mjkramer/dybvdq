@@ -5,7 +5,9 @@
 - Add custom comments
 - Add water pools
 - Add purple points
-- Build frontend in container
+- Fill missing entries in dq_db; re-check to 68000
+- Consider tagging runs with blocked triggers
+- Remove -1 when calculating plotAverage
 
 * Deployment checklist [9/9]
 - [X] Build/upload frontend
