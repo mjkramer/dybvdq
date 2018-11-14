@@ -51,7 +51,7 @@ def ndet(hall, runno):
 
 def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
     """For when user clicks NEXT or PREV. Also abused by back_the_hell_up and
-    get_shifted, which uses skipfirst=False """
+    get_data, which uses skipfirst=False """
     assert page_shift in [1, -1]
     oper, order = ('>', 'ASC') if page_shift == 1 else ('<', 'DESC')
     nrows = NROWS if skipfirst else NROWS-1
