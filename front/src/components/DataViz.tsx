@@ -13,6 +13,8 @@ import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '..
 const COLOR_GOOD = 'blue';
 const COLOR_BAD = 'orange';
 
+const XAXIS_MARGIN = 10;
+
 const numGraphs = (data: FileData): number => {
   const metricSets = Object.values(data.metrics);
   return metricSets.reduce((sum, metricSet) => sum + Object.keys(metricSet).length, 0);
@@ -321,6 +323,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
         const layout: Partial<Plotly.Layout> = {
           title: `${name} (${detName})`,
+          // NB: 'xaxis.range' doesn't work here
+          xaxis: { range: [-XAXIS_MARGIN, npoints + XAXIS_MARGIN] },
           ...defaultPlotlyLayout,
         };
 
@@ -376,23 +380,25 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     eventData: Plotly.PlotRelayoutEvent,
     src: Plotly.PlotlyHTMLElement,
   ) {
-    const update: Partial<Plotly.Layout> | null = (() => {
-      if (eventData['xaxis.range[0]'] !== undefined) {
-        const range = [eventData['xaxis.range[0]'], eventData['xaxis.range[1]']];
-        return { 'xaxis.range': range as [Plotly.Datum, Plotly.Datum] };
-      } else if (eventData['xaxis.autorange']) {
-        return { 'xaxis.autorange': true };
-      } else {
-        return null;
-      }
-    })();
+    const zoomingToBox = eventData['xaxis.range[0]'] !== undefined;
+    const unzooming = eventData['xaxis.autorange'];
 
-    if (update === null) {
+    let range: [number, number];
+    if (zoomingToBox) {
+      range = [eventData['xaxis.range[0]'], eventData['xaxis.range[1]']];
+    } else if (unzooming) {
+      const npoints = this.data!.runnos.length;
+      range = [-XAXIS_MARGIN, npoints + XAXIS_MARGIN];
+    } else {
       return;
     }
 
+    const update: Partial<Plotly.Layout> = {
+      xaxis: { range },
+    };
+
     this.divs.forEach((el, iDiv) => {
-      if (el !== src) {
+      if (unzooming || (zoomingToBox && el !== src)) {
         el.removeAllListeners();
         el.on('plotly_relayout', () => this.bindPlotEvents(iDiv));
         Plotly.relayout(el, update);
