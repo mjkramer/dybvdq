@@ -323,6 +323,8 @@ https://github.com/Microsoft/TypeScript/pull/27028
 ** Plotly
 *** autosize, width etc.
 - https://github.com/plotly/react-plotly.js/issues/76
+** Versioning
+- https://www.npmjs.com/package/genversion
 * Potentially useful libraries
 - immer
 - reselect
