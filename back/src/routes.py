@@ -12,7 +12,7 @@ from . import app
 from .constants import NROWS
 from .db import db
 from .util import EndOfDataException, app_exec
-from .util import back_the_hell_up, clip_location, loc_pred
+from .util import back_the_hell_up, clip_location, is_sane, loc_pred
 from .util import get_data, get_latest, get_shifted, get_taggings
 from .model import Tagging, all_fields
 
@@ -86,7 +86,7 @@ def realdata():                 # pylint: disable=too-many-locals
         runno, fileno = back_the_hell_up(runno, hall)
         result = get_data(runno, fileno, hall, fields)
 
-    assert len(result['runnos']) == NROWS
+    assert is_sane(result)
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])

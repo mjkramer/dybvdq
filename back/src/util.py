@@ -49,6 +49,16 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
+def is_sane(data):
+    "Verifies absence of gaps in the data we're sending to the client"
+    if not (len(data['runnos']) == len(data['filenos']) == NROWS):  # pylint: disable=superfluous-parens
+        return False
+    for metname in data['metrics'].keys():
+        for detname in data['metrics'][metname].keys():
+            if len(data['metrics'][metname][detname]['values']) != NROWS:
+                return False
+    return True
+
 def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
     """For when user clicks NEXT or PREV. Also abused by back_the_hell_up and
     get_data, which uses skipfirst=False """
@@ -195,7 +205,7 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
                 if val is not None:  # in case we got a NULL in this row
                     val /= norm
 
-            if fileno == last_fileno and det == last_det:
+            if runno == last_runno and fileno == last_fileno and det == last_det:
                 vals[-1] = val
             else:
                 vals.append(val)
