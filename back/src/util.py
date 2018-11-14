@@ -114,7 +114,7 @@ def clip_location(runno, fileno, hall):
 def loc_pred(runno, fileno, end_runno, end_fileno):
     "Generate SQL to select the specified file range (inclusive)"
     if end_runno == runno:
-        return f'(runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}-1))'
+        return f'(runno = {runno} AND (fileno BETWEEN {fileno} AND {end_fileno}))'
     return f'''((runno BETWEEN {runno}+1 AND {end_runno}-1) OR
                 (runno = {runno} AND fileno >= {fileno}) OR
                 (runno = {end_runno} AND fileno <= {end_fileno}))'''
