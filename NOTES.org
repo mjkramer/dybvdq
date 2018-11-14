@@ -19,7 +19,7 @@
 - [X] docker-compose rm; docker-compose up --build
 * New deployment checklist
 - [ ] git pull
-- [ ] docker-compose up -d [--build --force-recreate]
+- [ ] docker-compose up -d [--build --force-recreate] [nginx]
 - [ ] scripts/db_update.sh if necessary
 * Frontend update
 ssh root@dybdq.work "rm -rf visual_dq/dybvdq/front/build" && scp -r build root@dybdq.work:visual_dq/dybvdq/front && ssh root@dybdq.work "docker restart dybvdq-nginx"
