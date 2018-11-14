@@ -73,7 +73,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public async componentDidUpdate() {
-    const { runno, fileno, fields } = this.props;
+    const { runno, fileno, fields, hall, session } = this.props;
 
     this.clearPlots();
 
@@ -103,6 +103,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.cachedData = null;
     this.data = data;
     this.plot(data);
+
+    this.lastLoc = { fileno, hall, runno, session }; // must happen at the end!
   }
 
   public componentWillUnmount() {
@@ -210,6 +212,11 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       // purge when changing halls.
       this.divs.forEach(el => Plotly.purge(el));
     }
+
+    // clear the convenience data we use elsewhere
+    this.plotMetadata = [];
+    this.plotAverages = [];
+    this.plotValues = [];
   }
 
   private doSelect(pointNumbers: number[], iDiv: number | null) {
@@ -255,18 +262,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.tagSelection();
   };
 
-  private plot(data: FileData) {
-    const { runnos, filenos, metrics, taggings, comments } = data;
-    if (Object.keys(metrics).length === 0) {
-      return;
-    }
-
-    const firstMetric = metrics[Object.keys(metrics)[0]];
-    const detectors = Object.keys(firstMetric);
-    detectors.sort();
-
-    const npoints = firstMetric[detectors[0]].values.length;
-
+  private updateTaggings(data: FileData) {
     // Don't reset taggings if we've only changed the fields
     const { fileno, hall, runno, session } = this.props;
     if (
@@ -275,11 +271,13 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       hall !== this.lastLoc.hall ||
       session !== this.lastLoc.session
     ) {
+      const { runnos, filenos, taggings, comments } = data;
       const locToIndex: { [loc: string]: number } = {};
       zip(runnos, filenos).forEach(([r, f], i) => {
         locToIndex[`${r}_${f}`] = i;
       });
 
+      const npoints = runnos.length;
       this.colors = Array(npoints).fill(COLOR_GOOD);
       this.comments = {};
 
@@ -289,13 +287,20 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         this.comments[idx] = c!;
       });
     }
+  }
 
+  private plot(data: FileData) {
+    const { runnos, filenos, metrics } = data;
+    if (Object.keys(metrics).length === 0) {
+      return;
+    }
+
+    this.updateTaggings(data);
+
+    const npoints = runnos.length;
     const xs = [...Array(npoints).keys()];
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
 
-    this.plotMetadata = [];
-    this.plotAverages = [];
-    this.plotValues = [];
     let iDiv = -1;
 
     Object.entries(metrics).forEach(([name, metricSet]) => {
@@ -326,8 +331,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         this.plotValues.push(ys);
       });
     });
-
-    this.lastLoc = { fileno, hall, runno, session };
   }
 
   private resizeHandler = () => {
