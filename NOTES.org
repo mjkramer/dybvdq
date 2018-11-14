@@ -320,6 +320,9 @@ https://github.com/Microsoft/TypeScript/pull/27028
 * Misc notes
 ** SSH hopping
 - https://serverfault.com/questions/337274/ssh-from-a-through-b-to-c-using-private-key-on-b (google: ssh use key from jump)
+** Plotly
+*** autosize, width etc.
+- https://github.com/plotly/react-plotly.js/issues/76
 * Potentially useful libraries
 - immer
 - reselect
