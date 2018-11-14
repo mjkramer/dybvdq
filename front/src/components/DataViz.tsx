@@ -247,6 +247,13 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     return api.fetchData({ runno, fileno, hall, session, fields });
   }
 
+  private plotWidth() {
+    // HACK: Plotly (at least this version) is inconsistent in autosizing the
+    // plots. It should use the body's width, minus 30px (15px padding each
+    // side). Sometimes it does, but sometimes it only subtracts 15px! WTF!
+    return document.getElementsByTagName('body')[0].clientWidth - 30;
+  }
+
   private reportTaggingsListener = () => {
     const { hall, session } = this.props;
     const [taggings, comments] = this.getTaggings();
@@ -302,6 +309,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const npoints = runnos.length;
     const xs = [...Array(npoints).keys()];
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
+    const width = this.plotWidth();
 
     let iDiv = -1;
 
@@ -324,6 +332,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         const layout: Partial<Plotly.Layout> = {
           title: `${name} (${detName})`,
           // NB: 'xaxis.range' doesn't work here
+          width,
           xaxis: { range: [-XAXIS_MARGIN, npoints + XAXIS_MARGIN] },
           ...defaultPlotlyLayout,
         };
@@ -337,9 +346,18 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     });
   }
 
+  private relayout(iDiv: number, update: Partial<Plotly.Layout>) {
+    const el = this.divs[iDiv];
+    el.removeAllListeners();
+    el.on('plotly_relayout', () => this.bindPlotEvents(iDiv));
+    Plotly.relayout(el, update);
+  }
+
   private resizeHandler = () => {
-    this.divs.forEach(el => {
-      Plotly.Plots.resize(el);
+    const width = this.plotWidth();
+    this.divs.forEach((_, iDiv) => {
+      this.relayout(iDiv, { width });
+      // Plotly.Plots.resize(el);
     });
   };
 
@@ -399,9 +417,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.divs.forEach((el, iDiv) => {
       if (unzooming || (zoomingToBox && el !== src)) {
-        el.removeAllListeners();
-        el.on('plotly_relayout', () => this.bindPlotEvents(iDiv));
-        Plotly.relayout(el, update);
+        this.relayout(iDiv, update);
       }
     });
   }

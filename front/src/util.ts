@@ -33,6 +33,7 @@ export const defaultPlotlyTrace: Plotly.Data = {
 };
 
 export const defaultPlotlyLayout: Partial<Plotly.Layout> = {
+  // autosize: true,
   height: 200,
   hovermode: 'closest',
   margin: { b: 30, l: 50, r: 50, t: 30 },
