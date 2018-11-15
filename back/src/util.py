@@ -49,6 +49,16 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
+def dets_for(hall, runno):
+    "Active detectors in each hall"
+    if hall == 1:
+        return [2] if runno >= START_7AD else [1, 2]
+    if hall == 2:
+        return [1, 2] if runno >= START_8AD else [1]
+    if hall == 3:
+        return [1, 2, 3, 4] if runno >= START_8AD else [1, 2, 3]
+    raise "Invalid hall"
+
 def assert_is_sane(data):
     "Verifies absence of gaps in the data we're sending to the client"
     assert len(data['runnos']) == len(data['filenos']) == NROWS
@@ -149,7 +159,11 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
     the specified one"""
     result = {'runnos': [],
               'filenos': [],
-              'metrics': {field_desc(field): {} for field in fields}}
+              'metrics': {
+                  field_desc(field): {
+                      f'AD{det}': {'values': []}
+                      for det in dets_for(hall, start_runno)}
+                  for field in fields}}
 
     focus = focus_sql(hall, start_runno)
 
@@ -177,7 +191,10 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
 
     rows = dq_exec(query).fetchall()
 
-    last_runno, last_fileno, last_det = None, None, None
+    def val_arr(field, det):
+        return result['metrics'][field_desc(field)][f'AD{det}']['values']
+
+    last_runno, last_fileno = None, None
 
     for row in rows:
         runno, fileno, det = row[:3]
@@ -185,12 +202,11 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
         if runno != last_runno or fileno != last_fileno:
             result['runnos'].append(runno)
             result['filenos'].append(fileno)
-
-        detkey = f'AD{det}'
+            for each_det in dets_for(hall, start_runno):
+                for field in fields:
+                    val_arr(field, each_det).append(-2)  # default value
 
         for i, field in enumerate(fields):
-            detdict = result['metrics'][field_desc(field)].setdefault(detkey, {})
-            vals = detdict.setdefault('values', [])
             val = row[i+3]
 
             if field.endswith('counts'):
@@ -202,13 +218,11 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
                 if val is not None:  # in case we got a NULL in this row
                     val /= norm
 
-            if runno == last_runno and fileno == last_fileno and det == last_det:
-                vals[-1] = val
-            else:
-                vals.append(val)
+            if val is None:
+                val = -3
 
-        last_runno, last_fileno, last_det = runno, fileno, det
-
+            val_arr(field, det)[-1] = val  # replace default/older
+        last_runno, last_fileno = runno, fileno
     return result
 
 def get_taggings(hall, session, lowbound, highbound):
