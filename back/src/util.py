@@ -49,15 +49,12 @@ def ndet(hall, runno):
         return 4 if runno >= START_8AD else 3
     raise "Invalid hall"
 
-def is_sane(data):
+def assert_is_sane(data):
     "Verifies absence of gaps in the data we're sending to the client"
-    if not (len(data['runnos']) == len(data['filenos']) == NROWS):  # pylint: disable=superfluous-parens
-        return False
+    assert len(data['runnos']) == len(data['filenos']) == NROWS
     for metname in data['metrics'].keys():
         for detname in data['metrics'][metname].keys():
-            if len(data['metrics'][metname][detname]['values']) != NROWS:
-                return False
-    return True
+            assert len(data['metrics'][metname][detname]['values']) == NROWS
 
 def get_shifted(runno, fileno, hall, page_shift, skipfirst=True):
     """For when user clicks NEXT or PREV. Also abused by back_the_hell_up and
