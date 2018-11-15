@@ -3,6 +3,8 @@
 # Pull relevant tables from official DQ/offline DB, load into local DB, rebuild indices
 # Should be run as a cron job
 
+shopt -s expand_aliases
+
 while getopts "n" o; do
     case "$o" in
         # in case we need to perform any manual steps (e.g. rebuild backend image)
@@ -19,13 +21,13 @@ TODAY=$(date +%Y%m%d)
 
 echo "=== Clearing old dumps"
 cd ~/visual_dq/dq_db/dumps
-find . -name '*.sql' -mtime +60 | xargs -r -t rm
+find . -name '*.sql' -mtime +14 | xargs -r -t rm
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
 ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   cd matt/mysqldumps
   echo "=== (dybdq.ihep) Clearing old dumps"
-  find . -name '*.sql' -mtime +30 | xargs -r -t rm
+  find . -name '*.sql' -mtime +5 | xargs -r -t rm
   echo "=== (dybdq.ihep) Dumping dq_db"
   mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
   echo "=== (dybdq.ihep) Dumping offline_db"
