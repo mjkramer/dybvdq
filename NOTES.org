@@ -325,6 +325,10 @@ https://github.com/Microsoft/TypeScript/pull/27028
 - https://github.com/plotly/react-plotly.js/issues/76
 ** Versioning
 - https://www.npmjs.com/package/genversion
+- https://coderwall.com/p/mk18zq/automatic-git-version-tagging-for-npm-modules
+- https://stackoverflow.com/questions/9153571/is-there-a-way-to-get-version-from-package-json-in-nodejs-code
+- Google: npm include git tag
+- Google: npm get version from package.json
 * Potentially useful libraries
 - immer
 - reselect
