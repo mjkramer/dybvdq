@@ -171,16 +171,22 @@ https://www.digitalocean.com/community/tutorials/how-to-set-up-master-slave-repl
 (google certbot wildcard)
 https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https
 https://levelup.gitconnected.com/how-to-get-certbot-wildcard-certificates-3d25618a81e0
-My steps:
+
+Initial setup:
 
 git clone https://github.com/certbot/certbot
 cd certbot
 ./certbot-auto --os-packages-only
 ./tools/venv.sh # only needed once; _creates_ venv
 source venv/bin/activate
-./certbot-auto -d dybdq.work -d *.dybdq.work --manual --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory certonly
 
-[[https://certbot.eff.org/docs/using.html#nginx][Renewal]] (every 90 days; due 2018/12/4): Either,
+Creation/renewal (no need to source virtualenv):
+
+./certbot-auto -d dybdq.work -d *.dybdq.work --manual --preferred-challenges dns-01 --server https://acme-v02.api.letsencrypt.org/directory certonly
+cd ~/visual_dq/dybvdq/deploy
+docker-compose up -d --force-recreate --no-deps nginx   # add --build it if doesn't work
+
+[[https://certbot.eff.org/docs/using.html#nginx][Renewal]] (every 90 days; due 2019/3/8): Either,
 - Manually repeat the above
 - Write a --manual-auth-hook to repeat the above
 - Switch to the "standalone" certbot plugin (no more wildcard)
