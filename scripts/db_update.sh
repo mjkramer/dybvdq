@@ -36,21 +36,23 @@ ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@dybdq.work:visual_dq/dq_db/dumps
 EOF
 
-echo "=== Shutting down backend and DB"
-docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
-docker stop dybvdq-back
-docker stop dybvdq-dq_db
-docker rm dybvdq-dq_db
+echo "=== Starting temporary DB"
+TMP_DATA=~/visual_dq/dq_db/data.tmp
+rm -rf $TMP_DATA
+mkdir $TMP_DATA
+docker run -d --name=dybvdq-dq_db-tmp \
+       -e MYSQL_ROOT_PASSWORD=$OFFLINE_DB_PASS \
+       -e MYSQL_DATABASE=dq_db \
+       -v $TMP_DATA:/var/lib/mysql \
+       mariadb
 
-echo "=== Wiping old DB"
-rm -rf ~/visual_dq/dq_db/data/*
+echo "=== Waiting for temporary DB"
+# sleep 60
+while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+    sleep 1
+done
 
-echo "=== Starting fresh DB"
-cd ~/visual_dq/dybvdq/deploy
-docker-compose up -d dq_db
-sleep 60                 # use code from P17B to determine when DB comes online?
-
-alias dq_mysql="docker exec -i dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS dq_db"
+alias dq_mysql="docker exec -i dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS dq_db"
 
 echo "=== Loading data into DB"
 dq_mysql < ~/visual_dq/dq_db/dumps/dq_db.$TODAY.sql
@@ -58,6 +60,36 @@ dq_mysql < ~/visual_dq/dq_db/dumps/offline_db.$TODAY.sql
 
 echo "=== Building indexes and derived tables"
 dq_mysql < ~/visual_dq/dybvdq/extra/indexes.sql
+
+echo "=== Shutting down temporary DB and deleting container"
+docker stop dybvdq-dq_db-tmp
+docker rm dybvdq-dq_db-tmp
+
+echo "=== Shutting down backend and DB at $(date)"
+docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
+if [ -z "$dontstartback" ]; then
+    docker exec dybvdq-back touch /DONTSLEEP.HACK # see start_back.sh
+fi
+docker stop dybvdq-back
+docker stop dybvdq-dq_db
+
+echo "=== Removing old DB container"
+docker rm dybvdq-dq_db
+
+echo "=== Rotating DB data directories"
+rm -rf ~/visual_dq/dq_db/data.bak
+mv ~/visual_dq/dq_db/data ~/visual_dq/dq_db/data.bak
+mv $TMP_DATA ~/visual_dq/dq_db/data
+
+echo "=== Starting new DB"
+cd ~/visual_dq/dybvdq/deploy
+docker-compose up -d dq_db
+
+echo "=== Waiting for new DB"
+# sleep 60                 # use code from P17B to determine when DB comes online?
+while ! docker exec dybvdq-dq_db mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+    sleep 1
+done
 
 if [ -z "$dontstartback" ]; then
     echo "=== Starting backend"

@@ -10,4 +10,4 @@ WORKDIR /app
 
 RUN set -ex && pipenv install --deploy --system
 
-CMD sleep 10 && gunicorn -w 4 -k gevent -b :5000 src:app
+CMD ./start_back.sh
