@@ -48,7 +48,14 @@ docker run -d --name=dybvdq-dq_db-tmp \
 
 echo "=== Waiting for temporary DB"
 # sleep 60
-while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+
+# can't use mysqladmin ping as it will return 0 if server is up but we can't log
+# in (e.g. because it's still being initialized)
+
+# while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+
+while ! docker exec dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS -e "SELECT 1" >/dev/null 2>&1; do
+    echo wait
     sleep 1
 done
 
@@ -70,7 +77,7 @@ docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
 if [ -z "$dontstartback" ]; then
     docker exec dybvdq-back touch /DONTSLEEP.HACK # see start_back.sh
 fi
-docker stop dybvdq-back
+docker stop dybvdq-back         # "stop" takes a good 10 seconds, but "kill" could be dangerous
 docker stop dybvdq-dq_db
 
 echo "=== Removing old DB container"
@@ -87,7 +94,9 @@ docker-compose up -d dq_db
 
 echo "=== Waiting for new DB"
 # sleep 60                 # use code from P17B to determine when DB comes online?
-while ! docker exec dybvdq-dq_db mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+# while ! docker exec dybvdq-dq_db mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+while ! docker exec dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS -e "SELECT 1" >/dev/null 2>&1; do
+    echo wait
     sleep 1
 done
 
