@@ -73,7 +73,7 @@ docker stop dybvdq-dq_db-tmp
 docker rm dybvdq-dq_db-tmp
 
 echo "=== Shutting down backend and DB at $(date)"
-docker cp ~/visual_dq/dybvdq/extra/maintenance.html dybvdq-nginx:/webroot
+curl -X PUT -d go2sleep https://dybdq.work/suspend/$DYBVDQ_SUSPEND_CODE
 if [ -z "$dontstartback" ]; then
     docker exec dybvdq-back touch /DONTSLEEP.HACK # see start_back.sh
 fi
@@ -103,7 +103,7 @@ done
 if [ -z "$dontstartback" ]; then
     echo "=== Starting backend"
     docker start dybvdq-back
-    docker exec dybvdq-nginx rm /webroot/maintenance.html
+    curl -X PUT -d wake_up https://dybdq.work/suspend/$DYBVDQ_SUSPEND_CODE
 fi
 
 echo "=== Update completed at $(date)"
