@@ -15,7 +15,7 @@ RUN npm install && npm run build
 FROM alpine:3.8
 
 # Need gettext for envsubst
-RUN apk add --no-cache bash gettext nginx-mod-http-lua
+RUN apk add --no-cache bash gettext nginx-mod-http-lua curl
 
 # Forward request and error logs to Docker log collector
 RUN ln -sf /dev/stdout /var/log/nginx/access.log
@@ -24,5 +24,6 @@ RUN ln -sf /dev/stderr /var/log/nginx/error.log
 COPY --from=builder /front/build /webroot
 COPY nginx/nginx.conf /nginx.conf.template
 COPY nginx/start_nginx.sh /start_nginx.sh
+COPY nginx/wait_backend.sh /wait_backend.sh
 
 CMD /bin/bash /start_nginx.sh

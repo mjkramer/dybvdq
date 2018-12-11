@@ -103,6 +103,7 @@ done
 if [ -z "$dontstartback" ]; then
     echo "=== Starting backend"
     docker start dybvdq-back
+    docker exec dybvdq-nginx /wait_backend.sh
     curl -X PUT -d wake_up https://dybdq.work/suspend/$DYBVDQ_SUSPEND_CODE
 fi
 
