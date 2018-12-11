@@ -21,13 +21,13 @@ TODAY=$(date +%Y%m%d)
 
 echo "=== Clearing old dumps"
 cd ~/visual_dq/dq_db/dumps
-find . -name '*.sql' -mtime +14 | xargs -r -t rm 2>&1
+find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
 ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   cd matt/mysqldumps
   echo "=== (dybdq.ihep) Clearing old dumps"
-  find . -name '*.sql' -mtime +5 | xargs -r -t rm 2>&1
+  find . -name '*.sql' -mtime +3 | xargs -r -t rm 2>&1
   echo "=== (dybdq.ihep) Dumping dq_db"
   mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
   echo "=== (dybdq.ihep) Dumping offline_db"
