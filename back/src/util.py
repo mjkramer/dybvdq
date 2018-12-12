@@ -109,6 +109,13 @@ def get_latest(hall):
                 ORDER BY runno DESC, fileno DESC LIMIT 1'''
     return dq_exec(query).fetchone()
 
+def all_latest():
+    "Latest runs for all halls"
+    annotate = lambda runno, fileno: {'runno': runno, 'fileno': fileno}
+    obj = {f'EH{hall}': annotate(*get_latest(hall))
+           for hall in [1, 2, 3]}
+    return obj
+
 def back_the_hell_up(runno, hall):
     """If we're near a boundary (either 7/8AD switch or end of data), back up so we
     get exactly NROWS points"""
@@ -167,7 +174,9 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
               'metrics': {
                   field_desc(field): wp_dict() if field.endswith('WP') else ad_dict()
                   for field in fields
-              }}
+              },
+              # Send 'latest' so that frontend knows whether to disable END button
+              'latest': all_latest()}
 
     focus = focus_sql(hall, start_runno)
 

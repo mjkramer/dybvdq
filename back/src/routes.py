@@ -13,7 +13,7 @@ from .constants import NROWS
 from .db import db
 from .util import EndOfDataException, app_exec
 from .util import assert_is_sane, back_the_hell_up, clip_location, loc_pred
-from .util import get_data, get_latest, get_shifted, get_taggings
+from .util import get_data, all_latest, get_shifted, get_taggings
 from .model import Tagging, all_fields
 
 @app.route('/report_taggings', methods=['POST'])
@@ -103,7 +103,4 @@ def list_fields():
 @app.route('/latest')
 def latest():
     "Get the latest runs. Used in frontend initialization"
-    annotate = lambda runno, fileno: {'runno': runno, 'fileno': fileno}
-    obj = {f'EH{hall}': annotate(*get_latest(hall))
-           for hall in [1, 2, 3]}
-    return jsonify(obj)
+    return jsonify(all_latest())
