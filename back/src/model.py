@@ -42,6 +42,11 @@ def all_fields():
         'tl208energy': 'Tl208 energy',
         'plikecounts': 'Prompt-like rate',
         'nlikecounts': 'Delayed-like rate',
+
+        'triggercountsWP': 'WP trigger rate',
+        'flashercountsWP': 'WP flasher rate',
+        'muoncountsWP': 'WP muon rate',
+        'blocktrigcountsWP': 'WP blocked trigger rate',
     }
 
 db.create_all()

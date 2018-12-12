@@ -27,16 +27,16 @@ def focus_sql(hall, runno):
     "Restrict detector and runno as appropriate"
     if hall == 1:
         if runno >= START_7AD:
-            return f'detectorid = 2'
-        return f'detectorid <= 2 and runno < {START_7AD}'
+            return f'detectorid IN (2, 5, 6)'
+        return f'detectorid IN (1, 2, 5, 6) and runno < {START_7AD}'
     if hall == 2:
         if runno >= START_8AD:
-            return f'detectorid <= 2'
-        return f'detectorid <= 1 and runno < {START_8AD}'
+            return f'detectorid IN (1, 2, 5, 6)'
+        return f'detectorid IN (1, 5, 6) and runno < {START_8AD}'
     if hall == 3:
         if runno >= START_8AD:
-            return f'detectorid <= 4'
-        return f'detectorid <= 3 and runno < {START_8AD}'
+            return f'detectorid <= 6'
+        return f'detectorid IN (1, 2, 5, 6) and runno < {START_8AD}'
     raise "Invalid hall"
 
 def ndet(hall, runno):
@@ -154,16 +154,20 @@ def get_livetimes(runno, fileno, end_runno, end_fileno, hall):
                  SELECT runno, fileno, integralruntime FROM ranked WHERE rn = 1'''
     return dq_exec(query)
 
-def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-many-locals
+def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-many-locals,too-many-branches
     """Pull the data requested, starting from first VALID run/file after/including
     the specified one"""
+    val_dict = lambda: {'values': []}
+    ad_dict = lambda: {f'AD{det}': val_dict()
+                       for det in dets_for(hall, start_runno)}
+    wp_dict = lambda: {f'WP{det}': val_dict()
+                       for det in ['I', 'O']}
     result = {'runnos': [],
               'filenos': [],
               'metrics': {
-                  field_desc(field): {
-                      f'AD{det}': {'values': []}
-                      for det in dets_for(hall, start_runno)}
-                  for field in fields}}
+                  field_desc(field): wp_dict() if field.endswith('WP') else ad_dict()
+                  for field in fields
+              }}
 
     focus = focus_sql(hall, start_runno)
 
@@ -172,14 +176,18 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
     except EndOfDataException:  # return empty result, let caller decide how to proceed
         return result
 
-    if any(f.endswith('counts') for f in fields):
+    ad_fields = [f for f in fields if not f.endswith('WP')]
+    wp_fields = [f[:-2] for f in fields if f.endswith('WP')]
+    uniq_fields = list(set(ad_fields + wp_fields))
+
+    if any(f.endswith('counts') for f in uniq_fields):
         livetimes = {}
         rows = get_livetimes(start_runno, start_fileno, end_runno, end_fileno, hall)
         for runno, fileno, lt_ms in rows:
             livetimes[(runno, fileno)] = lt_ms / 1000
         default_livetime = sum(livetimes.values()) / len(livetimes)
 
-    field_sel = f', {",".join(fields)}' if fields else ''
+    field_sel = f', {",".join(uniq_fields)}' if uniq_fields else ''
     loc = loc_pred(start_runno, start_fileno, end_runno, end_fileno)
 
     query = f'''SELECT runno, fileno, detectorid {field_sel}
@@ -192,7 +200,12 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
     rows = dq_exec(query).fetchall()
 
     def val_arr(field, det):
-        return result['metrics'][field_desc(field)][f'AD{det}']['values']
+        if det >= 5:
+            prefix = 'WP'
+            det = 'O' if det == 6 else 'I'
+        else:
+            prefix = 'AD'
+        return result['metrics'][field_desc(field)][f'{prefix}{det}']['values']
 
     last_runno, last_fileno = None, None
 
@@ -202,11 +215,14 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
         if runno != last_runno or fileno != last_fileno:
             result['runnos'].append(runno)
             result['filenos'].append(fileno)
-            for each_det in dets_for(hall, start_runno):
-                for field in fields:
-                    val_arr(field, each_det).append(-2)  # default value
+            for each_ad in dets_for(hall, start_runno):
+                for field in ad_fields:
+                    val_arr(field, each_ad).append(-2)  # default value
+            for each_wp in [5, 6]:
+                for field in wp_fields:
+                    val_arr(field+'WP', each_wp).append(-2)
 
-        for i, field in enumerate(fields):
+        for i, field in enumerate(uniq_fields):
             val = row[i+3]
 
             if field.endswith('counts'):
@@ -221,7 +237,14 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
             if val is None:
                 val = -3
 
-            val_arr(field, det)[-1] = val  # replace default/older
+            # NOTE If the loc_pred queries are slow due to IN, consider
+            # simplifying those and instead doing a more precise AD check
+            # here
+            if field in ad_fields and det <= 4:
+                val_arr(field, det)[-1] = val  # replace default/older
+            elif field in wp_fields and det >= 5:
+                val_arr(field+'WP', det)[-1] = val
+
         last_runno, last_fileno = runno, fileno
     return result
 
