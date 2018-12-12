@@ -1,4 +1,4 @@
-import { Latest } from './api';
+import { Latest } from './model';
 
 export let LATEST: Latest | null = null;
 

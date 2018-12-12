@@ -82,28 +82,26 @@ export const initLocation = () => async (
   getState: () => AppState,
 ) => {
   const latest = await api.latest();
-  globals.setLatest(latest);
 
   const hall: Hall = 'EH1';
   const { runno, fileno } = latest[hall];
   const { session, fields } = getState();
   const params = { runno, fileno, hall, session, fields };
   fetchWithNewLocation(params, dispatch);
-  // dispatch(setLocation(runno, fileno, hall));
 };
 
 const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispatch) => {
   const data = await api.fetchData(params, { saveToCache: true });
 
-  const newRun = data.runnos[0];
-  const newFile = data.filenos[0];
-  // const latestRun = data.latest.runno;
-  // const latestFile = data.latest.fileno;
+  const { runnos, filenos, latest } = data;
+  const newRun = runnos[0];
+  const newFile = filenos[0];
   const { hall } = params;
   const atEnd =
-    data.runnos[data.runnos.length - 1] === globals.LATEST![hall].runno &&
-    data.filenos[data.filenos.length - 1] === globals.LATEST![hall].fileno;
+    runnos[runnos.length - 1] === latest[hall].runno &&
+    filenos[filenos.length - 1] === latest[hall].fileno;
 
+  globals.setLatest(latest);
   dispatch(updateEndStatus(atEnd));
-  dispatch(setLocation(newRun, newFile, params.hall));
+  dispatch(setLocation(newRun, newFile, hall));
 };

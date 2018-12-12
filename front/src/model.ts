@@ -20,6 +20,8 @@ export type Field = {
 
 export type Hall = 'EH1' | 'EH2' | 'EH3';
 
+export type Latest = { [hall in Hall]: DataLocation };
+
 export const initialState: AppState = {
   atEnd: false,
   // XXX should get initial field from backend
@@ -49,4 +51,5 @@ export type FileData = {
   metrics: { [fieldName: string]: MetricSet };
   taggings: Array<[number, number]>;
   comments: string[];
+  latest: Latest;
 };
