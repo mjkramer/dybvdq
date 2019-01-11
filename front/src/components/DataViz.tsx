@@ -299,7 +299,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   private plot(data: FileData) {
-    const { runnos, filenos, metrics } = data;
+    const { runnos, filenos, xs, metrics } = data;
     if (Object.keys(metrics).length === 0) {
       return;
     }
@@ -307,7 +307,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.updateTaggings(data);
 
     const npoints = runnos.length;
-    const xs = [...Array(npoints).keys()];
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
     const width = this.plotWidth();
 

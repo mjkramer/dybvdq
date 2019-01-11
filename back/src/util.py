@@ -161,6 +161,25 @@ def get_livetimes(runno, fileno, end_runno, end_fileno, hall):
                  SELECT runno, fileno, integralruntime FROM ranked WHERE rn = 1'''
     return dq_exec(query)
 
+def scale_xs(runnos, filenos, start, end, hall):
+    """Return the x-coordinates of the points. Creates visual gaps corresponding to
+    gaps in the DQ DB, by comparing the DQ records to the full list of daq files."""
+    srun, sfile = start
+    erun, efile = end
+    loc = loc_pred(srun, sfile, erun, efile)
+
+    query = f'''SELECT runno, fileno FROM DaqRawDataFileInfo
+                WHERE stream = 'EH{hall}-Merged' AND streamtype = 'Physics'
+                AND ({loc})'''
+
+    rows = dq_exec(query).fetchall()
+
+    positions = {(runno, fileno): i
+                 for i, (runno, fileno) in enumerate(rows)}
+
+    return [positions[(r, f)] / len(rows) * NROWS
+            for r, f in zip(runnos, filenos)]
+
 def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-many-locals,too-many-branches
     """Pull the data requested, starting from first VALID run/file after/including
     the specified one"""
@@ -255,6 +274,11 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
                 val_arr(field+'WP', det)[-1] = val
 
         last_runno, last_fileno = runno, fileno
+
+    result['xs'] = scale_xs(result['runnos'], result['filenos'],
+                            (start_runno, start_fileno),
+                            (end_runno, end_fileno), hall)
+
     return result
 
 def get_taggings(hall, session, lowbound, highbound):

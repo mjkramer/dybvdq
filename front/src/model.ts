@@ -48,6 +48,7 @@ export type MetricSet = { [det in DetKey]: Metric };
 export type FileData = {
   runnos: number[];
   filenos: number[];
+  xs: number[];
   metrics: { [fieldName: string]: MetricSet };
   taggings: Array<[number, number]>;
   comments: string[];
