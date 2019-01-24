@@ -54,10 +54,13 @@ echo "=== Waiting for temporary DB"
 
 # while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
 
-while ! docker exec dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS -e "SELECT 1" >/dev/null 2>&1; do
+while ! docker exec dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS -e "SELECT 1"; do
     echo wait
     sleep 1
 done
+
+# seems like the above sometimes "succeeds" before DB is ready?
+sleep 5
 
 alias dq_mysql="docker exec -i dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS dq_db"
 
@@ -95,7 +98,7 @@ docker-compose up -d dq_db
 echo "=== Waiting for new DB"
 # sleep 60                 # use code from P17B to determine when DB comes online?
 # while ! docker exec dybvdq-dq_db mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
-while ! docker exec dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS -e "SELECT 1" >/dev/null 2>&1; do
+while ! docker exec dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS -e "SELECT 1"; do
     echo wait
     sleep 1
 done
@@ -108,3 +111,5 @@ if [ -z "$dontstartback" ]; then
 fi
 
 echo "=== Update completed at $(date)"
+
+echo
