@@ -15,7 +15,7 @@ shift $((OPTIND-1))
 
 echo "Update started at $(date)"
 
-. ~/.db_secrets
+. ~/.db_secrets                 # DQ_DB_PASS, OFFLINE_DB_PASS, DYBVDQ_SUSPEND_CODE
 
 TODAY=$(date +%Y%m%d)
 
