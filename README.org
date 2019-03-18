@@ -1,0 +1,19 @@
+* Daya Bay Visual Data Quality
+
+This is the code that powers https://dybdq.work. Python/Flask + TypeScript/React/Redux.
+
+** Quickstart
+
+- Make sure Docker is installed.
+- Get an SSL cert from Let's Encrypt.
+- Clone this repository.
+- Copy =deploy/env.template= to =deploy/.env= and customize it.
+- Run =scripts/db_bootstrap.sh= to bootstrap the DQ DB. Make sure you have the necessary SSH keys for IHEP.
+- Launch the app:
+
+#+begin_src bash
+cd deploy
+docker-compose up -d
+#+end_src
+
+- (Optional) Add =scripts/db_update.sh= to your crontab (e.g. nightly) for automatic updates for the DQ DB.
