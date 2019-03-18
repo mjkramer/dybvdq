@@ -15,12 +15,16 @@ shift $((OPTIND-1))
 
 echo "Update started at $(date)"
 
-. ~/.db_secrets                 # DQ_DB_PASS, OFFLINE_DB_PASS, DYBVDQ_SUSPEND_CODE
+BASEDIR=$(cd $(dirname $BASH_SOURCE)/.. && pwd) # root of dybvdq repo
+
+. $BASEDIR/deploy/.env
 
 TODAY=$(date +%Y%m%d)
 
 echo "=== Clearing old dumps"
-cd ~/visual_dq/dq_db/dumps
+DUMPDIR=$DYBVDQ_DQ_DB_DATA/../dumps
+mkdir -p $DUMPDIR
+cd $DUMPDIR
 find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
@@ -29,19 +33,19 @@ ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   echo "=== (dybdq.ihep) Clearing old dumps"
   find . -name '*.sql' -mtime +3 | xargs -r -t rm 2>&1
   echo "=== (dybdq.ihep) Dumping dq_db"
-  mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
+  mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DYBVDQ_IHEP_DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
   echo "=== (dybdq.ihep) Dumping offline_db"
-  mysqldump -h dybdb1.ihep.ac.cn -u dayabay --password=$OFFLINE_DB_PASS --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > offline_db.$TODAY.sql
+  mysqldump -h dybdb1.ihep.ac.cn -u dayabay --password=$DYBVDQ_IHEP_OFFLINE_DB_PASS --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > offline_db.$TODAY.sql
   echo "=== (dybdq.ihep) Copying to dybdq.work"
-  scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@dybdq.work:visual_dq/dq_db/dumps
+  scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@$DYBVDQ_HOSTNAME:$DUMPDIR
 EOF
 
 echo "=== Starting temporary DB"
-TMP_DATA=~/visual_dq/dq_db/data.tmp
+TMP_DATA=$DYBVDQ_DQ_DB_DATA/../data.tmp
 rm -rf $TMP_DATA
 mkdir $TMP_DATA
 docker run -d --name=dybvdq-dq_db-tmp \
-       -e MYSQL_ROOT_PASSWORD=$OFFLINE_DB_PASS \
+       -e MYSQL_ROOT_PASSWORD=$DYBVDQ_DQ_DB_PASS \
        -e MYSQL_DATABASE=dq_db \
        -v $TMP_DATA:/var/lib/mysql \
        mariadb
@@ -52,9 +56,9 @@ echo "=== Waiting for temporary DB"
 # can't use mysqladmin ping as it will return 0 if server is up but we can't log
 # in (e.g. because it's still being initialized)
 
-# while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
+# while ! docker exec dybvdq-dq_db-tmp mysqladmin ping --password=$DYBVDQ_DQ_DB_PASS >/dev/null 2>&1; do
 
-while ! docker exec dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS -e "SELECT 1"; do
+while ! docker exec dybvdq-dq_db-tmp mysql --password=$DYBVDQ_DQ_DB_PASS -e "SELECT 1"; do
     echo wait
     sleep 1
 done
@@ -62,21 +66,21 @@ done
 # seems like the above sometimes "succeeds" before DB is ready?
 sleep 5
 
-alias dq_mysql="docker exec -i dybvdq-dq_db-tmp mysql --password=$OFFLINE_DB_PASS dq_db"
+alias dq_mysql="docker exec -i dybvdq-dq_db-tmp mysql --password=$DYBVDQ_DQ_DB_PASS dq_db"
 
 echo "=== Loading data into DB"
-dq_mysql < ~/visual_dq/dq_db/dumps/dq_db.$TODAY.sql
-dq_mysql < ~/visual_dq/dq_db/dumps/offline_db.$TODAY.sql
+dq_mysql < $DUMPDIR/dq_db.$TODAY.sql
+dq_mysql < $DUMPDIR/offline_db.$TODAY.sql
 
 echo "=== Building indexes and derived tables"
-dq_mysql < ~/visual_dq/dybvdq/extra/indexes.sql
+dq_mysql < $BASEDIR/extra/indexes.sql
 
 echo "=== Shutting down temporary DB and deleting container"
 docker stop dybvdq-dq_db-tmp
 docker rm dybvdq-dq_db-tmp
 
 echo "=== Shutting down backend and DB at $(date)"
-curl -X PUT -d go2sleep https://dybdq.work/suspend/$DYBVDQ_SUSPEND_CODE
+curl -X PUT -d go2sleep https://$DYBVDQ_HOSTNAME/suspend/$DYBVDQ_SUSPEND_CODE
 if [ -z "$dontstartback" ]; then
     docker exec dybvdq-back touch /DONTSLEEP.HACK # see start_back.sh
 fi
@@ -87,18 +91,19 @@ echo "=== Removing old DB container"
 docker rm dybvdq-dq_db
 
 echo "=== Rotating DB data directories"
-rm -rf ~/visual_dq/dq_db/data.bak
-mv ~/visual_dq/dq_db/data ~/visual_dq/dq_db/data.bak
-mv $TMP_DATA ~/visual_dq/dq_db/data
+BAK_DATA=$DYBVDQ_DQ_DB_DATA/../data.bak
+rm -rf $BAK_DATA
+mv $DYBVDQ_DQ_DB_DATA $BAK_DATA
+mv $TMP_DATA $DYBVDQ_DQ_DB_DATA
 
 echo "=== Starting new DB"
-cd ~/visual_dq/dybvdq/deploy
+cd $BASEDIR/deploy
 docker-compose up -d dq_db
 
 echo "=== Waiting for new DB"
 # sleep 60                 # use code from P17B to determine when DB comes online?
-# while ! docker exec dybvdq-dq_db mysqladmin ping --password=$OFFLINE_DB_PASS >/dev/null 2>&1; do
-while ! docker exec dybvdq-dq_db mysql --password=$OFFLINE_DB_PASS -e "SELECT 1"; do
+# while ! docker exec dybvdq-dq_db mysqladmin ping --password=$DYBVDQ_DQ_DB_PASS >/dev/null 2>&1; do
+while ! docker exec dybvdq-dq_db mysql --password=$DYBVDQ_DQ_DB_PASS -e "SELECT 1"; do
     echo wait
     sleep 1
 done
