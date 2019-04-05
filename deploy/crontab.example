@@ -1,0 +1,5 @@
+# m h  dom mon dow   command
+
+0 20 * * * /root/visual_dq/dybvdq/scripts/db_update.sh >> /root/visual_dq/logs/db_update.log 2>&1
+0 10 * * 1,4 ssh mkramer@lxslc6.ihep.ac.cn /bin/bash -l < /root/visual_dq/dybvdq/scripts/fill_gaps/fill_gaps.sh >> /root/visual_dq/logs/fill_gaps.log 2>&1
+0 12 * * 1,4 /root/visual_dq/emailer-venv/bin/python3 /root/visual_dq/dybvdq/scripts/fill_gaps/emailer.py GMAILUSER GMAILPASS bob@aol.com alice@hotmail.com >> /root/visual_dq/logs/emailer.log 2>&1
