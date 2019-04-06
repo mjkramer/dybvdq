@@ -22,7 +22,7 @@ BASEDIR=$(cd $(dirname $BASH_SOURCE)/.. && pwd) # root of dybvdq repo
 TODAY=$(date +%Y%m%d)
 
 echo "=== Clearing old dumps"
-DUMPDIR=$DYBVDQ_DQ_DB_DATA/../dumps
+DUMPDIR=$(dirname $DYBVDQ_DQ_DB_DATA)/dumps
 mkdir -p $DUMPDIR
 cd $DUMPDIR
 find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
@@ -41,7 +41,7 @@ ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
 EOF
 
 echo "=== Starting temporary DB"
-TMP_DATA=$DYBVDQ_DQ_DB_DATA/../data.tmp
+TMP_DATA=$(dirname $DYBVDQ_DQ_DB_DATA)/data.tmp
 rm -rf $TMP_DATA
 mkdir $TMP_DATA
 docker run -d --name=dybvdq-dq_db-tmp \
@@ -91,7 +91,7 @@ echo "=== Removing old DB container"
 docker rm dybvdq-dq_db
 
 echo "=== Rotating DB data directories"
-BAK_DATA=$DYBVDQ_DQ_DB_DATA/../data.bak
+BAK_DATA=$(dirname $DYBVDQ_DQ_DB_DATA)/data.bak
 rm -rf $BAK_DATA
 mv $DYBVDQ_DQ_DB_DATA $BAK_DATA
 mv $TMP_DATA $DYBVDQ_DQ_DB_DATA
