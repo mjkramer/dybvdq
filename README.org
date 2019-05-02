@@ -16,4 +16,10 @@ cd deploy
 docker-compose up -d
 #+end_src
 
-- (Optional) Add =scripts/db_update.sh= to your crontab (e.g. nightly) for automatic updates for the DQ DB.
+** Cron jobs
+
+See =deploy/crontab.example=. The following jobs are available:
+
+- =scripts/db_update.sh=: Rebuilds the DQ DB from a fresh dump of the IHEP master. Recommend running once a day. Does not cause any true downtime, just a period of a few dozen seconds during which incoming browser requests are buffered while DB switchover takes place.
+- =scripts/fill_gaps/fill_gaps.sh=: Resubmits failed DQ-filling jobs on the IHEP cluster in order to eliminate gaps in the DB. Recommend running twice a week.
+- =scripts/fill_gaps/emailer.py=: Sends you an email containing a list of missing KUP/ODM files. These correspond to gaps in the DQ DB which cannot be filled until the ODM file is generated. This list should be forwarded to someone at IHEP (e.g. Miao), who can resubmit the KUP jobs. Recommend scheduling a couple hours after =fill_gaps.sh=.
