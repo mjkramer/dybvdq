@@ -29,17 +29,40 @@ find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
 # Use ServerAliveInterval/ServerAliveCountMax if SSH connection times out
-ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
-  cd matt/mysqldumps
-  echo "=== (dybdq.ihep) Clearing old dumps"
-  find . -name '*.sql' -mtime +3 | xargs -r -t rm 2>&1
-  echo "=== (dybdq.ihep) Dumping dq_db"
-  mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DYBVDQ_IHEP_DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
-  echo "=== (dybdq.ihep) Dumping offline_db"
-  mysqldump -h dybdb1.ihep.ac.cn -u dayabay --password=$DYBVDQ_IHEP_OFFLINE_DB_PASS --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > offline_db.$TODAY.sql
-  echo "=== (dybdq.ihep) Copying to dybdq.work"
-  scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@$DYBVDQ_HOSTNAME:$DUMPDIR
+attempts=0
+while true; do
+  ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
+    cd matt/mysqldumps
+    echo "=== (dybdq.ihep) Clearing old dumps"
+    find . -name '*.sql' -mtime +3 | xargs -r -t rm 2>&1
+    echo "=== (dybdq.ihep) Dumping dq_db"
+    mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DYBVDQ_IHEP_DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql
+    echo "=== (dybdq.ihep) Dumping offline_db"
+    mysqldump -h dybdb1.ihep.ac.cn -u dayabay --password=$DYBVDQ_IHEP_OFFLINE_DB_PASS --opt --skip-lock-tables offline_db DaqRawDataFileInfo DaqRawDataFileInfoVld > offline_db.$TODAY.sql
+    echo "=== (dybdq.ihep) Copying to dybdq.work"
+    scp dq_db.$TODAY.sql offline_db.$TODAY.sql root@$DYBVDQ_HOSTNAME:$DUMPDIR
+
+    rm -f finished.*
+    touch finished.$TODAY
+    scp finished.$TODAY root@$DYBVDQ_HOSTNAME:$DUMPDIR
+    rm finished.$TODAY
 EOF
+
+  attempts=$((attempts + 1))
+
+  if [ ! -f $DUMPDIR/finished.$TODAY ]; then
+      if [ $attempts -lt 3 ]; then
+          echo "=== SSH to IHEP timed out; retrying in an hour"
+          sleep 1h
+      else
+          echo "=== SSH to IHEP timed out; giving up after too many retries"
+          exit 1
+      fi
+  else
+      rm $DUMPDIR/finished.$TODAY
+      break
+  fi
+done
 
 echo "=== Starting temporary DB"
 TMP_DATA=$(dirname $DYBVDQ_DQ_DB_DATA)/data.tmp
