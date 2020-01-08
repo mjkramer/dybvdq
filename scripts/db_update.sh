@@ -28,6 +28,7 @@ cd $DUMPDIR
 find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
+# Use ServerAliveInterval/ServerAliveCountMax if SSH connection times out
 ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   cd matt/mysqldumps
   echo "=== (dybdq.ihep) Clearing old dumps"
