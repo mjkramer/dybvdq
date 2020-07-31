@@ -44,6 +44,7 @@ export const reportTaggings = (
   session: string,
   bounds: Bounds,
   taggings: Array<[number, number]>,
+  untaggings: Array<[number, number]>,
   comments: string[],
 ) => {
   axios.post('/report_taggings', {
@@ -52,6 +53,7 @@ export const reportTaggings = (
     hall,
     session,
     taggings,
+    untaggings,
   });
 };
 

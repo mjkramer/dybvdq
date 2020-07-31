@@ -3,6 +3,7 @@ CREATE TABLE runno_fileno_sitemask (
   fileno INTEGER,
   sitemask INTEGER NOT NULL,
   streamtype VARCHAR(32) NOT NULL,
+  officially_tagged BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (runno, fileno)
 );
 
@@ -24,3 +25,10 @@ SELECT DISTINCT runno, fileno, sitemask, streamtype
 
    (sitemask = 4 AND detectorid <= 3 AND runno BETWEEN 21221 AND 26693) OR
    (sitemask = 4 AND detectorid <= 4 AND runno >=      26694));
+
+UPDATE runno_fileno_sitemask SET officially_tagged=TRUE
+  WHERE (runno, fileno) IN
+    (SELECT DISTINCT runno, fileno
+      FROM DaqRawDataFileInfo
+      JOIN most_recent_file_tag ON file_id = seqno
+      WHERE last_status = 'bad');

@@ -27,6 +27,7 @@ def report_taggings():
     session: str = payload['session']
     bounds: Dict = payload['bounds']
     taggings: List[List[int]] = payload['taggings']  # [[run, file]]
+    untaggings: List[List[int]] = payload['untaggings']
     comments: List[str] = payload['comments']
 
     # HACK
@@ -50,13 +51,21 @@ def report_taggings():
     #     db.session.add(tagging)  # pylint: disable=no-member
 
     inserts = [{'hall': hall, 'session': session,
-                'runno': tagging[0], 'fileno': tagging[1],
+                'runno': runno, 'fileno': fileno,
                 'comment': comment}
-               for tagging, comment in zip(taggings, comments)]
+               for (runno, fileno), comment in zip(taggings, comments)]
     stmt = mysql.insert(Tagging).values(inserts) # \
                 # .on_duplicate_key_update(hall=Tagging.hall)
     db.get_engine(bind='app_db').execute(stmt)
     # db.session.commit()         # pylint: disable=no-member
+
+    inserts = [{'hall': hall, 'session': session,
+                'runno': runno, 'fileno': fileno,
+                'untag': True,
+                'comment': 'Untagging'}
+               for runno, fileno in untaggings]
+    stmt = mysql.insert(Tagging).values(inserts) # \
+    db.get_engine(bind='app_db').execute(stmt)
 
     return 'Thanks!'
 
@@ -90,8 +99,7 @@ def realdata():                 # pylint: disable=too-many-locals
 
     lowbound = (result['runnos'][0], result['filenos'][0])
     highbound = (result['runnos'][-1], result['filenos'][-1])
-    result['taggings'], result['comments'] = \
-        get_taggings(hall, session, lowbound, highbound)
+    result.update(get_taggings(hall, session, lowbound, highbound))
 
     return jsonify(result)
 

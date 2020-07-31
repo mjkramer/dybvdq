@@ -51,6 +51,8 @@ export type FileData = {
   xs: number[];
   metrics: { [fieldName: string]: MetricSet };
   taggings: Array<[number, number]>;
+  untaggings: Array<[number, number]>;
+  official_tags: Array<[number, number]>;
   comments: string[];
   latest: Latest;
 };

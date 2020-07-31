@@ -10,8 +10,10 @@ import { plzReportTaggings, plzTagSelection } from '../events';
 import { AppState, DataLocation, Field, FileData, Hall } from '../model';
 import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '../util';
 
-const COLOR_GOOD = 'blue';
-const COLOR_BAD = 'orange';
+const COLOR_GOOD = 'blue'; // neither user-tagged nor official-tagged
+const COLOR_TAGGED = 'orange'; // user-tagged but not officially tagged
+const COLOR_UNTAGGED = 'green'; // officially tagged, user-untagged
+const COLOR_OFFICIAL = 'red'; // officialy tagged
 
 const XAXIS_MARGIN = 10;
 
@@ -115,19 +117,24 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     }
   }
 
-  public getTaggings(): [Array<[number, number]>, string[]] {
+  public getTaggings(): [Array<[number, number]>, Array<[number, number]>, string[]] {
     const taggings: Array<[number, number]> = [];
+    const untaggings: Array<[number, number]> = [];
     const comments: string[] = [];
 
     this.colors.forEach((color, idx) => {
-      if (color === COLOR_BAD) {
+      if (color === COLOR_TAGGED || color === COLOR_UNTAGGED) {
         const loc = [this.data!.runnos[idx], this.data!.filenos[idx]];
-        taggings.push(loc as [number, number]);
-        comments.push(this.comments[idx]);
+        if (color === COLOR_TAGGED) {
+          taggings.push(loc as [number, number]);
+          comments.push(this.comments[idx]);
+        } else {
+          untaggings.push(loc as [number, number]);
+        }
       }
     });
 
-    return [taggings, comments];
+    return [taggings, untaggings, comments];
   }
 
   public render() {
@@ -256,7 +263,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private reportTaggingsListener = () => {
     const { hall, session } = this.props;
-    const [taggings, comments] = this.getTaggings();
+    const [taggings, untaggings, comments] = this.getTaggings();
     const { runnos, filenos } = this.data!;
     const bounds = {
       maxFile: filenos[filenos.length - 1],
@@ -264,7 +271,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       minFile: filenos[0],
       minRun: runnos[0],
     };
-    api.reportTaggings(hall, session, bounds, taggings, comments);
+    api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
   };
 
   private tagSelectionListener = () => {
@@ -280,7 +287,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       hall !== this.lastLoc.hall ||
       session !== this.lastLoc.session
     ) {
-      const { runnos, filenos, taggings, comments } = data;
+      const { runnos, filenos, taggings, untaggings, official_tags, comments } = data;
       const locToIndex: { [loc: string]: number } = {};
       zip(runnos, filenos).forEach(([r, f], i) => {
         locToIndex[`${r}_${f}`] = i;
@@ -292,8 +299,18 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
       zip(taggings, comments).forEach(([[r, f], c]) => {
         const idx = locToIndex[`${r}_${f}`];
-        this.colors[idx] = COLOR_BAD;
+        this.colors[idx] = COLOR_TAGGED;
         this.comments[idx] = c!;
+      });
+
+      untaggings.forEach(([r, f]) => {
+        const idx = locToIndex[`${r}_${f}`];
+        this.colors[idx] = COLOR_UNTAGGED;
+      });
+
+      official_tags.forEach(([r, f]) => {
+        const idx = locToIndex[`${r}_${f}`];
+        this.colors[idx] = COLOR_OFFICIAL;
       });
     }
   }
@@ -373,17 +390,28 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const nameWithoutUnit = this.stripUnit(name);
     const baseComment = `${detName} ${nameWithoutUnit}`;
 
-    const untoggle = !some(idxs, i => this.colors[i] === COLOR_GOOD);
+    const untoggle = !some(
+      idxs,
+      i => this.colors[i] === COLOR_GOOD || this.colors[i] === COLOR_UNTAGGED,
+    );
 
     idxs.forEach(i => {
       if (untoggle) {
-        this.colors[i] = COLOR_GOOD;
-        delete this.comments[i];
+        if (this.colors[i] === COLOR_TAGGED) {
+          this.colors[i] = COLOR_GOOD;
+          delete this.comments[i];
+        } else if (this.colors[i] === COLOR_OFFICIAL) {
+          this.colors[i] = COLOR_UNTAGGED;
+        }
       } else {
         const high = this.plotValues[iDiv][i] > this.plotAverages[iDiv];
-        const comment = `${baseComment}: ${high ? 'HIGH' : 'LOW'}`;
-        this.colors[i] = COLOR_BAD;
-        this.comments[i] = comment;
+        if (this.colors[i] === COLOR_GOOD) {
+          const comment = `${baseComment}: ${high ? 'HIGH' : 'LOW'}`;
+          this.comments[i] = comment;
+          this.colors[i] = COLOR_TAGGED;
+        } else if (this.colors[i] === COLOR_UNTAGGED) {
+          this.colors[i] = COLOR_OFFICIAL;
+        }
       }
     });
 

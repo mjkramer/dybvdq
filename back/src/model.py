@@ -19,6 +19,7 @@ class Tagging(db.Model):
     fileno = db.Column(db.Integer, primary_key=True)
     timestamp = db.Column(db.DateTime, default=func.now())
     comment = db.Column(db.Text, default='')
+    untag = db.Column(db.Boolean, default=False)
 
 class DqDetectorNew(db.Model):
     __tablename__ = 'DqDetectorNew'

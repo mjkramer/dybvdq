@@ -283,22 +283,30 @@ def get_data(start_runno, start_fileno, hall, fields):  # pylint: disable=too-ma
 
 def get_taggings(hall, session, lowbound, highbound):
     "Fetch any saved taggings between the bounds"
+    ret = {}
+
     low_runno, low_fileno = lowbound
     high_runno, high_fileno = highbound
+    loc = loc_pred(low_runno, low_fileno, high_runno, high_fileno)
 
-    if low_runno == high_runno:
-        pred = f'''runno={low_runno} AND
-                   (fileno BETWEEN {low_fileno} AND {high_fileno})'''
-    else:
-        pred = f'''(runno BETWEEN {low_runno}+1 AND {high_runno}-1) OR
-                   (runno={low_runno} AND fileno>={low_fileno}) OR
-                   (runno={high_runno} AND fileno<={high_fileno})'''
-
-    query = f'''SELECT runno, fileno, comment FROM tagging
-                WHERE ({pred}) AND hall={hall} AND session="{session}"
+    query = f'''SELECT runno, fileno, comment, untag FROM tagging
+                WHERE ({loc}) AND hall={hall} AND session="{session}"
                 ORDER BY runno, fileno'''
-
     result = app_exec(query).fetchall()
-    taggings = [(runno, fileno) for runno, fileno, _ in result]
-    comments = [comment for _, _, comment in result]
-    return taggings, comments
+    ret['taggings' ]= [(runno, fileno) for runno, fileno, _, untag in result
+                       if not untag]
+    ret['untaggings' ]= [(runno, fileno) for runno, fileno, _, untag in result
+                         if untag]
+    ret['comments' ]= [comment for _, _, comment, untag in result
+                       if not untag]
+
+    query = f'''SELECT runno, fileno FROM runno_fileno_sitemask
+                WHERE ({loc}) AND streamtype = 'Physics' AND sitemask={sitemask(hall)}
+                AND officially_tagged'''
+
+    # we must manually unpack so that we don't end up with unjsonable RowProxy's
+    result = dq_exec(query).fetchall()
+    ret['official_tags'] = [(r, f) for r, f in result
+                            if (r, f) not in ret['untaggings']]
+
+    return ret
