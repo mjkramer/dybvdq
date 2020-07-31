@@ -68,6 +68,7 @@ echo "=== Starting temporary DB"
 TMP_DATA=$(dirname $DYBVDQ_DQ_DB_DATA)/data.tmp
 rm -rf $TMP_DATA
 mkdir $TMP_DATA
+docker rm dybvdq-dq_db-tmp 2>/dev/null # in case it's left over
 docker run -d --name=dybvdq-dq_db-tmp \
        -e MYSQL_ROOT_PASSWORD=$DYBVDQ_DQ_DB_PASS \
        -e MYSQL_DATABASE=dq_db \
