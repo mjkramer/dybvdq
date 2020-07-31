@@ -49,7 +49,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   private cachedData: FileData | null = null;
 
   private colors: string[] = []; // size: total # of files
-  private comments: { [idx: number]: string } = [];
+  private comments: { [idx: number]: string } = {};
 
   private divs: Plotly.PlotlyHTMLElement[] = [];
   private iDivOfSelection: number | null = null;

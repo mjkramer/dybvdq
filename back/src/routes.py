@@ -30,10 +30,6 @@ def report_taggings():
     untaggings: List[List[int]] = payload['untaggings']
     comments: List[str] = payload['comments']
 
-    # HACK
-    if not taggings:
-        return 'Thanks!'
-
     loc = loc_pred(bounds['minRun'], bounds['minFile'],
                    bounds['maxRun'], bounds['maxFile'])
     del_query = f'''DELETE FROM tagging
@@ -54,18 +50,20 @@ def report_taggings():
                 'runno': runno, 'fileno': fileno,
                 'comment': comment}
                for (runno, fileno), comment in zip(taggings, comments)]
-    stmt = mysql.insert(Tagging).values(inserts) # \
-                # .on_duplicate_key_update(hall=Tagging.hall)
-    db.get_engine(bind='app_db').execute(stmt)
-    # db.session.commit()         # pylint: disable=no-member
+    if inserts:
+        stmt = mysql.insert(Tagging).values(inserts) # \
+                    # .on_duplicate_key_update(hall=Tagging.hall)
+        db.get_engine(bind='app_db').execute(stmt)
+        # db.session.commit()         # pylint: disable=no-member
 
     inserts = [{'hall': hall, 'session': session,
                 'runno': runno, 'fileno': fileno,
                 'untag': True,
                 'comment': 'Untagging'}
                for runno, fileno in untaggings]
-    stmt = mysql.insert(Tagging).values(inserts) # \
-    db.get_engine(bind='app_db').execute(stmt)
+    if inserts:
+        stmt = mysql.insert(Tagging).values(inserts) # \
+        db.get_engine(bind='app_db').execute(stmt)
 
     return 'Thanks!'
 

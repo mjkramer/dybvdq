@@ -11,7 +11,7 @@ CREATE INDEX idx_rfs ON runno_fileno_sitemask (sitemask, streamtype, runno, file
 CREATE INDEX idx_drdfi ON DaqRawDataFileInfo (runno, fileno);
 CREATE INDEX idx_dqdn ON DqDetectorNew (runno, fileno);
 
-INSERT INTO runno_fileno_sitemask
+INSERT INTO runno_fileno_sitemask (runno, fileno, sitemask, streamtype)
 SELECT DISTINCT runno, fileno, sitemask, streamtype
   FROM DqDetectorNew
          NATURAL JOIN DqDetectorNewVld
