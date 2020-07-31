@@ -1,4 +1,8 @@
 * Things to do
+** Eliminate need to "navigate" in order for taggings to be sent to backend
+This is a pitfall for users.
+
+* Old things to do
 - cleanup FieldSel
 - scattergl wtf
 - Add #BC plot
