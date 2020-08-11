@@ -356,6 +356,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
         };
 
         const layout: Partial<Plotly.Layout> = {
+          dragmode: 'select',
           title: `${name} (${detName})`,
           // NB: 'xaxis.range' doesn't work here
           width,
