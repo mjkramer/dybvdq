@@ -157,7 +157,7 @@ def get_livetimes(runno, fileno, end_runno, end_fileno, hall):
                           ROW_NUMBER() OVER
                             (PARTITION BY runno, fileno ORDER BY seqno DESC) AS rn
                    FROM DqLiveTime NATURAL JOIN DqLiveTimeVld
-                   WHERE ({loc}) AND sitemask = {sitemask(hall)})
+                   WHERE ({loc}) AND sitemask = {sitemask(hall)} AND integralruntime != 0)
                  SELECT runno, fileno, integralruntime FROM ranked WHERE rn = 1'''
     return dq_exec(query)
 
