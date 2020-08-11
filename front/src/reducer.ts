@@ -15,8 +15,16 @@ type Loc = Pick<AppState, 'runno' | 'fileno' | 'hall'>;
 
 export default handleActions<AppState, any>(
   {
-    [didDeselect as any]: state => ({ ...state, selectionActive: false }),
-    [didSelect as any]: state => ({ ...state, selectionActive: true }),
+    [didDeselect as any]: state => ({
+      ...state,
+      selectionActive: false,
+      selectionAllTagged: false,
+    }),
+    [didSelect as any]: (state, action: Action<boolean>) => ({
+      ...state,
+      selectionActive: true,
+      selectionAllTagged: action.payload!,
+    }),
     [setFields as any]: (state, action: Action<Field[]>) => ({
       ...state,
       fields: action.payload!,

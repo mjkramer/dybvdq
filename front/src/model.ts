@@ -5,6 +5,7 @@ export type AppState = {
   hall: Hall;
   runno: number;
   selectionActive: boolean;
+  selectionAllTagged: boolean;
   session: string;
 };
 
@@ -31,6 +32,7 @@ export const initialState: AppState = {
   hall: 'EH1',
   runno: -1,
   selectionActive: false,
+  selectionAllTagged: false,
   session: 'Default session',
 };
 

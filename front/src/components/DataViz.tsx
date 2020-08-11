@@ -12,7 +12,7 @@ import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '..
 
 const COLOR_GOOD = 'blue'; // neither user-tagged nor official-tagged
 const COLOR_TAGGED = 'orange'; // user-tagged but not officially tagged
-const COLOR_UNTAGGED = 'green'; // officially tagged, user-untagged
+const COLOR_UNTAGGED = 'lightgreen'; // officially tagged, user-untagged
 const COLOR_OFFICIAL = 'red'; // officialy tagged
 
 const XAXIS_MARGIN = 10;
@@ -245,7 +245,10 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
     this.iDivOfSelection = pointNumbers.length ? iDiv : null;
 
-    const action = pointNumbers.length ? didSelect() : didDeselect();
+    const action = pointNumbers.length
+      ? didSelect(this.selectionAllTagged(pointNumbers))
+      : didDeselect();
+
     this.props.dispatch(action);
   }
 
@@ -273,6 +276,13 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     };
     api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
   };
+
+  private selectionAllTagged(idxs: number[]) {
+    return !some(
+      idxs,
+      i => this.colors[i] === COLOR_GOOD || this.colors[i] === COLOR_UNTAGGED,
+    );
+  }
 
   private tagSelectionListener = () => {
     this.tagSelection();
@@ -389,11 +399,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const { name, detName } = this.plotMetadata[iDiv];
     const nameWithoutUnit = this.stripUnit(name);
     const baseComment = `${detName} ${nameWithoutUnit}`;
-
-    const untoggle = !some(
-      idxs,
-      i => this.colors[i] === COLOR_GOOD || this.colors[i] === COLOR_UNTAGGED,
-    );
+    const untoggle = this.selectionAllTagged(idxs);
 
     idxs.forEach(i => {
       if (untoggle) {
