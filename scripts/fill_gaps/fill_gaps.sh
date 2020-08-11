@@ -4,7 +4,7 @@
 # Also generate a list of missing KUP/ODM files
 
 # This script is meant to be executed on the IHEP system
-# E.g. ssh mkramer@lxslc6.ihep.ac.cn /bin/bash < fill_gaps.sh
+# E.g. ssh mkramer@lxslc7.ihep.ac.cn /bin/bash < fill_gaps.sh
 # Recommend running via cron every 3 days or so
 
 FIRST_RUN=78000                 # Bump me up as needed

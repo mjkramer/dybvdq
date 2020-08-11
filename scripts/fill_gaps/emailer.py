@@ -26,7 +26,7 @@ def main():
     ap.add_argument('recipients', nargs='+')
     args = ap.parse_args()
 
-    cmd = 'scp mkramer@lxslc6.ihep.ac.cn:workfs/db_fill2/data/misc/missing_kupodm.txt /tmp'
+    cmd = 'scp mkramer@lxslc7.ihep.ac.cn:workfs/db_fill2/data/misc/missing_kupodm.txt /tmp'
     os.system(cmd)
 
     nfiles = len(open(LISTFILE).readlines())

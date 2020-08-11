@@ -14,7 +14,7 @@ DUMPDIR=$DYBVDQ_DQ_DB_DATA/../dumps
 mkdir -p $DUMPDIR
 
 # Need /bin/bash to suppress "pseudo-terminal will not be allocated" blah
-ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
+ssh -J mkramer@lxslc7.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
   cd matt/mysqldumps
   echo "=== (dybdq.ihep) Dumping dq_db"
   mysqldump -h dybdq.ihep.ac.cn -u dybrw --password=$DYBVDQ_IHEP_DQ_DB_PASS --opt dq_db DqDetectorNew DqDetectorNewVld DqLiveTime DqLiveTimeVld most_recent_file_tag > dq_db.$TODAY.sql

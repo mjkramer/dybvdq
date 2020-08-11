@@ -31,7 +31,7 @@ find . -name '*.sql' -mtime +7 | xargs -r -t rm 2>&1
 # Use ServerAliveInterval/ServerAliveCountMax if SSH connection times out
 attempts=0
 while true; do
-  ssh -J mkramer@lxslc6.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
+  ssh -J mkramer@lxslc7.ihep.ac.cn guwq@dybdq.ihep.ac.cn /bin/bash <<-EOF
     cd matt/mysqldumps
     echo "=== (dybdq.ihep) Clearing old dumps"
     find . -name '*.sql' -mtime +3 | xargs -r -t rm 2>&1
