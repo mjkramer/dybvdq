@@ -7,10 +7,11 @@ import { plzReportTaggings } from './events';
 import * as globals from './globals';
 import { AppState, Field, Hall } from './model';
 
-export const reportAndSetFields = (fields: SelectValueType<Field>) => (
+export const reportAndSetFields = (fields: SelectValueType<Field>) => async (
   dispatch: Dispatch,
+  getState: () => AppState,
 ) => {
-  plzReportTaggings.next();
+  await flush(dispatch, getState, false);
   dispatch(setFields(fields as Field[]));
 };
 
@@ -26,14 +27,21 @@ export const reportAndSetFields = (fields: SelectValueType<Field>) => (
 //   fetchWithNewLocation(params, dispatch);
 // };
 
+const flush = async (dispatch: Dispatch, getState: () => AppState, blankLoc = true) => {
+  plzReportTaggings.next();
+  if (blankLoc) {
+    dispatch(setLocation(-1, -1, getState().hall));
+  }
+  await api.reportTaggingsPromise;
+};
+
 export const reportAndSetRunAndFile = (runno: number, fileno: number) => async (
   dispatch: Dispatch,
   getState: () => AppState,
 ) => {
   const { hall, session, fields } = getState();
 
-  plzReportTaggings.next();
-  dispatch(setLocation(-1, -1, hall));
+  await flush(dispatch, getState);
 
   const params = { runno, fileno, hall, session, fields };
   fetchWithNewLocation(params, dispatch);
@@ -48,8 +56,7 @@ export const reportAndSetHall = (hall: Hall) => async (
   const { session, fields, atEnd } = getState();
   let { runno, fileno } = getState();
 
-  plzReportTaggings.next();
-  dispatch(setLocation(-1, -1, hall));
+  await flush(dispatch, getState);
 
   if (atEnd) {
     const latest = globals.LATEST![hall];
@@ -68,8 +75,7 @@ export const reportAndShiftPage = (count: number) => async (
 ) => {
   const { runno, fileno, hall, session, fields } = getState();
 
-  plzReportTaggings.next();
-  dispatch(setLocation(-1, -1, hall));
+  await flush(dispatch, getState);
 
   const params = { runno, fileno, hall, session, fields, pageShift: count };
   fetchWithNewLocation(params, dispatch);

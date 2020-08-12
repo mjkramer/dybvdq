@@ -1,4 +1,3 @@
-import { AxiosPromise } from 'axios';
 import { isNil, mean, some, zip } from 'lodash';
 import Plotly from 'plotly.js';
 import React from 'react';
@@ -48,7 +47,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private data: FileData | null = null;
   private cachedData: FileData | null = null;
-  private reportTaggingsPromise: AxiosPromise | null = null;
 
   private colors: string[] = []; // size: total # of files
   private comments: { [idx: number]: string } = {};
@@ -277,15 +275,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       minRun: runnos[0],
     };
 
-    const report = () =>
-      api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
-
-    // Ensure that we don't send a report until the prev one was processed
-    if (this.reportTaggingsPromise) {
-      this.reportTaggingsPromise = this.reportTaggingsPromise.then(_ => report());
-    } else {
-      this.reportTaggingsPromise = report();
-    }
+    api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
   };
 
   private selectionAllTagged(idxs: number[]) {

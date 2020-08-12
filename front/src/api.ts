@@ -39,6 +39,8 @@ type Bounds = {
   maxFile: number;
 };
 
+export let reportTaggingsPromise: Promise<any> = Promise.resolve();
+
 export const reportTaggings = (
   hall: Hall,
   session: string,
@@ -47,14 +49,18 @@ export const reportTaggings = (
   untaggings: Array<[number, number]>,
   comments: string[],
 ) => {
-  return axios.post('/report_taggings', {
-    bounds,
-    comments,
-    hall,
-    session,
-    taggings,
-    untaggings,
-  });
+  const report = () =>
+    axios.post('/report_taggings', {
+      bounds,
+      comments,
+      hall,
+      session,
+      taggings,
+      untaggings,
+    });
+
+  // Ensure that previous report is processed before sending this one
+  reportTaggingsPromise = reportTaggingsPromise.then(_ => report());
 };
 
 export const latest = async (): Promise<Latest> => (await axios.get('/latest')).data;
