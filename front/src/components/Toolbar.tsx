@@ -13,7 +13,7 @@ export const Toolbar = () => (
     <HallSelector className="mr-4" />
     <RunAndFile />
     <div style={{ flexGrow: 1 }} />
-    <div className="mr-4" style={{ flexGrow: 1 }}>
+    <div className="mr-4" style={{ flexGrow: 1, maxWidth: '20em' }}>
       <SessionSel />
     </div>
     <TagSelectionButton />
