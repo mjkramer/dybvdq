@@ -110,3 +110,11 @@ def list_fields():
 def latest():
     "Get the latest runs. Used in frontend initialization"
     return jsonify(all_latest())
+
+@app.route('/list_sessions')
+def list_sessions():
+    "List the sessions"
+    query = '''SELECT session FROM tagging
+               GROUP BY session ORDER BY MAX(timestamp) DESC''' 
+    result = app_exec(query).fetchall()
+    return jsonify([s for (s,) in result])

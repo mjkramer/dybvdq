@@ -1,79 +1,63 @@
+import axios from 'axios';
 import React from 'react';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
-import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
+import Select from 'react-select';
+import { ValueType as SelectValueType } from 'react-select/lib/types';
 
 import { setSession } from '../actions';
 import { AppState } from '../model';
-import { num } from '../util';
-import NavButton from './NavButton';
+
+type StateProps = Readonly<Pick<AppState, 'session'>>;
 
 type DispatchProps = {
-  onSwitch: (session: string) => any;
+  onChange: (session: SelectValueType<string>) => void;
 };
 
-type State = Readonly<Pick<AppState, 'session'>>;
+type Props = StateProps & DispatchProps;
 
-type Props = State & DispatchProps & React.HTMLProps<HTMLDivElement>;
+type State = {
+  allSessions: string[];
+};
 
-class SaveFormView extends React.Component<Props, State> {
+class SessionFormView extends React.Component<Props, State> {
   public readonly state: State = {
-    session: this.props.session,
+    allSessions: [],
   };
 
-  public render() {
-    const { session } = this.state;
-    const { onSwitch: _, ...divProps } = this.props;
-    divProps.className += ' form-inline';
-    return (
-      <div {...divProps}>
-        <InputGroup className="mr-2">
-          <InputGroupAddon addonType="prepend">Session</InputGroupAddon>
-          <Input
-            onChange={this.onChange}
-            onKeyUp={this.onKeyUp}
-            size={num(12)}
-            value={session}
-          />
-        </InputGroup>
-        <NavButton
-          disabled={this.state.session === this.props.session}
-          onClick={this.onClick}
-        >
-          SWITCH
-        </NavButton>
-      </div>
-    );
+  public async componentDidMount() {
+    const { data } = await axios.get('/list_sessions');
+    this.setState({ allSessions: data });
   }
 
-  private onChange: InputProps['onChange'] = e => {
-    this.setState({ session: e.target.value });
-  };
+  public render() {
+    const { session, onChange } = this.props;
+    const { allSessions } = this.state;
 
-  private onClick = () => {
-    const { onSwitch } = this.props;
-    const { session } = this.state;
-    onSwitch(session);
-  };
-
-  private onKeyUp: InputProps['onKeyUp'] = e => {
-    if (e.key === 'Enter') {
-      this.onClick();
+    if (!allSessions) {
+      return <span>Loading...</span>;
     }
-  };
+
+    const options = allSessions.map(s => ({ label: s, value: s }));
+
+    return (
+      <Select
+        options={(options as unknown) as string[]}
+        value={{ label: session, value: session } as any}
+        onChange={onChange}
+      />
+    );
+  }
 }
 
-type StateProps = State & React.Attributes; // Add "key" attribute
-
 const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ session }) => ({
-  key: session, // forces reinitialization when props change
   session,
 });
 
 const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
-  onSwitch: setSession,
+  onChange: s => setSession((s as any).value),
 };
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(SaveFormView);
+)(SessionFormView);

@@ -13,7 +13,9 @@ export const Toolbar = () => (
     <HallSelector className="mr-4" />
     <RunAndFile />
     <div style={{ flexGrow: 1 }} />
-    <SessionForm className="mr-4" />
+    <div className="mr-4" style={{ flexGrow: 1 }}>
+      <SessionForm />
+    </div>
     <TagSelectionButton />
   </div>
 );

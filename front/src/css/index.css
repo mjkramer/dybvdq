@@ -9,3 +9,8 @@ input {
     -webkit-appearance: none;
 }
 */
+
+/* Prevent the modebar from covering up the session dropdown */
+.modebar {
+    z-index: 0 !important;
+}
