@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import HallSelector from './HallSelector';
 import RunAndFile from './RunAndFile';
-import SessionForm from './SessionForm';
+import SessionSel from './SessionSel';
 import { NextButton, PrevButton } from './ShiftButton';
 import TagSelectionButton from './TagSelectionButton';
 
@@ -14,7 +14,7 @@ export const Toolbar = () => (
     <RunAndFile />
     <div style={{ flexGrow: 1 }} />
     <div className="mr-4" style={{ flexGrow: 1 }}>
-      <SessionForm />
+      <SessionSel />
     </div>
     <TagSelectionButton />
   </div>

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
-import Select from 'react-select';
+import CreatableSelect from 'react-select/lib/Creatable';
 import { ValueType as SelectValueType } from 'react-select/lib/types';
 
 import { setSession } from '../actions';
@@ -19,7 +19,7 @@ type State = {
   allSessions: string[];
 };
 
-class SessionFormView extends React.Component<Props, State> {
+class SessionSelView extends React.Component<Props, State> {
   public readonly state: State = {
     allSessions: [],
   };
@@ -40,13 +40,20 @@ class SessionFormView extends React.Component<Props, State> {
     const options = allSessions.map(s => ({ label: s, value: s }));
 
     return (
-      <Select
+      <CreatableSelect
+        inputId="sessionSel"
         options={(options as unknown) as string[]}
         value={{ label: session, value: session } as any}
         onChange={onChange}
+        onCreateOption={this.onCreateSession}
       />
     );
   }
+
+  private onCreateSession = (session: string) => {
+    this.setState({ allSessions: [session, ...this.state.allSessions] });
+    this.props.onChange({ value: session } as any);
+  };
 }
 
 const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({ session }) => ({
@@ -60,4 +67,4 @@ const mapDispatchToProps: MapDispatchToProps<DispatchProps, {}> = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(SessionFormView);
+)(SessionSelView);

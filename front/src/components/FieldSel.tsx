@@ -51,7 +51,13 @@ class FieldSelView extends React.Component<Props & DispatchProp, State> {
     }
 
     return (
-      <Select isMulti={true} options={allFields} value={fields} onChange={onChange} />
+      <Select
+        inputId="fieldSel"
+        isMulti={true}
+        options={allFields}
+        value={fields}
+        onChange={onChange}
+      />
     );
   }
 }
