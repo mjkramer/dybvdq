@@ -1,3 +1,4 @@
+import { AxiosPromise } from 'axios';
 import { isNil, mean, some, zip } from 'lodash';
 import Plotly from 'plotly.js';
 import React from 'react';
@@ -47,6 +48,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   private data: FileData | null = null;
   private cachedData: FileData | null = null;
+  private reportTaggingsPromise: AxiosPromise | null = null;
 
   private colors: string[] = []; // size: total # of files
   private comments: { [idx: number]: string } = {};
@@ -70,7 +72,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
 
   public componentDidMount() {
     const subs = this.subscriptions;
-    subs.push(plzReportTaggings.subscribe(this.reportTaggingsListener));
+    subs.push(plzReportTaggings.subscribe(this.reportTaggings));
     subs.push(plzTagSelection.subscribe(this.tagSelectionListener));
     window.addEventListener('resize', this.resizeHandler);
     this.componentDidUpdate();
@@ -264,7 +266,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     return document.getElementsByTagName('body')[0].clientWidth - 30;
   }
 
-  private reportTaggingsListener = () => {
+  private reportTaggings = () => {
     const { hall, session } = this.props;
     const [taggings, untaggings, comments] = this.getTaggings();
     const { runnos, filenos } = this.data!;
@@ -274,7 +276,16 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       minFile: filenos[0],
       minRun: runnos[0],
     };
-    api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
+
+    const report = () =>
+      api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
+
+    // Ensure that we don't send a report until the prev one was processed
+    if (this.reportTaggingsPromise) {
+      this.reportTaggingsPromise = this.reportTaggingsPromise.then(_ => report());
+    } else {
+      this.reportTaggingsPromise = report();
+    }
   };
 
   private selectionAllTagged(idxs: number[]) {
@@ -425,6 +436,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.divs.forEach(div => {
       Plotly.restyle(div, { 'marker.color': [this.colors] }, [0]);
     });
+
+    this.reportTaggings();
   }
 
   // XXX we might have to deborg this

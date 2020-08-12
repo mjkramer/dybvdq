@@ -47,7 +47,7 @@ export const reportTaggings = (
   untaggings: Array<[number, number]>,
   comments: string[],
 ) => {
-  axios.post('/report_taggings', {
+  return axios.post('/report_taggings', {
     bounds,
     comments,
     hall,
