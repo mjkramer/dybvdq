@@ -22,9 +22,6 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
   // private didClick = false;
 
   public render() {
-    // tslint:disable-next-line:no-console
-    console.log('R&F');
-
     const { runno, fileno } = this.state;
 
     // let runno: number;

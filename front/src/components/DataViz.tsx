@@ -138,9 +138,6 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
   }
 
   public render() {
-    // tslint:disable-next-line:no-console
-    console.log('render');
-
     const { numDivs } = this.state;
     this.divs = [];
 
