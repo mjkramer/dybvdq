@@ -1,4 +1,4 @@
-import { isNil, mean, some, zip } from 'lodash';
+import { isNil, mean, zip } from 'lodash';
 import Plotly from 'plotly.js';
 import React from 'react';
 import { connect, DispatchProp, MapStateToProps } from 'react-redux';
@@ -6,8 +6,8 @@ import { Subscription } from 'rxjs';
 
 import { didDeselect, didSelect } from '../actions';
 import * as api from '../api';
-import { plzReportTaggings, plzTagSelection } from '../events';
-import { AppState, DataLocation, Field, FileData, Hall } from '../model';
+import { plzReportTaggings, plzTagSelection, plzUntagSelection } from '../events';
+import { AppState, DataLocation, Field, FileData, Hall, SelectionType } from '../model';
 import { defaultPlotlyConfig, defaultPlotlyLayout, defaultPlotlyTrace } from '../util';
 
 const COLOR_GOOD = 'blue'; // neither user-tagged nor official-tagged
@@ -26,6 +26,8 @@ type PlotMetadata = {
   name: string;
   detName: string;
 };
+
+type ToggleMode = 'Click' | 'TagSel' | 'UntagSel';
 
 type StateProps = {
   runno: number;
@@ -72,6 +74,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     const subs = this.subscriptions;
     subs.push(plzReportTaggings.subscribe(this.reportTaggings));
     subs.push(plzTagSelection.subscribe(this.tagSelectionListener));
+    subs.push(plzUntagSelection.subscribe(this.untagSelectionListener));
     window.addEventListener('resize', this.resizeHandler);
     this.componentDidUpdate();
   }
@@ -159,8 +162,8 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     );
   }
 
-  public tagSelection() {
-    this.togglePoints(this.selection, this.iDivOfSelection!);
+  public tagOrUntagSelection(mode: ToggleMode) {
+    this.togglePoints(this.selection, this.iDivOfSelection!, mode);
     this.doSelect([], null);
   }
 
@@ -171,7 +174,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     el.on('plotly_click', (eventData: Plotly.PlotMouseEvent) => {
       if (!isNil(eventData)) {
         const pointNumbers = eventData.points.map(p => p.pointNumber);
-        this.togglePoints(pointNumbers, iDiv);
+        this.togglePoints(pointNumbers, iDiv, 'Click');
       }
     });
 
@@ -243,7 +246,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.iDivOfSelection = pointNumbers.length ? iDiv : null;
 
     const action = pointNumbers.length
-      ? didSelect(this.selectionAllTagged(pointNumbers))
+      ? didSelect(this.selectionType(pointNumbers))
       : didDeselect();
 
     this.props.dispatch(action);
@@ -275,15 +278,33 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     api.reportTaggings(hall, session, bounds, taggings, untaggings, comments);
   };
 
-  private selectionAllTagged(idxs: number[]) {
-    return !some(
-      idxs,
-      i => this.colors[i] === COLOR_GOOD || this.colors[i] === COLOR_UNTAGGED,
-    );
+  private selectionType(idxs: number[]): SelectionType {
+    let nGood = 0;
+    let nBad = 0;
+
+    for (const i of idxs) {
+      if (this.colors[i] === COLOR_GOOD || this.colors[i] === COLOR_UNTAGGED) {
+        ++nGood;
+        if (nBad) {
+          return 'Mixed';
+        }
+      } else {
+        ++nBad;
+        if (nGood) {
+          return 'Mixed';
+        }
+      }
+    }
+
+    return nGood ? 'AllGood' : 'AllBad';
   }
 
   private tagSelectionListener = () => {
-    this.tagSelection();
+    this.tagOrUntagSelection('TagSel');
+  };
+
+  private untagSelectionListener = () => {
+    this.tagOrUntagSelection('UntagSel');
   };
 
   private updateTaggings(data: FileData) {
@@ -394,11 +415,12 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     return newWords.join(' ');
   }
 
-  private togglePoints(idxs: number[], iDiv: number) {
+  private togglePoints(idxs: number[], iDiv: number, mode: ToggleMode) {
     const { name, detName } = this.plotMetadata[iDiv];
     const nameWithoutUnit = this.stripUnit(name);
     const baseComment = `${detName} ${nameWithoutUnit}`;
-    const untoggle = this.selectionAllTagged(idxs);
+    const untoggle =
+      mode === 'UntagSel' || (mode === 'Click' && this.selectionType(idxs) === 'AllBad');
 
     idxs.forEach(i => {
       if (untoggle) {

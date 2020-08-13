@@ -4,7 +4,7 @@ import HallSelector from './HallSelector';
 import RunAndFile from './RunAndFile';
 import SessionSel from './SessionSel';
 import { NextButton, PrevButton } from './ShiftButton';
-import TagSelectionButton from './TagSelectionButton';
+import TagSelectionButtons from './TagSelectionButtons';
 
 export const Toolbar = () => (
   <div className="d-flex mb-2">
@@ -16,7 +16,7 @@ export const Toolbar = () => (
     <div className="mr-4" style={{ flexGrow: 1, maxWidth: '20em' }}>
       <SessionSel />
     </div>
-    <TagSelectionButton />
+    <TagSelectionButtons />
   </div>
 );
 

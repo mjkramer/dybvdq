@@ -1,6 +1,6 @@
 import { Action, handleActions } from 'redux-actions';
 
-import { AppState, Field, initialState } from './model';
+import { AppState, Field, initialState, SelectionType } from './model';
 
 import {
   didDeselect,
@@ -18,12 +18,12 @@ export default handleActions<AppState, any>(
     [didDeselect as any]: state => ({
       ...state,
       selectionActive: false,
-      selectionAllTagged: false,
+      selectionType: null,
     }),
-    [didSelect as any]: (state, action: Action<boolean>) => ({
+    [didSelect as any]: (state, action: Action<SelectionType>) => ({
       ...state,
       selectionActive: true,
-      selectionAllTagged: action.payload!,
+      selectionType: action.payload!,
     }),
     [setFields as any]: (state, action: Action<Field[]>) => ({
       ...state,

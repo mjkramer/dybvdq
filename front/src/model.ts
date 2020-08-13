@@ -5,7 +5,7 @@ export type AppState = {
   hall: Hall;
   runno: number;
   selectionActive: boolean;
-  selectionAllTagged: boolean;
+  selectionType: SelectionType | null;
   session: string;
 };
 
@@ -32,7 +32,7 @@ export const initialState: AppState = {
   hall: 'EH1',
   runno: -1,
   selectionActive: false,
-  selectionAllTagged: false,
+  selectionType: null,
   session: 'Default session',
 };
 
@@ -58,3 +58,5 @@ export type FileData = {
   comments: string[];
   latest: Latest;
 };
+
+export type SelectionType = 'Mixed' | 'AllGood' | 'AllBad';

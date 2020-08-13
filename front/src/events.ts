@@ -7,6 +7,7 @@ export const plzReportTaggings = new Subject();
 // Observer: DataViz
 // Source: TagSelectionButton
 export const plzTagSelection = new Subject();
+export const plzUntagSelection = new Subject();
 
 // Observer: DataViz
 // Source; thunks.reportAndShiftPage
