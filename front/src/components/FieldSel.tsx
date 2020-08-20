@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { find } from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import { connect, DispatchProp, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import Select from 'react-select';
 import { ValueType as SelectValueType } from 'react-select/lib/types';
@@ -11,6 +11,7 @@ import { setFields } from '../actions';
 import { AppState, Field } from '../model';
 import { initLocation, reportAndSetFields } from '../thunks';
 import { DEFAULT_FIELD } from '../util';
+import NavButton from './NavButton';
 
 type Props = {
   fields: Field[];
@@ -51,15 +52,37 @@ class FieldSelView extends React.Component<Props & DispatchProp, State> {
     }
 
     return (
-      <Select
-        inputId="fieldSel"
-        isMulti={true}
-        options={allFields}
-        value={fields}
-        onChange={onChange}
-      />
+      <Fragment>
+        <div style={{ flexGrow: 1 }}>
+          <Select
+            inputId="fieldSel"
+            isMulti={true}
+            options={allFields}
+            value={fields}
+            onChange={onChange}
+          />
+        </div>
+        <NavButton
+          className="ml-4"
+          disabled={fields.length === 0}
+          onClick={this.onClear}
+        >
+          CLEAR
+        </NavButton>
+        <NavButton className="ml-4" disabled={fields === allFields} onClick={this.onAll}>
+          ALL PLOTS
+        </NavButton>
+      </Fragment>
     );
   }
+
+  private onClear = () => {
+    this.props.onChange([]);
+  };
+
+  private onAll = () => {
+    this.props.onChange(this.state.allFields);
+  };
 }
 
 type StateProps = Pick<Props, 'fields'>;
