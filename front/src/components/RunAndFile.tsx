@@ -2,6 +2,7 @@ import React from 'react';
 import { connect, MapDispatchToProps, MapStateToProps } from 'react-redux';
 import { Input, InputGroup, InputGroupAddon, InputProps } from 'reactstrap';
 
+import { latest } from '../api';
 import { AppState } from '../model';
 import { reportAndSetRunAndFile } from '../thunks';
 import { num } from '../util';
@@ -13,7 +14,12 @@ type DispatchProps = {
 
 type State = Readonly<Pick<AppState, 'runno' | 'fileno'>>;
 
-class RunAndFileView extends React.Component<State & DispatchProps, State> {
+// We need to know the hall to fetch the latest run/file when user clicks "LATEST"
+type AppStateProps = State & Pick<AppState, 'hall'>;
+
+type Props = AppStateProps & DispatchProps;
+
+class RunAndFileView extends React.Component<Props, State> {
   public readonly state: State = {
     fileno: this.props.fileno,
     runno: this.props.runno,
@@ -66,12 +72,20 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
         >
           GO!
         </NavButton>
+        <NavButton className="ml-4" onClick={this.onLatest}>
+          LATEST
+        </NavButton>
       </div>
     );
   }
 
   private fmt = (stateVal: number): string =>
-    this.props.runno === -1 ? 'WAIT' : isNaN(stateVal) ? '' : stateVal.toString();
+    // Added the "stateVal === -1" check to avoid flashing -1 when user clicks "LATEST"
+    this.props.runno === -1 || stateVal === -1
+      ? 'WAIT'
+      : isNaN(stateVal)
+        ? ''
+        : stateVal.toString();
 
   private onClick = () => {
     const { onGo } = this.props;
@@ -80,6 +94,13 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
     onGo(runno, fileno);
     // this.forceUpdate();
     // this.setState(this.props);
+  };
+
+  private onLatest = async () => {
+    this.setState({ runno: -1, fileno: -1 });
+    const theLatest = (await latest())[this.props.hall];
+    this.setState({ runno: theLatest.runno, fileno: theLatest.fileno });
+    this.props.onGo(theLatest.runno, theLatest.fileno);
   };
 
   private onChangeRunno: InputProps['onChange'] = e => {
@@ -97,13 +118,15 @@ class RunAndFileView extends React.Component<State & DispatchProps, State> {
   };
 }
 
-type StateProps = State & React.Attributes; // Add "key" attribute
+type StateProps = AppStateProps & React.Attributes; // Add "key" attribute
 
 const mapStateToProps: MapStateToProps<StateProps, {}, AppState> = ({
   fileno,
+  hall,
   runno,
 }) => ({
   fileno,
+  hall,
   runno,
   // tslint:disable-next-line:object-literal-sort-keys
   key: `${runno}_${fileno}`, // forces reinitialization when props change
