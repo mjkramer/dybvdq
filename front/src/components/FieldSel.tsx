@@ -38,8 +38,10 @@ class FieldSelView extends React.Component<Props & DispatchProp, State> {
     //   value: k,,
     // }));,
     this.setState({ allFields });
-    const defaultField = find(allFields, { value: DEFAULT_FIELD });
-    this.props.dispatch(setFields([defaultField]));
+    if (this.props.fields.length === 0) {
+      const defaultField = find(allFields, { value: DEFAULT_FIELD });
+      this.props.dispatch(setFields([defaultField]));
+    }
     (this.props.dispatch as any)(initLocation());
   }
 

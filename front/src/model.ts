@@ -1,3 +1,5 @@
+import { getStateFromCookies } from 'redux-cookies-middleware';
+
 export type AppState = {
   atEnd: boolean;
   fields: Field[];
@@ -23,7 +25,7 @@ export type Hall = 'EH1' | 'EH2' | 'EH3';
 
 export type Latest = { [hall in Hall]: DataLocation };
 
-export const initialState: AppState = {
+const defaultInitialState: AppState = {
   atEnd: false,
   // XXX should get initial field from backend
   // fields: [{ value: 'plikecounts', label: 'Prompt-like rate, Hz' }],
@@ -35,6 +37,19 @@ export const initialState: AppState = {
   selectionType: null,
   session: 'Default session',
 };
+
+export const cookiePaths = {
+  fields: { name: 'fields' },
+  fileno: { name: 'fileno' },
+  hall: { name: 'hall' },
+  runno: { name: 'runno' },
+  session: { name: 'session' },
+};
+
+export const initialState: AppState = getStateFromCookies(
+  defaultInitialState,
+  cookiePaths,
+);
 
 // Now we describe the data provided by the backend
 
