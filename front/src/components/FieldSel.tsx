@@ -67,7 +67,7 @@ class FieldSelView extends React.Component<Props & DispatchProp, State> {
           disabled={fields.length === 0}
           onClick={this.onClear}
         >
-          CLEAR
+          CLEAR PLOTS
         </NavButton>
         <NavButton className="ml-4" disabled={fields === allFields} onClick={this.onAll}>
           ALL PLOTS
