@@ -307,7 +307,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
     this.tagOrUntagSelection('UntagSel');
   };
 
-  private updateTaggings(data: FileData) {
+  private updateColors(data: FileData) {
     // Don't reset taggings if we've only changed the fields
     const { fileno, hall, runno, session } = this.props;
     if (
@@ -350,7 +350,7 @@ class DataVizView extends React.PureComponent<StateProps & DispatchProp, State> 
       return;
     }
 
-    this.updateTaggings(data);
+    this.updateColors(data);
 
     const npoints = runnos.length;
     const labels = zip(runnos, filenos).map(([r, f]) => `Run ${r} file ${f}`);
