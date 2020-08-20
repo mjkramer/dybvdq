@@ -89,10 +89,14 @@ export const initLocation = () => async (
 ) => {
   const latest = await api.latest();
 
-  const hall: Hall = 'EH1';
-  const { runno, fileno } = latest[hall];
-  const { session, fields } = getState();
-  const params = { runno, fileno, hall, session, fields };
+  const { hall, runno, fileno, session, fields } = getState();
+  const params = {
+    fields,
+    fileno: fileno === -1 ? latest[hall].fileno : fileno,
+    hall,
+    runno: runno === -1 ? latest[hall].runno : runno,
+    session,
+  };
   fetchWithNewLocation(params, dispatch);
 };
 
