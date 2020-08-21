@@ -101,7 +101,8 @@ export const initLocation = () => async (
 };
 
 const fetchWithNewLocation = async (params: api.FetchDataParams, dispatch: Dispatch) => {
-  const data = await api.fetchData(params, { saveToCache: true });
+  // const data = await api.fetchData(params, { saveToCache: true });
+  const data = await api.fetchData(params);
 
   const { runnos, filenos, latest } = data;
   const newRun = runnos[0];
